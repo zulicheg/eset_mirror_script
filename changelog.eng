@@ -1,0 +1,101 @@
+20171026:
+ Fixed:
+  - multidownload function
+ Added:
+  - translations
+  - download speed limit
+ Changed:
+  - rewrited Mirror class
+
+20171025:
+ Added:
+  - memory limit parameter to config
+  - translations
+  - debug run script
+  - debug strings to code
+ Changed:
+  - code rewrited
+  - appended new comments to readme file
+  - get_DB_version moved from Mirror to Tools class
+
+20171021:
+ Added:
+  - To configuration file unrar binary path & debug update(saving update.ver files)
+  - Messages for unrar binary and their translations
+
+20171012:
+ Changed:
+  - Configuration file now at ini format
+ Removed:
+  - Many old code
+
+20171010:
+ Fixed:
+  - Saving all update.ver files
+  - Calculation of average speeds of download
+ Added:
+ - Scan all mirror
+1.0.20170502:
+ Fixed:
+  - Extract function
+  - Autofind key function
+
+1.0.20170429:
+ Fixed:
+  - Write key function
+ Added:
+  - Translation strings
+  - Writing more messages to log
+
+1.0.20170428:
+ Fixed:
+  - Validation function
+  - Extract function
+ Added:
+  - Translation strings
+  - Writing more messages to log
+
+1.0.20170427:
+ Fixed:
+  - Function name
+
+1.0.20170426:
+ Added:
+  - Autofind unrar in Unix OS
+
+1.0.20170422:
+ Fixed:
+  - Log rotate calculation method
+  - Cleanups
+
+1.0.20170420:
+ Fixed:
+  - Download signatures
+
+1.0.20170418:
+ Added:
+  - If language file corrupt program not exit and use default(english) translation
+ Fixed:
+  - Translation files
+
+1.0.20170417:
+ Removed:
+  - Debug info
+ Added:
+  - Translation
+
+1.0.20170416:
+ Edited:
+  - Edited download signature method - now method splited for multiple methods
+ Fix:
+  - Time to generate databases decreased
+
+1.0.20170403:
+ Fixed:
+  - In README.md - for all EAV and ESS map
+
+1.0.20170331:
+ Fixed:
+  - Downloading all files in all dbs
+ Removed:
+  - Check all files in all dbs after downloading(unneded now)
