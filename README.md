@@ -1,4 +1,4 @@
-# eset_mirror_script_new
+# eset_mirror_script
 Script to run own eset mirror
 
 # Requirements
