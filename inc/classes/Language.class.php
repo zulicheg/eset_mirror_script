@@ -33,12 +33,12 @@ class Language
     static public function init($lang = 'en')
     {
         static::$language = $lang;
-        static::$language_file = Tools::ds(SELF, LANGPACKS_DIR, $lang . '.ini');
-        static::$default_language_file = Tools::ds(SELF, LANGPACKS_DIR, Config::get_default_config_parameter('default_language') . '.ini');
+        static::$language_file = Tools::ds(SELF, LANGPACKS_DIR, $lang . '.lng');
+        static::$default_language_file = Tools::ds(SELF, LANGPACKS_DIR, Config::get_default_config_parameter('default_language') . '.lng');
 
         if ($lang != 'en') {
             if (!file_exists(static::$language_file)) {
-                return sprintf("Language file [%s.ini] does not exist!", $lang);
+                return sprintf("Language file [%s.lng] does not exist!", $lang);
             }
         } else {
             return null;

@@ -18,7 +18,7 @@ Pattern directory is not readable. Check your permissions!
 Log directory is not writable. Check your permissions!
 Web directory is not writable. Check your permissions!
 Incorrect value of self_update parameter. Must be 0,1 or 2!
-Language file [%s.ini] does not exist!
+Language file [%s.lng] does not exist!
 Language file [%s] is corrupted!
 Created hard link for %s
 Copied file %s

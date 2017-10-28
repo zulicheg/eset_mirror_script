@@ -1,3 +1,6 @@
+20171028:
+ Changed:
+  - language files moved from ini -> lng
 20171026:
  Fixed:
   - multidownload function

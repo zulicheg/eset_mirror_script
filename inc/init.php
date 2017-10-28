@@ -19,7 +19,7 @@ $SELFUPDATE_POSTFIX = array(
 );
 
 define('DS', DIRECTORY_SEPARATOR);
-define('VERSION', '20171026 [Freedom for Ukraine by harmless]');
+define('VERSION', '20171028 [Freedom for Ukraine by harmless]');
 define('SELF', dirname(__DIR__) . DS);
 define('INC', SELF . "inc" . DS);
 define('CLASSES', INC . "classes" . DS);
@@ -43,5 +43,5 @@ define("CONNECTTIMEOUT", 5); # Seconds
 
 function __autoload($class)
 {
-    @include_once CLASSES.$class.".class.php";
+    @include_once CLASSES . "$class.class.php";
 }
