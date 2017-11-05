@@ -370,6 +370,7 @@ class Mirror
                     } else {
                         @fclose($files[$info['url']]);
                         reset(static::$mirrors);
+                        unset($files[$info['url']]);
                         Log::write_log(Language::t("All mirrors is down!"), 3, static::$version);
                     }
 
