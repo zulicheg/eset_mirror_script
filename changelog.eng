@@ -1,6 +1,13 @@
+20171114:
+ Changed:
+  - fix_timestamp function moved Nod32ms -> Mirror
+ Fixed:
+  - last update time generation for each db
+
 20171028:
  Changed:
   - language files moved from ini -> lng
+
 20171026:
  Fixed:
   - multidownload function
@@ -37,7 +44,8 @@
   - Saving all update.ver files
   - Calculation of average speeds of download
  Added:
- - Scan all mirror
+  - Scan all mirror
+
 1.0.20170502:
  Fixed:
   - Extract function

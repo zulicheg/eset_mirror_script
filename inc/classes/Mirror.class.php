@@ -36,6 +36,34 @@ class Mirror
     static public $key = array();
 
     /**
+     *
+     */
+    private function fix_time_stamp()
+    {
+        Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
+        $fn = Tools::ds(Config::get('log_dir'), SUCCESSFUL_TIMESTAMP);
+        $timestamps = array();
+
+        if (file_exists($fn)) {
+            $handle = file_get_contents($fn);
+            $content = Parser::parse_line($handle, false, "/(.+:.+)\n/");
+
+            if (isset($content) && count($content)) {
+                foreach ($content as $value) {
+                    $result = explode(":", $value);
+                    $timestamps[$result[0]] = $result[1];
+                }
+            }
+        }
+
+        $timestamps[static::$version] = time();
+        @unlink($fn);
+
+        foreach ($timestamps as $key => $name)
+            Log::write_to_file(SUCCESSFUL_TIMESTAMP, "$key:$name\r\n");
+    }
+
+    /**
      * @return bool
      */
     static public function test_key()
@@ -192,6 +220,7 @@ class Mirror
             }
 
             // Delete not needed files
+            $del_files = 0;
             foreach (glob(Tools::ds($dir, static::$dir), GLOB_ONLYDIR) as $file) {
                 $del_files = Tools::del_files($file, $needed_files);
                 if ($del_files > 0)
@@ -199,6 +228,7 @@ class Mirror
             }
 
             // Delete empty folders
+            $del_folders = 0;
             foreach (glob(Tools::ds($dir, static::$dir), GLOB_ONLYDIR) as $folder) {
                 $del_folders = Tools::del_folders($folder);
                 if ($del_folders > 0)
@@ -215,6 +245,8 @@ class Mirror
                 Log::write_log(Language::t("Total downloaded: %s", Tools::bytesToSize1024(static::$total_downloads)), 3, static::$version);
                 Log::write_log(Language::t("Average speed: %s/s", Tools::bytesToSize1024($average_speed)), 3, static::$version);
             }
+
+            if (count($download_files) > 0 || $del_files > 0 || $del_folders > 0) static::fix_time_stamp();
         } else {
             Log::write_log(Language::t("Error while parsing update.ver from %s", current(static::$mirrors)['host']), 3, static::$version);
         }

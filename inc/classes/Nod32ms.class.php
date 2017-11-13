@@ -67,34 +67,6 @@ class Nod32ms
     }
 
     /**
-     *
-     */
-    private function fix_time_stamp()
-    {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $fn = Tools::ds(Config::get('log_dir'), SUCCESSFUL_TIMESTAMP);
-        $timestamps = array();
-
-        if (file_exists($fn)) {
-            $handle = file_get_contents($fn);
-            $content = Parser::parse_line($handle, false, "/(.+:.+)\n/");
-
-            if (isset($content) && count($content)) {
-                foreach ($content as $value) {
-                    $result = explode(":", $value);
-                    $timestamps[$result[0]] = $result[1];
-                }
-            }
-        }
-
-        $timestamps[Mirror::$version] = time();
-        @unlink($fn);
-
-        foreach ($timestamps as $key => $name)
-            Log::write_to_file(SUCCESSFUL_TIMESTAMP, "$key:$name\r\n");
-    }
-
-    /**
      * @param $size
      */
     private function set_database_size($size)
@@ -681,7 +653,6 @@ class Nod32ms
                                 } elseif ($old_version <= $mirror['db_version'] && !empty($downloads)) {
                                     Log::informer(Language::t("Your database was successfully updated from %s to %s", $old_version, $mirror['db_version']), Mirror::$version, 2);
                                 }
-                                $this->fix_time_stamp();
                                 break;
                             }
                         }
