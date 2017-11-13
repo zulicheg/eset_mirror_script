@@ -670,7 +670,6 @@ class Nod32ms
                             if (is_null($downloads)) {
                                 Log::informer(Language::t("Your database has not been updated!"), Mirror::$version, 1);
                             } else {
-                                $this->fix_time_stamp();
                                 $total_size[Mirror::$version] = $size;
                                 $total_downloads[Mirror::$version] = $downloads;
                                 if (!empty($speed)) {
@@ -679,9 +678,10 @@ class Nod32ms
 
                                 if (empty($old_version)) {
                                     Log::informer(Language::t("Your database was successfully updated to %s", $mirror['db_version']), Mirror::$version, 2);
-                                } elseif (!empty($total_downloads[Mirror::$version])) {
+                                } elseif ($old_version <= $mirror['db_version'] && !empty($downloads)) {
                                     Log::informer(Language::t("Your database was successfully updated from %s to %s", $old_version, $mirror['db_version']), Mirror::$version, 2);
                                 }
+                                $this->fix_time_stamp();
                                 break;
                             }
                         }
