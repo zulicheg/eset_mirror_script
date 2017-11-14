@@ -70,6 +70,7 @@ class Config
         'debug_update' => 0,
         'unrar_binary' => '/usr/local/bin/unrar',
         'download_speed_limit' => 0,
+        'threads' => 32,
     );
 
     /**

@@ -18,6 +18,11 @@
 ; Default: unlimit(0)
 ; download_speed_limit = 0
 
+; Download threads
+; Default: 32
+; threads = 32
+
+
 ; Script autoupdate module.
 ; Recommended to turn it on to get actual updates.
 ; Possible parameters:

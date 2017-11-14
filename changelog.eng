@@ -1,3 +1,7 @@
+20171115:
+ Added:
+  - threads for download limitation
+
 20171114:
  Changed:
   - fix_timestamp function moved Nod32ms -> Mirror
