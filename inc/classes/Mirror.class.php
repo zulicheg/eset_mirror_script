@@ -38,7 +38,7 @@ class Mirror
     /**
      *
      */
-    private function fix_time_stamp()
+    static private function fix_time_stamp()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $fn = Tools::ds(Config::get('log_dir'), SUCCESSFUL_TIMESTAMP);
