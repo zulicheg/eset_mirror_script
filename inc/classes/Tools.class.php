@@ -103,7 +103,7 @@ class Tools
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
 
-        return (fclose(@fsockopen($hostname, $port, $errno, $errstr, CONNECTTIMEOUT))) ? true : false;
+        return (@fclose(@fsockopen($hostname, $port, $errno, $errstr, CONNECTTIMEOUT))) ? true : false;
     }
 
     /**
