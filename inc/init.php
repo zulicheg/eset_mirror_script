@@ -11,6 +11,7 @@ $DIRECTORIES = array(
     8 => 'eset_upd/v8',
     9 => 'eset_upd/v9',
     10 => 'eset_upd/v10',
+    11 => 'eset_upd/v11',
 );
 
 $SELFUPDATE_POSTFIX = array(

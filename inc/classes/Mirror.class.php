@@ -534,7 +534,7 @@ class Mirror
             $parsed_container = parse_ini_string((preg_replace("/version=(.*?)\n/i", "version=\"\${1}\"\n", str_replace("\r\n", "\n", $container))), true);
             $output = array_shift($parsed_container);
 
-            if (intval(static::$version) != 10) {
+            if (intval(static::$version) < 10) {
                 if (empty($output['file']) or empty($output['size']) or empty($output['date']) or
                     (!empty($output['language']) and !in_array($output['language'], Config::get('update_version_lang'))) or
                     (Config::get('update_version_x32') != 1 and preg_match("/32|86/", $output['platform'])) or

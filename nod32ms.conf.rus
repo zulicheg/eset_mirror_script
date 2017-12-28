@@ -73,6 +73,9 @@ mirror = "update.eset.com, um01.eset.com, um02.eset.com, um03.eset.com, um04.ese
 ; 10-я версия NOD32
 ; update_version10 = 1
 
+; 11-я версия NOD32
+; update_version11 = 1
+
 
 ; Включение обновлений различных модулей 3/4/5/6 версий. По умолчанию все модули включены.
 
