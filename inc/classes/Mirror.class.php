@@ -433,7 +433,7 @@ class Mirror
 
                             if (next(static::$mirrors)) {
                                 Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
-                                $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $file['file'];
+                                $options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], current(static::$mirrors)['host'], $info['url']);
                                 curl_setopt_array($ch, $options);
                             } else {
                                 @fclose($files[$info['url']]);
@@ -475,7 +475,6 @@ class Mirror
 
                     curl_multi_remove_handle($master, $ch);
                     curl_close($ch);
-                    $threads--;
                 } else {
                     Log::write_log(Language::t("Error download url %s", $info['url']), 3, static::$version);
 
@@ -483,7 +482,6 @@ class Mirror
                         Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
                         $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $file['file'];
                         curl_setopt_array($ch, $options);
-                        continue;
                     } else {
                         @fclose($files[$info['url']]);
                         reset(static::$mirrors);
@@ -492,7 +490,6 @@ class Mirror
 
                         curl_multi_remove_handle($master, $ch);
                         curl_close($ch);
-                        $threads--;
                     }
                 }
             }
