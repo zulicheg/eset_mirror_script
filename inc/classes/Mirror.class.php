@@ -79,7 +79,7 @@ class Mirror
                 if ($tries > 1)
                     usleep(CONNECTTIMEOUT * 1000000);
 
-                return (preg_match("/401/", @get_headers("http://" . static::$key[0] . ":" . static::$key[1] . "@$mirror")[0])) ? false : true;
+                return (preg_match("/401/", @get_headers("http://" . static::$key[0] . ":" . static::$key[1] . "@$mirror/v3-rel-sta/mod_021_horus_13117/em021_32_n9.nup")[0])) ? false : true;
             }
         }
 
@@ -403,7 +403,7 @@ class Mirror
 
                             if (next(static::$mirrors)) {
                                 Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
-                                $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $info['url'];
+                                $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $file['file'];
                                 curl_setopt_array($ch, $options);
                             } else {
                                 @fclose($files[$info['url']]);
@@ -451,8 +451,9 @@ class Mirror
 
                     if (next(static::$mirrors)) {
                         Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
-                        $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $info['url'];
+                        $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $file['file'];
                         curl_setopt_array($ch, $options);
+                        continue;
                     } else {
                         @fclose($files[$info['url']]);
                         reset(static::$mirrors);
