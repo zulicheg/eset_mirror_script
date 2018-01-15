@@ -105,6 +105,16 @@ class Mirror
                 CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1]
             );
 
+            if (Config::get('proxy_enable') !== 0) {
+                $options[CURLOPT_PROXY] = Config::get('proxy_server');
+                $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
+
+                if (Config::get('proxy_user') !== NULL) {
+                    $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
+                    $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
+                }
+            }
+
             foreach (Config::get('mirror') as $mirror) {
                 $ch = curl_init();
                 $url = "http://" . $mirror . "/" . static::$mirror_dir . "/update.ver";
@@ -323,6 +333,15 @@ class Mirror
                 'content' => $xml
             )
         );
+
+        if (Config::get('proxy_enable') !== 0) {
+            $opts['http']['proxy'] = Config::get('proxy_server') . ":" . Config::get('proxy_port');
+
+            if (Config::get('proxy_user') !== NULL) {
+                $opts['http']['header'] .= "Proxy_Authorization: Basic " . base64_encode(Config::get('proxy_user') . ":" . Config::get('proxy_passwd')) . "\r\n";
+            }
+        }
+
         $context = stream_context_create($opts);
         $response = file_get_contents('http://expire.eset.com/getlicexp', false, $context);
         $LicInfo = array();
@@ -352,8 +371,19 @@ class Mirror
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
         );
+
         if (Config::get('download_speed_limit') !== 0) {
             $options[CURLOPT_MAX_RECV_SPEED_LARGE] = Config::get('download_speed_limit');
+        }
+
+        if (Config::get('proxy_enable') !== 0) {
+            $options[CURLOPT_PROXY] = Config::get('proxy_server');
+            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
+
+            if (Config::get('proxy_user') !== NULL) {
+                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
+                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
+            }
         }
 
         $files = array();

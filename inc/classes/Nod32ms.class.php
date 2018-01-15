@@ -347,6 +347,15 @@ class Nod32ms
                 'header' => "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201\r\n"
             )
         );
+
+        if (Config::get('proxy_enable') !== 0) {
+            $options['http']['proxy'] = Config::get('proxy_server') . ":" . Config::get('proxy_port');
+
+            if (Config::get('proxy_user') !== NULL) {
+                $options['http']['header'] .= "Proxy_Authorization: Basic " . base64_encode(Config::get('proxy_user') . ":" . Config::get('proxy_passwd')) . "\r\n";
+            }
+        }
+
         $context = stream_context_create($options);
         $search = @file_get_contents($this_link, false, $context);
         $test = false;

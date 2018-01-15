@@ -72,6 +72,11 @@ class Config
         'unrar_binary' => '/usr/local/bin/unrar',
         'download_speed_limit' => 0,
         'threads' => 32,
+        'proxy_enable' => 0,
+        'proxy_server' => null,
+        'proxy_port' => 3128,
+        'proxy_user' => null,
+        'proxy_passwd' => null,
     );
 
     /**

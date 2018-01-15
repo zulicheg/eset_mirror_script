@@ -22,6 +22,19 @@ default_language = "ru"
 ; По умолчанию: 32
 ; threads = 32
 
+
+; Настройки Proxy
+; 0 - выключено
+; 1 - включено
+; По умолчанию - выключено
+
+; proxy_enable = 0
+; proxy_server = 'http://proxy.example.com'
+; proxy_port = 3128
+; proxy_user = 'username'
+; proxy_passwd = 'pass'
+
+
 ; Модуль для автоматического обновления скрипта.
 ; Рекомендуется включить для получения актуальных обновлений.
 ; Возможные параметры:
