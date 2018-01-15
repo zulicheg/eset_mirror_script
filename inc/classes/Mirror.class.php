@@ -329,7 +329,7 @@ class Mirror
         $opts = array(
             'http' => array(
                 'method' => 'POST',
-                'header' => 'Content-type: application/x-www-form-urlencoded',
+                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
                 'content' => $xml
             )
         );
