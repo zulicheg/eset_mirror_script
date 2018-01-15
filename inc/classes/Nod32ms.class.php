@@ -650,7 +650,7 @@ class Nod32ms
 
                                 if (empty($old_version)) {
                                     Log::informer(Language::t("Your database was successfully updated to %s", $mirror['db_version']), Mirror::$version, 2);
-                                } elseif ($old_version <= $mirror['db_version'] && !empty($downloads)) {
+                                } elseif ($old_version <= $mirror['db_version']) {
                                     Log::informer(Language::t("Your database was successfully updated from %s to %s", $old_version, $mirror['db_version']), Mirror::$version, 2);
                                 }
                                 break;
