@@ -191,7 +191,7 @@ class Mirror
         $header = Tools::download_file("http://" . static::$key[0] .":" . static::$key[1] . "@$mirror/" . static::$mirror_dir . "/update.ver", $archive);
 
         if (is_array($header) and $header['http_code'] == 200) {
-            if ($header['content_type'] == 'text/html') {
+            if (preg_match("/text/", $info['content_type'])) {
                 rename($archive, $extracted);
             } else {
                 Log::write_log(Language::t("Extracting file %s to %s", $archive, $tmp_path), 5, static::$version);

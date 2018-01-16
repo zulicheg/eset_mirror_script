@@ -413,7 +413,7 @@ class Nod32ms
             $test = true;
 
         } else {
-            if (strlen($search) == 0 or $info['content_type'] !== 'text/html')
+            if (strlen($search) == 0 or !preg_match("/text/", $info['content_type']))
                 $test = true;
         }
 
