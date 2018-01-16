@@ -341,28 +341,6 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         static $found_key = false;
-
-        /*$options = array(
-            'http' => array(
-                'method' => "GET",
-                'header' => "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201\r\n"
-            )
-        );
-
-        if (Config::get('proxy_enable') !== 0) {
-            $options['http']['proxy'] = Config::get('proxy_server') . ":" . Config::get('proxy_port');
-
-            if (Config::get('proxy_user') !== NULL) {
-                $options['http']['header'] .= "Proxy_Authorization: Basic " . base64_encode(Config::get('proxy_user') . ":" . Config::get('proxy_passwd')) . "\r\n";
-            }
-        }
-
-        $context = stream_context_create($options);
-        $search = @file_get_contents($this_link, false, $context);
-*/
-
-
-
         $options = array(
             CURLOPT_BINARYTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
@@ -392,22 +370,7 @@ class Nod32ms
         $search = curl_exec($ch);
         $info = curl_getinfo($ch);
         curl_close($ch);
-
-
-
-
-
         $test = false;
-/*
-        if (empty($http_response_header)) {
-            $test = true;
-        } else {
-            $header = Parser::parse_header($http_response_header);
-
-            if (strlen($search) == 0 or empty($header[0]) or empty($header['Content-Type']) or !preg_match("/200/", $header[0]) or !preg_match("/text/", $header['Content-Type']))
-                $test = true;
-        }
-*/
 
         if ($info['http_code'] !== 200) {
             $test = true;
