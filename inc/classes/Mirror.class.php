@@ -190,9 +190,8 @@ class Mirror
         $extracted = Tools::ds($tmp_path, 'update.ver');
         $header = Tools::download_file("http://" . static::$key[0] .":" . static::$key[1] . "@$mirror/" . static::$mirror_dir . "/update.ver", $archive);
 var_dump($header);
-exit;
-        if (is_array($header) and !empty($header[0]) and preg_match("/200/", $header[0])) {
-            if (preg_match("/text/", $header['Content-Type'])) {
+        if (is_array($header) and $header['http_code'] == 200) {
+            if ($header['Content-Type'] == 'text') {
                 rename($archive, $extracted);
             } else {
                 Log::write_log(Language::t("Extracting file %s to %s", $archive, $tmp_path), 5, static::$version);
