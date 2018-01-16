@@ -360,7 +360,7 @@ class Mirror
         $info = curl_getinfo($ch);
         curl_close($ch);
 
-        var_dump($result);
+        print_r($result);
         var_dump($info);
 /*        if ($info['http_code'] == 200) {
             return $info;
