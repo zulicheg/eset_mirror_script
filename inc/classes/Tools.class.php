@@ -9,34 +9,49 @@ class Tools
     /**
      * @param string $source
      * @param string $destination
-     * @param int $buffer
      * @return array|bool
      */
-    static public function download_file($source, $destination, $buffer = 1024)
+    static public function download_file($source, $destination)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        ini_set('default_socket_timeout', CONNECTTIMEOUT);
-        $header = @get_headers($source, 1);
-        ini_restore('default_socket_timeout');
+        $options = array(
+            CURLOPT_BINARYTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
+            CURLOPT_HEADER => false,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+        );
 
-        if (is_array($header)) {
-            if (preg_match("/200/", $header[0])) {
-                $dir = dirname($destination);
+        if (Config::get('download_speed_limit') !== 0) {
+            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = Config::get('download_speed_limit');
+        }
 
-                if (!file_exists($dir))
-                    @mkdir($dir, 0755, true);
+        if (Config::get('proxy_enable') !== 0) {
+            $options[CURLOPT_PROXY] = Config::get('proxy_server');
+            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
 
-                $in = fopen($source, 'rb', false);
-                $out = fopen($destination, "wb");
-
-                while ($chunk = fread($in, $buffer))
-                    fwrite($out, $chunk, $buffer);
-
-                fclose($in);
-                fclose($out);
+            if (Config::get('proxy_user') !== NULL) {
+                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
+                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
             }
+        }
 
-            return $header;
+        $dir = dirname($destination);
+        $out = fopen($destination, "w");
+
+        if (!@file_exists($dir))
+            @mkdir($dir, 0755, true);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_FILE, $out);
+        curl_setopt($ch, CURLOPT_URL, $source);
+        curl_exec($ch);
+        $info = curl_getinfo($ch);
+        if ($info['http_code'] == 200) {
+            @fclose($out);
+            curl_close($ch);
+
+            return $info;
         } else
             return false;
     }

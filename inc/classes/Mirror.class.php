@@ -189,7 +189,8 @@ class Mirror
         $archive = Tools::ds($tmp_path, 'update.rar');
         $extracted = Tools::ds($tmp_path, 'update.ver');
         $header = Tools::download_file("http://" . static::$key[0] .":" . static::$key[1] . "@$mirror/" . static::$mirror_dir . "/update.ver", $archive);
-
+var_dump($header);
+exit;
         if (is_array($header) and !empty($header[0]) and preg_match("/200/", $header[0])) {
             if (preg_match("/text/", $header['Content-Type'])) {
                 rename($archive, $extracted);
@@ -480,7 +481,7 @@ class Mirror
 
                     if (next(static::$mirrors)) {
                         Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
-                        $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $file['file'];
+                        $options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], current(static::$mirrors)['host'], $info['url']);
                         curl_setopt_array($ch, $options);
                     } else {
                         @fclose($files[$info['url']]);
