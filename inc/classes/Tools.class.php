@@ -14,12 +14,21 @@ class Tools
     static public function download_file($source, $destination)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
+
+        $dir = dirname($destination);
+        $out = fopen($destination, "w");
+
+        if (!@file_exists($dir))
+            @mkdir($dir, 0755, true);
+
         $options = array(
             CURLOPT_BINARYTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
             CURLOPT_HEADER => false,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
+            CURLOPT_FILE => $out,
+            CURLOPT_URL => $source,
         );
 
         if (Config::get('download_speed_limit') !== 0) {
@@ -36,21 +45,14 @@ class Tools
             }
         }
 
-        $dir = dirname($destination);
-        $out = fopen($destination, "w");
-
-        if (!@file_exists($dir))
-            @mkdir($dir, 0755, true);
-
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_FILE, $out);
-        curl_setopt($ch, CURLOPT_URL, $source);
+        curl_setopt_array($ch, $options);
         curl_exec($ch);
         $info = curl_getinfo($ch);
-        if ($info['http_code'] == 200) {
-            @fclose($out);
-            curl_close($ch);
+        @fclose($out);
+        curl_close($ch);
 
+        if ($info['http_code'] == 200) {
             return $info;
         } else
             return false;

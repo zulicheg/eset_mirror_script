@@ -189,7 +189,7 @@ class Mirror
         $archive = Tools::ds($tmp_path, 'update.rar');
         $extracted = Tools::ds($tmp_path, 'update.ver');
         $header = Tools::download_file("http://" . static::$key[0] .":" . static::$key[1] . "@$mirror/" . static::$mirror_dir . "/update.ver", $archive);
-var_dump($header);
+
         if (is_array($header) and $header['http_code'] == 200) {
             if ($header['content_type'] == 'text') {
                 rename($archive, $extracted);
@@ -325,6 +325,48 @@ var_dump($header);
   </LICENSEREQUEST>
   </SECTION>
   </GETLICEXP>';
+
+
+
+        $options = array(
+            CURLOPT_BINARYTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
+            CURLOPT_HEADER => false,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_URL => 'http://expire.eset.com/getlicexp',
+        );
+
+        if (Config::get('download_speed_limit') !== 0) {
+            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = Config::get('download_speed_limit');
+        }
+
+        if (Config::get('proxy_enable') !== 0) {
+            $options[CURLOPT_PROXY] = Config::get('proxy_server');
+            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
+
+            if (Config::get('proxy_user') !== NULL) {
+                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
+                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
+            }
+        }
+
+        $ch = curl_init();
+        curl_setopt_array($ch, $options);
+        $result = curl_exec($ch);
+        $info = curl_getinfo($ch);
+        curl_close($ch);
+
+        var_dump($result);
+        var_dump($info);
+/*        if ($info['http_code'] == 200) {
+            return $info;
+        } else
+            return false;
+
+*/
+exit;
 
         $opts = array(
             'http' => array(
@@ -510,16 +552,15 @@ var_dump($header);
                 Log::write_log(Language::t("Trying download file %s from %s", basename($file['file']), $mirror['host']), 3, static::$version);
                 $header = Tools::download_file("http://" . static::$key[0] .":" . static::$key[1] . "@" . $mirror['host'] . $file['file'], Tools::ds(Config::get('web_dir'), $file['file']));
 
-                if (is_array($header) and !empty($header[0]) and preg_match("/200/", $header[0]) and $header['Content-Length'] == $file['size']) {
-                    $size = $header['Content-Length'];
-                    static::$total_downloads += $size;
+                if (is_array($header) and $header['http_code'] == 200 and $header['size_download'] == $file['size']) {
+                    static::$total_downloads += $header['size_download'];
                     Log::write_log(Language::t("From %s downloaded %s [%s] [%s/s]", $mirror['host'], basename($file['file']),
-                        Tools::bytesToSize1024($header['Content-Length']),
-                        Tools::bytesToSize1024($header['Content-Length'] / (microtime(true) - $time))),
+                        Tools::bytesToSize1024($header['size_download']),
+                        Tools::bytesToSize1024($header['size_download'] / (microtime(true) - $time))),
                         3,
                         static::$version
                     );
-                    static::$total_downloads += $header['Content-Length'];
+                    static::$total_downloads += $header['size_download'];
                     break;
                 } else {
                     @unlink(Tools::ds(static::$mirror_dir, $file['file']));
