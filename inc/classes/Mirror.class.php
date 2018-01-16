@@ -356,38 +356,9 @@ class Mirror
 
         $ch = curl_init();
         curl_setopt_array($ch, $options);
-        $result = curl_exec($ch);
-        $info = curl_getinfo($ch);
+        $response = curl_exec($ch);
         curl_close($ch);
 
-        print_r($result);
-        var_dump($info);
-/*        if ($info['http_code'] == 200) {
-            return $info;
-        } else
-            return false;
-
-*/
-exit;
-
-        $opts = array(
-            'http' => array(
-                'method' => 'POST',
-                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-                'content' => $xml
-            )
-        );
-
-        if (Config::get('proxy_enable') !== 0) {
-            $opts['http']['proxy'] = Config::get('proxy_server') . ":" . Config::get('proxy_port');
-
-            if (Config::get('proxy_user') !== NULL) {
-                $opts['http']['header'] .= "Proxy_Authorization: Basic " . base64_encode(Config::get('proxy_user') . ":" . Config::get('proxy_passwd')) . "\r\n";
-            }
-        }
-
-        $context = stream_context_create($opts);
-        $response = file_get_contents('http://expire.eset.com/getlicexp', false, $context);
         $LicInfo = array();
 
         if ($response == "unknownlic\n") return false;
