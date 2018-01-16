@@ -326,8 +326,6 @@ class Mirror
   </SECTION>
   </GETLICEXP>';
 
-
-
         $options = array(
             CURLOPT_BINARYTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
