@@ -331,11 +331,13 @@ class Mirror
         $options = array(
             CURLOPT_BINARYTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
-            CURLOPT_HEADER => false,
+            CURLOPT_HEADER => 'Content-type: application/x-www-form-urlencoded',
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_URL => 'http://expire.eset.com/getlicexp',
+            CURLOPT_POST => 1,
+            CURLOPT_POSTFIELDS => $xml,
         );
 
         if (Config::get('download_speed_limit') !== 0) {
