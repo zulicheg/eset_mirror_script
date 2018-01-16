@@ -25,7 +25,33 @@ class SelfUpdate
     static private function get_hashes_from_server()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        $content = file_get_contents(sprintf("http://%s:%s/%s/%s", SELFUPDATE_SERVER, SELFUPDATE_PORT, SELFUPDATE_DIR, SELFUPDATE_FILE));
+        $options = array(
+            CURLOPT_BINARYTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_URL => sprintf("http://%s:%s/%s/%s", SELFUPDATE_SERVER, SELFUPDATE_PORT, SELFUPDATE_DIR, SELFUPDATE_FILE),
+        );
+
+        if (Config::get('download_speed_limit') !== 0) {
+            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = Config::get('download_speed_limit');
+        }
+
+        if (Config::get('proxy_enable') !== 0) {
+            $options[CURLOPT_PROXY] = Config::get('proxy_server');
+            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
+
+            if (Config::get('proxy_user') !== NULL) {
+                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
+                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
+            }
+        }
+
+        $ch = curl_init();
+        curl_setopt_array($ch, $options);
+        $content = curl_exec($ch);
+        curl_close($ch);
         $arr = array();
 
         if (preg_match_all("/(.+)=(.+)=(.+)/", $content, $result, PREG_OFFSET_CAPTURE))
