@@ -93,27 +93,27 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $test_mirrors = array();
+        $options = array(
+            CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
+            CURLOPT_HEADER => false,
+            CURLOPT_NOBODY => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1]
+        );
+
+        if (Config::get('proxy_enable') !== 0) {
+            $options[CURLOPT_PROXY] = Config::get('proxy_server');
+            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
+
+            if (Config::get('proxy_user') !== NULL) {
+                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
+                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
+            }
+        }
 
         if (function_exists('curl_multi_init')) {
             $master = curl_multi_init();
-            $options = array(
-                CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
-                CURLOPT_HEADER => false,
-                CURLOPT_NOBODY => true,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_MAXREDIRS => 5,
-                CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1]
-            );
-
-            if (Config::get('proxy_enable') !== 0) {
-                $options[CURLOPT_PROXY] = Config::get('proxy_server');
-                $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
-
-                if (Config::get('proxy_user') !== NULL) {
-                    $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
-                    $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
-                }
-            }
 
             foreach (Config::get('mirror') as $mirror) {
                 $ch = curl_init();
@@ -143,17 +143,22 @@ class Mirror
             } while ($running && $run === CURLM_OK);
             curl_multi_close($master);
         } else {
-            ini_set('default_socket_timeout', CONNECTTIMEOUT);
-
             foreach (Config::get('mirror') as $mirror) {
-                $time = microtime(true);
-                $header = @get_headers("http://" . static::$key[0] . ":" . static::$key[1] . "@$mirror/" . static::$mirror_dir . "/update.ver", 1);
-
-                if (preg_match("/200/", $header[0]))
-                    $test_mirrors[$mirror] = round((microtime(true) - $time) * 1000);
-                unset($header);
+                $ch = curl_init();
+                $url = "http://" . $mirror . "/" . static::$mirror_dir . "/update.ver";
+                $options[CURLOPT_URL] = $url;
+                curl_setopt_array($ch, $options);
+                curl_exec($ch);
+                $info = curl_getinfo($ch);
+                $url = parse_url($info['url']);
+                if ($info['http_code'] == 200) {
+                    $test_mirrors[$url['host']] = round($info['total_time'] * 1000);
+                    Log::write_log(Language::t("Mirror %s active", $url['host']), 3, static::$version);
+                } else {
+                    Log::write_log(Language::t("Mirror %s inactive", $url['host']), 3, static::$version);
+                }
+                curl_close($ch);
             }
-            ini_restore('default_socket_timeout');
         }
         asort($test_mirrors);
 
