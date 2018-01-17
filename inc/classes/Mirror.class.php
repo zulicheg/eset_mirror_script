@@ -71,6 +71,25 @@ class Mirror
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         Log::write_log(Language::t("Testing key [%s:%s]", static::$key[0], static::$key[1]), 4, static::$version);
 
+        $options = array(
+            CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
+            CURLOPT_HEADER => false,
+            CURLOPT_NOBODY => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1]
+        );
+
+        if (Config::get('proxy_enable') !== 0) {
+            $options[CURLOPT_PROXY] = Config::get('proxy_server');
+            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
+
+            if (Config::get('proxy_user') !== NULL) {
+                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
+                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
+            }
+        }
+
         foreach (Config::get('mirror') as $mirror) {
             $tries = 0;
             $quantity = Config::get('default_errors_quantity');
@@ -79,7 +98,14 @@ class Mirror
                 if ($tries > 1)
                     usleep(CONNECTTIMEOUT * 1000000);
 
-                return (preg_match("/401/", @get_headers("http://" . static::$key[0] . ":" . static::$key[1] . "@$mirror/v3-rel-sta/mod_021_horus_13117/em021_32_n9.nup")[0])) ? false : true;
+                $ch = curl_init();
+                $url = "http://" . $mirror . "/" . static::$mirror_dir;
+                $options[CURLOPT_URL] = $url;
+                curl_setopt_array($ch, $options);
+                curl_exec($ch);
+                $info = curl_getinfo($ch);
+                curl_close($ch);
+                return (preg_match("/401/", $info['http_code'])) ? false : true;
             }
         }
 
