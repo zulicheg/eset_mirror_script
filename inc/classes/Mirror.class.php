@@ -407,14 +407,13 @@ class Mirror
             $ch = curl_init();
             $handles[Tools::get_resource_id($ch)] = current(static::$mirrors)['host'];
             $res = dirname(Tools::ds(Config::get('web_dir'), $file['file']));
-            if (!@file_exists($res))
-                @mkdir($res, 0755, true);
+            if (!@file_exists($res)) @mkdir($res, 0755, true);
             $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $file['file'];
             $options[CURLOPT_FILE] = $files['url'] = fopen(Tools::ds(Config::get('web_dir'), $download_files[$i]['file']), 'w');
             curl_setopt_array($ch, $options);
             curl_multi_add_handle($master, $ch);
-
             $threads++;
+
             if ($threads >= Config::get('threads')) {
                 while ($threads >= Config::get('threads')) {
                     usleep(100);
@@ -437,7 +436,6 @@ class Mirror
                             );
                             unset($handles[$id]);
                             static::$total_downloads += $info['download_content_length'];
-
                             curl_multi_remove_handle($master, $ch);
                             curl_close($ch);
                             $threads--;
@@ -453,7 +451,6 @@ class Mirror
                                 reset(static::$mirrors);
                                 unset($files[$info['url']]);
                                 Log::write_log(Language::t("All mirrors is down!"), 3, static::$version);
-
                                 curl_multi_remove_handle($master, $ch);
                                 curl_close($ch);
                                 $threads--;
@@ -534,7 +531,7 @@ class Mirror
                     static::$total_downloads += $header['size_download'];
                     break;
                 } else {
-                    @unlink(Tools::ds(static::$mirror_dir, $file['file']));
+                    @unlink(Tools::ds(Config::get('web_dir'), $file['file']));
                 }
             }
         }
