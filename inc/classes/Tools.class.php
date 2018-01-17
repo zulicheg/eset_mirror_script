@@ -16,11 +16,9 @@ class Tools
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
 
         $dir = dirname($destination);
-        $out = fopen($destination, "w");
+        if (!@file_exists($dir)) @mkdir($dir, 0755, true);
 
-        if (!@file_exists($dir))
-            @mkdir($dir, 0755, true);
-
+        $out = fopen($destination, "wb");
         $options = array(
             CURLOPT_BINARYTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
@@ -84,7 +82,7 @@ class Tools
     static public function extract_file($source, $destination)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $date = date("Y-m-d-H-i-s-").explode('.', microtime(1))[1];
+        $date = date("Y-m-d-H-i-s-") . explode('.', microtime(1))[1];
 
         if (!file_exists(Config::get('unrar_binary'))) {
             Log::write_log(Language::t("Unrar not exists at %s", Config::get('unrar_binary')), 0, Mirror::$version);
