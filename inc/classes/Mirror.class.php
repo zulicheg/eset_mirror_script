@@ -188,7 +188,7 @@ class Mirror
         @mkdir($tmp_path, 0755, true);
         $archive = Tools::ds($tmp_path, 'update.rar');
         $extracted = Tools::ds($tmp_path, 'update.ver');
-        $header = Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . "$mirror/" . static::$mirror_dir . "/update.ver", CURLOPT_FILE => $archive));
+        $header = Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . "$mirror/" . static::$mirror_dir . "/update.ver", CURLOPT_FILE => $archive, CURLOPT_RETURNTRANSFER => 0));
 
         if (is_array($header) and $header['http_code'] == 200) {
             if (preg_match("/text/", $header['content_type'])) {
