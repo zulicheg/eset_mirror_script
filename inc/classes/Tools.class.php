@@ -27,7 +27,6 @@ class Tools
             if (!@file_exists($dir)) @mkdir($dir, 0755, true);
             $out = fopen($options[CURLOPT_FILE], "wb");
             $options[CURLOPT_FILE] = $out;
-            $options[CURLOPT_RETURNTRANSFER] = 0;
         }
 
         if (Config::get('download_speed_limit') !== 0) {
