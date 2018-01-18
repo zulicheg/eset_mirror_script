@@ -26,7 +26,7 @@ class Tools
             $dir = dirname($options[CURLOPT_FILE]);
             if (!@file_exists($dir)) @mkdir($dir, 0755, true);
             $out = fopen($options[CURLOPT_FILE], "wb");
-            $opts[CURLOPT_RETURNTRANSFER] = 0;
+            $options[CURLOPT_RETURNTRANSFER] = 0;
         }
 
         if (Config::get('download_speed_limit') !== 0) {
@@ -45,14 +45,17 @@ class Tools
 
         $ch = curl_init();
         curl_setopt_array($ch, ($opts + $options));
-        $res = curl_exec($ch);
+
+        if (key_exists(CURLOPT_RETURNTRANSFER, $options)) {
+            if ($options[CURLOPT_RETURNTRANSFER] == 1) {
+                $res = curl_exec($ch);
+                return $res;
+            }
+        }
+        curl_exec($ch);
         $info = curl_getinfo($ch);
         if ($out) @fclose($out);
         curl_close($ch);
-
-        if (key_exists(CURLOPT_RETURNTRANSFER, $options)) {
-            if ($options[CURLOPT_RETURNTRANSFER] == 1) return $res;
-        }
 
         if ($info['http_code'] == 200) {
             return $info;
