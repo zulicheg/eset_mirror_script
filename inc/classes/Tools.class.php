@@ -46,17 +46,16 @@ class Tools
 
         $ch = curl_init();
         curl_setopt_array($ch, ($opts + $options));
-
-        if (key_exists(CURLOPT_RETURNTRANSFER, $options)) {
-            if ($options[CURLOPT_RETURNTRANSFER] == 1) {
-                $res = curl_exec($ch);
-                return $res;
-            }
-        }
-        curl_exec($ch);
+        $res = curl_exec($ch);
         $info = curl_getinfo($ch);
         if ($out) @fclose($out);
         curl_close($ch);
+
+        if (key_exists(CURLOPT_RETURNTRANSFER, $options)) {
+            if ($options[CURLOPT_RETURNTRANSFER] == 1) {
+                return $res;
+            }
+        }
 
         if ($info['http_code'] == 200) {
             return $info;
