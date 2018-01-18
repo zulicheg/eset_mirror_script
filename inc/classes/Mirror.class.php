@@ -71,25 +71,6 @@ class Mirror
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         Log::write_log(Language::t("Testing key [%s:%s]", static::$key[0], static::$key[1]), 4, static::$version);
 
-        $options = array(
-            CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
-            CURLOPT_HEADER => false,
-            CURLOPT_NOBODY => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5,
-            CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1]
-        );
-
-        if (Config::get('proxy_enable') !== 0) {
-            $options[CURLOPT_PROXY] = Config::get('proxy_server');
-            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
-
-            if (Config::get('proxy_user') !== NULL) {
-                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
-                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
-            }
-        }
-
         foreach (Config::get('mirror') as $mirror) {
             $tries = 0;
             $quantity = Config::get('default_errors_quantity');
@@ -98,14 +79,8 @@ class Mirror
                 if ($tries > 1)
                     usleep(CONNECTTIMEOUT * 1000000);
 
-                $ch = curl_init();
-                $url = "http://" . $mirror . "/" . static::$mirror_dir;
-                $options[CURLOPT_URL] = $url;
-                curl_setopt_array($ch, $options);
-                curl_exec($ch);
-                $info = curl_getinfo($ch);
-                curl_close($ch);
-                return (preg_match("/401/", $info['http_code'])) ? false : true;
+                $info = Tools::download_file(array( CURLOPT_URL => "http://" . static::$key[0] . ":" . static::$key[1] . $mirror . "/" . static::$mirror_dir));
+                return ($info['http_code'] === 200) ? true : false;
             }
         }
 
@@ -170,12 +145,7 @@ class Mirror
             curl_multi_close($master);
         } else {
             foreach (Config::get('mirror') as $mirror) {
-                $ch = curl_init();
-                $url = "http://" . $mirror . "/" . static::$mirror_dir . "/update.ver";
-                $options[CURLOPT_URL] = $url;
-                curl_setopt_array($ch, $options);
-                curl_exec($ch);
-                $info = curl_getinfo($ch);
+                $info = Tools::download_file(array(CURLOPT_URL => "http://" . static::$key[0] . ":" . static::$key[1] . $mirror . "/" . static::$mirror_dir));
                 $url = parse_url($info['url']);
                 if ($info['http_code'] == 200) {
                     $test_mirrors[$url['host']] = round($info['total_time'] * 1000);
@@ -183,7 +153,6 @@ class Mirror
                 } else {
                     Log::write_log(Language::t("Mirror %s inactive", $url['host']), 3, static::$version);
                 }
-                curl_close($ch);
             }
         }
         asort($test_mirrors);
@@ -219,7 +188,7 @@ class Mirror
         @mkdir($tmp_path, 0755, true);
         $archive = Tools::ds($tmp_path, 'update.rar');
         $extracted = Tools::ds($tmp_path, 'update.ver');
-        $header = Tools::download_file("http://" . static::$key[0] .":" . static::$key[1] . "@$mirror/" . static::$mirror_dir . "/update.ver", $archive);
+        $header = Tools::download_file(array( CURLOPT_URL => "http://" . static::$key[0] . ":" . static::$key[1] . "@$mirror/" . static::$mirror_dir . "/update.ver", CURLOPT_FILE => $archive));
 
         if (is_array($header) and $header['http_code'] == 200) {
             if (preg_match("/text/", $header['content_type'])) {
@@ -549,7 +518,8 @@ class Mirror
             foreach (static::$mirrors as $id => $mirror) {
                 $time = microtime(true);
                 Log::write_log(Language::t("Trying download file %s from %s", basename($file['file']), $mirror['host']), 3, static::$version);
-                $header = Tools::download_file("http://" . static::$key[0] .":" . static::$key[1] . "@" . $mirror['host'] . $file['file'], Tools::ds(Config::get('web_dir'), $file['file']));
+                $out = Tools::ds(Config::get('web_dir'), $file['file']);
+                $header = Tools::download_file(array(CURLOPT_URL => "http://" . static::$key[0] .":" . static::$key[1] . "@" . $mirror['host'] . $file['file'], CURLOPT_FILE => $out));
 
                 if (is_array($header) and $header['http_code'] == 200 and $header['size_download'] == $file['size']) {
                     static::$total_downloads += $header['size_download'];

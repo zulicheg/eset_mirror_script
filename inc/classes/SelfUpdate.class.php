@@ -25,33 +25,7 @@ class SelfUpdate
     static private function get_hashes_from_server()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        $options = array(
-            CURLOPT_BINARYTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5,
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_URL => sprintf("http://%s:%s/%s/%s", SELFUPDATE_SERVER, SELFUPDATE_PORT, SELFUPDATE_DIR, SELFUPDATE_FILE),
-        );
-
-        if (Config::get('download_speed_limit') !== 0) {
-            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = Config::get('download_speed_limit');
-        }
-
-        if (Config::get('proxy_enable') !== 0) {
-            $options[CURLOPT_PROXY] = Config::get('proxy_server');
-            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
-
-            if (Config::get('proxy_user') !== NULL) {
-                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
-                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
-            }
-        }
-
-        $ch = curl_init();
-        curl_setopt_array($ch, $options);
-        $content = curl_exec($ch);
-        curl_close($ch);
+        $content = Tools::download_file(array(CURLOPT_URL => "http://" . SELFUPDATE_SERVER . ":" . SELFUPDATE_PORT . "/" . SELFUPDATE_DIR . "/" . SELFUPDATE_FILE, CURLOPT_RETURNTRANSFER => 1));
         $arr = array();
 
         if (preg_match_all("/(.+)=(.+)=(.+)/", $content, $result, PREG_OFFSET_CAPTURE))
@@ -90,33 +64,7 @@ class SelfUpdate
     static public function get_version_on_server()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        $options = array(
-            CURLOPT_BINARYTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5,
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_URL => sprintf("http://%s:%s/%s/%s", SELFUPDATE_SERVER, SELFUPDATE_PORT, SELFUPDATE_DIR, SELFUPDATE_NEW_VERSION),
-        );
-
-        if (Config::get('download_speed_limit') !== 0) {
-            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = Config::get('download_speed_limit');
-        }
-
-        if (Config::get('proxy_enable') !== 0) {
-            $options[CURLOPT_PROXY] = Config::get('proxy_server');
-            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
-
-            if (Config::get('proxy_user') !== NULL) {
-                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
-                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
-            }
-        }
-
-        $ch = curl_init();
-        curl_setopt_array($ch, $options);
-        $response = curl_exec($ch);
-        curl_close($ch);
+        $response = Tools::download_file(array(CURLOPT_URL => "http://" . SELFUPDATE_SERVER . ":" . SELFUPDATE_PORT . "/" . SELFUPDATE_DIR . "/" . SELFUPDATE_NEW_VERSION, CURLOPT_RETURNTRANSFER => 1));
         return trim($response);
     }
 
@@ -131,7 +79,7 @@ class SelfUpdate
             $fs_filename = str_replace("/", DS, str_replace("./", "", $filename));
             $remote_full_path = sprintf("http://%s:%s/%s/%s", SELFUPDATE_SERVER, SELFUPDATE_PORT, SELFUPDATE_DIR, $filename);
             Log::write_log(Language::t("Downloading %s [%s Bytes]", basename($filename), $info), 0);
-            $status = Tools::download_file($remote_full_path, $fs_filename);
+            $status = Tools::download_file(array(CURLOPT_URL => $remote_full_path, CURLOPT_FILE => $fs_filename));
 
             if (is_string($status))
                 Log::write_log(Language::t("Error while downloading file %s [%s]", basename($filename), $status), 0);
@@ -139,8 +87,10 @@ class SelfUpdate
 
         global $SELFUPDATE_POSTFIX;
 
-        foreach ($SELFUPDATE_POSTFIX as $file)
-            Tools::download_file(sprintf("http://%s:%s/%s/%s", SELFUPDATE_SERVER, SELFUPDATE_PORT, SELFUPDATE_DIR, $file), str_replace("/", DS, $file));
+        foreach ($SELFUPDATE_POSTFIX as $file) {
+            $out = str_replace("/", DS, $file);
+            Tools::download_file(array(CURLOPT_URL => "http://" . SELFUPDATE_SERVER . ":" . SELFUPDATE_PORT . "/" . SELFUPDATE_DIR . "/" . $file, CURLOPT_FILE => $out));
+        }
     }
 
     /**

@@ -341,46 +341,9 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         static $found_key = false;
-        $options = array(
-            CURLOPT_BINARYTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5,
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_URL => $this_link,
-            CURLOPT_USERAGENT => 'User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201',
-        );
+        $search = Tools::download_file(array(CURLOPT_URL => $this_link, CURLOPT_RETURNTRANSFER => 1));
 
-        if (Config::get('download_speed_limit') !== 0) {
-            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = Config::get('download_speed_limit');
-        }
-
-        if (Config::get('proxy_enable') !== 0) {
-            $options[CURLOPT_PROXY] = Config::get('proxy_server');
-            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
-
-            if (Config::get('proxy_user') !== NULL) {
-                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
-                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
-            }
-        }
-
-        $ch = curl_init();
-        curl_setopt_array($ch, $options);
-        $search = curl_exec($ch);
-        $info = curl_getinfo($ch);
-        curl_close($ch);
-        $test = false;
-
-        if ($info['http_code'] !== 200) {
-            $test = true;
-
-        } else {
-            if (strlen($search) == 0 or !preg_match("/text/", $info['content_type']))
-                $test = true;
-        }
-
-        if ($test) {
+        if ($search === false) {
             Log::write_log(Language::t("Link wasn't found [%s]", $this_link), 4, Mirror::$version);
             return false;
         }

@@ -7,47 +7,47 @@ class Tools
 {
 
     /**
-     * @param string $source
-     * @param string $destination
+     * @param array $options
      * @return array|bool
      */
-    static public function download_file($source, $destination)
+    static public function download_file($options = array())
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-
-        $dir = dirname($destination);
-        if (!@file_exists($dir)) @mkdir($dir, 0755, true);
-
-        $out = fopen($destination, "wb");
-        $options = array(
+        $out = FALSE;
+        $opts = array(
             CURLOPT_BINARYTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
             CURLOPT_HEADER => false,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
-            CURLOPT_FILE => $out,
-            CURLOPT_URL => $source,
         );
 
+
+        if ($options[CURLOPT_FILE]) {
+            $dir = dirname($options[CURLOPT_FILE]);
+            if (!@file_exists($dir)) @mkdir($dir, 0755, true);
+            $out = fopen($options[CURLOPT_FILE], "wb");
+        }
+
         if (Config::get('download_speed_limit') !== 0) {
-            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = Config::get('download_speed_limit');
+            $opts[CURLOPT_MAX_RECV_SPEED_LARGE] = Config::get('download_speed_limit');
         }
 
         if (Config::get('proxy_enable') !== 0) {
-            $options[CURLOPT_PROXY] = Config::get('proxy_server');
-            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
+            $opts[CURLOPT_PROXY] = Config::get('proxy_server');
+            $opts[CURLOPT_PROXYPORT] = Config::get('proxy_port');
 
             if (Config::get('proxy_user') !== NULL) {
-                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
-                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
+                $opts[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
+                $opts[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
             }
         }
 
         $ch = curl_init();
-        curl_setopt_array($ch, $options);
+        curl_setopt_array($ch, array_merge($opts, $options));
         curl_exec($ch);
         $info = curl_getinfo($ch);
-        @fclose($out);
+        if ($out) @fclose($out);
         curl_close($ch);
 
         if ($info['http_code'] == 200) {
@@ -118,7 +118,7 @@ class Tools
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
 
-        return (@fclose(@fsockopen($hostname, $port, $errno, $errstr, CONNECTTIMEOUT))) ? true : false;
+        return (is_array(static::download_file(array(CURLOPT_URL => "http://" . $hostname . ":" . $port)))) ? true : false;
     }
 
     /**
