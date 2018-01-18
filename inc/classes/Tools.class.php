@@ -22,8 +22,7 @@ class Tools
             CURLOPT_MAXREDIRS => 5,
         );
 
-
-        if ($options[CURLOPT_FILE]) {
+        if (isset($options[CURLOPT_FILE])) {
             $dir = dirname($options[CURLOPT_FILE]);
             if (!@file_exists($dir)) @mkdir($dir, 0755, true);
             $out = fopen($options[CURLOPT_FILE], "wb");
