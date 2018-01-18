@@ -20,13 +20,13 @@ class Tools
             CURLOPT_HEADER => false,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
-            CURLOPT_NOBODY => 1,
         );
 
         if (key_exists(CURLOPT_FILE, $options)) {
             $dir = dirname($options[CURLOPT_FILE]);
             if (!@file_exists($dir)) @mkdir($dir, 0755, true);
             $out = fopen($options[CURLOPT_FILE], "wb");
+            $opts[CURLOPT_NOBODY] = 1;
         }
 
         if (Config::get('download_speed_limit') !== 0) {
