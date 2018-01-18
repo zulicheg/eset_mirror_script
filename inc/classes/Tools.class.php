@@ -20,6 +20,7 @@ class Tools
             CURLOPT_HEADER => false,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
+            CURLOPT_NOBODY => 1,
         );
 
         if (key_exists(CURLOPT_FILE, $options)) {
