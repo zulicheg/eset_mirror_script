@@ -50,6 +50,7 @@ class Tools
         curl_close($ch);
 
         if (key_exists(CURLOPT_RETURNTRANSFER, $options)) {
+            if ($options[CURLOPT_RETURNTRANSFER] == 1)
             return $res;
         }
 
@@ -121,7 +122,7 @@ class Tools
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
 
-        return (is_array(static::download_file(array(CURLOPT_URL => "http://" . $hostname, CURLOPT_PORT => $port)))) ? true : false;
+        return (is_array(static::download_file(array(CURLOPT_URL => "http://" . $hostname, CURLOPT_PORT => $port, CURLOPT_NOBODY => 1)))) ? true : false;
     }
 
     /**

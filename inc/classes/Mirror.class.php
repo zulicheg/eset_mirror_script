@@ -79,7 +79,7 @@ class Mirror
                 if ($tries > 1)
                     usleep(CONNECTTIMEOUT * 1000000);
 
-                $info = Tools::download_file(array( CURLOPT_URL => "http://" . static::$key[0] . ":" . static::$key[1] . $mirror . "/" . static::$mirror_dir));
+                $info = Tools::download_file(array( CURLOPT_URL => "http://" . static::$key[0] . ":" . static::$key[1] . $mirror . "/" . static::$mirror_dir, CURLOPT_NOBODY => 1));
                 return ($info['http_code'] === 200) ? true : false;
             }
         }
@@ -145,7 +145,7 @@ class Mirror
             curl_multi_close($master);
         } else {
             foreach (Config::get('mirror') as $mirror) {
-                $info = Tools::download_file(array(CURLOPT_URL => "http://" . static::$key[0] . ":" . static::$key[1] . $mirror . "/" . static::$mirror_dir));
+                $info = Tools::download_file(array(CURLOPT_URL => "http://" . static::$key[0] . ":" . static::$key[1] . $mirror . "/" . static::$mirror_dir, CURLOPT_NOBODY => 1));
                 $url = parse_url($info['url']);
                 if ($info['http_code'] == 200) {
                     $test_mirrors[$url['host']] = round($info['total_time'] * 1000);
