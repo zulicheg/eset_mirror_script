@@ -591,12 +591,12 @@ class Nod32ms
                 if ($key === null) {
                     $this->find_keys();
                     $key = $this->read_keys();
-                    Mirror::set_key($key);
 
                     if ($key === null) {
                         Log::write_log(Language::t("The script has been stopped!"), 1, Mirror::$version);
                         continue;
                     }
+                    Mirror::set_key($key);
                 }
 
                 Mirror::find_best_mirrors();
