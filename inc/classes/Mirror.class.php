@@ -79,7 +79,7 @@ class Mirror
                 if ($tries > 1)
                     usleep(CONNECTTIMEOUT * 1000000);
 
-                $info = Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror . "/" . static::$mirror_dir, CURLOPT_NOBODY => 1));
+                $info = Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror . "/" . static::$mirror_dir . "/update.ver", CURLOPT_NOBODY => 1));
                 return ($info['http_code'] === 200) ? true : false;
             }
         }
