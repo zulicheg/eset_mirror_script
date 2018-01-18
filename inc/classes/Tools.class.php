@@ -43,7 +43,7 @@ class Tools
         }
 
         $ch = curl_init();
-        curl_setopt_array($ch, array_merge($opts, $options));
+        curl_setopt_array($ch, ($opts + $options));
         $res = curl_exec($ch);
         $info = curl_getinfo($ch);
         if ($out) @fclose($out);
