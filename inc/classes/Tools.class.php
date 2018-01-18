@@ -22,7 +22,7 @@ class Tools
             CURLOPT_MAXREDIRS => 5,
         );
 
-        if (isset($options[CURLOPT_FILE])) {
+        if (key_exists(CURLOPT_FILE, $options)) {
             $dir = dirname($options[CURLOPT_FILE]);
             if (!@file_exists($dir)) @mkdir($dir, 0755, true);
             $out = fopen($options[CURLOPT_FILE], "wb");
@@ -44,10 +44,14 @@ class Tools
 
         $ch = curl_init();
         curl_setopt_array($ch, array_merge($opts, $options));
-        curl_exec($ch);
+        $res = curl_exec($ch);
         $info = curl_getinfo($ch);
         if ($out) @fclose($out);
         curl_close($ch);
+
+        if (key_exists(CURLOPT_RETURNTRANSFER, $options)) {
+            return $res;
+        }
 
         if ($info['http_code'] == 200) {
             return $info;
