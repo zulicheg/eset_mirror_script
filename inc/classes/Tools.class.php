@@ -50,8 +50,7 @@ class Tools
         curl_close($ch);
 
         if (key_exists(CURLOPT_RETURNTRANSFER, $options)) {
-            if ($options[CURLOPT_RETURNTRANSFER] == 1)
-            return $res;
+            if ($options[CURLOPT_RETURNTRANSFER] == 1) return $res;
         }
 
         if ($info['http_code'] == 200) {
