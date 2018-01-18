@@ -25,7 +25,7 @@ class SelfUpdate
     static private function get_hashes_from_server()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        $content = Tools::download_file(array(CURLOPT_URL => "http://" . SELFUPDATE_SERVER . ":" . SELFUPDATE_PORT . "/" . SELFUPDATE_DIR . "/" . SELFUPDATE_FILE, CURLOPT_RETURNTRANSFER => 1));
+        $content = Tools::download_file(array(CURLOPT_URL => "http://" . SELFUPDATE_SERVER . "/" . SELFUPDATE_DIR . "/" . SELFUPDATE_FILE, CURLOPT_PORT => SELFUPDATE_PORT, CURLOPT_RETURNTRANSFER => 1));
         $arr = array();
 
         if (preg_match_all("/(.+)=(.+)=(.+)/", $content, $result, PREG_OFFSET_CAPTURE))
@@ -64,7 +64,7 @@ class SelfUpdate
     static public function get_version_on_server()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        $response = Tools::download_file(array(CURLOPT_URL => "http://" . SELFUPDATE_SERVER . ":" . SELFUPDATE_PORT . "/" . SELFUPDATE_DIR . "/" . SELFUPDATE_NEW_VERSION, CURLOPT_RETURNTRANSFER => 1));
+        $response = Tools::download_file(array(CURLOPT_URL => "http://" . SELFUPDATE_SERVER . "/" . SELFUPDATE_DIR . "/" . SELFUPDATE_NEW_VERSION, CURLOPT_PORT => SELFUPDATE_PORT, CURLOPT_RETURNTRANSFER => 1));
         return trim($response);
     }
 
@@ -77,9 +77,9 @@ class SelfUpdate
 
         foreach (static::$list_to_update as $filename => $info) {
             $fs_filename = str_replace("/", DS, str_replace("./", "", $filename));
-            $remote_full_path = sprintf("http://%s:%s/%s/%s", SELFUPDATE_SERVER, SELFUPDATE_PORT, SELFUPDATE_DIR, $filename);
+            $remote_full_path = sprintf("http://%s/%s/%s", SELFUPDATE_SERVER, SELFUPDATE_DIR, $filename);
             Log::write_log(Language::t("Downloading %s [%s Bytes]", basename($filename), $info), 0);
-            $status = Tools::download_file(array(CURLOPT_URL => $remote_full_path, CURLOPT_FILE => $fs_filename));
+            $status = Tools::download_file(array(CURLOPT_URL => $remote_full_path, CURLOPT_PORT => SELFUPDATE_PORT, CURLOPT_FILE => $fs_filename));
 
             if (is_string($status))
                 Log::write_log(Language::t("Error while downloading file %s [%s]", basename($filename), $status), 0);
@@ -89,7 +89,7 @@ class SelfUpdate
 
         foreach ($SELFUPDATE_POSTFIX as $file) {
             $out = str_replace("/", DS, $file);
-            Tools::download_file(array(CURLOPT_URL => "http://" . SELFUPDATE_SERVER . ":" . SELFUPDATE_PORT . "/" . SELFUPDATE_DIR . "/" . $file, CURLOPT_FILE => $out));
+            Tools::download_file(array(CURLOPT_URL => "http://" . SELFUPDATE_SERVER . "/" . SELFUPDATE_DIR . "/" . $file, CURLOPT_PORT => SELFUPDATE_PORT, CURLOPT_FILE => $out));
         }
     }
 
