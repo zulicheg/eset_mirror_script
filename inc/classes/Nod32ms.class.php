@@ -225,7 +225,7 @@ class Nod32ms
         $keys = Parser::parse_keys(Tools::ds(Config::get('log_dir'), KEY_FILE_VALID));
 
         if (!isset($keys) || !count($keys)) {
-            Log::write_log(Language::t("Keys file is empty!"), 4);
+            Log::write_log(Language::t("Keys file is empty!"), 4, Mirror::$version);
             return null;
         }
 
