@@ -118,13 +118,13 @@ class Tools
     /**
      * @param $hostname
      * @param int $port
+     * @param null $file
      * @return bool
      */
-    static public function ping($hostname, $port = 80)
+    static public function ping($hostname, $port = 80, $file = NULL)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-
-        return (is_array(static::download_file(array(CURLOPT_URL => "http://" . $hostname, CURLOPT_PORT => $port, CURLOPT_NOBODY => 1)))) ? true : false;
+        return (is_array(static::download_file(array(CURLOPT_URL => "http://" . $hostname . "/" . $file, CURLOPT_PORT => $port, CURLOPT_NOBODY => 1)))) ? true : false;
     }
 
     /**

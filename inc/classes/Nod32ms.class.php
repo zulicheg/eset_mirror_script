@@ -265,7 +265,7 @@ class Nod32ms
             Log::write_log(Language::t("Key [%s:%s] already exists", $login, $password), 4, Mirror::$version);
 
         if (Config::get('remove_invalid_keys') == 1)
-            Parser::delete_parse_line_in_file($login . ':' . $password . Mirror::$version, Tools::ds(Config::get('log_dir'), KEY_FILE_VALID));
+            Parser::delete_parse_line_in_file($login . ':' . $password . ':' . Mirror::$version, Tools::ds(Config::get('log_dir'), KEY_FILE_VALID));
     }
 
     /**

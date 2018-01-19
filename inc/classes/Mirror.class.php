@@ -605,9 +605,7 @@ class Mirror
         shuffle($download_files);
         Log::write_log(Language::t("Downloading %d files", count($download_files)), 3, static::$version);
 
-        if (Tools::ping(current(static::$mirrors)['host']) == true && static::check_mirror(current(static::$mirrors)['host']) != null) {
-            static::download($download_files);
-        }
+        if (static::check_mirror(current(static::$mirrors)['host']) != null) static::download($download_files);
     }
 
     /**
