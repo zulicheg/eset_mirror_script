@@ -94,65 +94,14 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $test_mirrors = array();
-        $options = array(
-            CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
-            CURLOPT_HEADER => false,
-            CURLOPT_NOBODY => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5,
-            CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1]
-        );
 
-        if (Config::get('proxy_enable') !== 0) {
-            $options[CURLOPT_PROXY] = Config::get('proxy_server');
-            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
-
-            if (Config::get('proxy_user') !== NULL) {
-                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
-                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
-            }
-        }
-
-        if (function_exists('curl_multi_init')) {
-            $master = curl_multi_init();
-
-            foreach (Config::get('mirror') as $mirror) {
-                $ch = curl_init();
-                $url = "http://" . $mirror . "/" . static::$mirror_dir . "/update.ver";
-                $options[CURLOPT_URL] = $url;
-                curl_setopt_array($ch, $options);
-                curl_multi_add_handle($master, $ch);
-            }
-
-            do {
-                $run = curl_multi_exec($master, $running);
-                curl_multi_select($master);
-
-                while ($done = curl_multi_info_read($master)) {
-                    $ch = $done['handle'];
-                    $info = curl_getinfo($ch);
-                    $url = parse_url($info['url']);
-                    if ($info['http_code'] == 200) {
-                        $test_mirrors[$url['host']] = round($info['total_time'] * 1000);
-                        Log::write_log(Language::t("Mirror %s active", $url['host']), 3, static::$version);
-                    } else {
-                        Log::write_log(Language::t("Mirror %s inactive", $url['host']), 3, static::$version);
-                    }
-                    curl_multi_remove_handle($master, $ch);
-                    curl_close($ch);
-                }
-            } while ($running && $run === CURLM_OK);
-            curl_multi_close($master);
-        } else {
-            foreach (Config::get('mirror') as $mirror) {
-                $info = Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror . "/" . static::$mirror_dir, CURLOPT_NOBODY => 1));
-                $url = parse_url($info['url']);
-                if ($info['http_code'] == 200) {
-                    $test_mirrors[$url['host']] = round($info['total_time'] * 1000);
-                    Log::write_log(Language::t("Mirror %s active", $url['host']), 3, static::$version);
-                } else {
-                    Log::write_log(Language::t("Mirror %s inactive", $url['host']), 3, static::$version);
-                }
+        foreach (Config::get('mirror') as $mirror) {
+            $info = Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror . "/" . static::$mirror_dir, CURLOPT_NOBODY => 1));
+            if ($info['http_code'] == 200) {
+                $test_mirrors[$mirror] = round($info['total_time'] * 1000);
+                Log::write_log(Language::t("Mirror %s active", $mirror), 3, static::$version);
+            } else {
+                Log::write_log(Language::t("Mirror %s inactive", $mirror), 3, static::$version);
             }
         }
         asort($test_mirrors);
@@ -326,37 +275,7 @@ class Mirror
   </SECTION>
   </GETLICEXP>';
 
-        $options = array(
-            CURLOPT_BINARYTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
-            CURLOPT_HEADER => 'Content-type: application/x-www-form-urlencoded',
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5,
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_URL => 'http://expire.eset.com/getlicexp',
-            CURLOPT_POST => 1,
-            CURLOPT_POSTFIELDS => $xml,
-        );
-
-        if (Config::get('download_speed_limit') !== 0) {
-            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = Config::get('download_speed_limit');
-        }
-
-        if (Config::get('proxy_enable') !== 0) {
-            $options[CURLOPT_PROXY] = Config::get('proxy_server');
-            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
-
-            if (Config::get('proxy_user') !== NULL) {
-                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
-                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
-            }
-        }
-
-        $ch = curl_init();
-        curl_setopt_array($ch, $options);
-        $response = curl_exec($ch);
-        curl_close($ch);
-
+        $response = Tools::download_file(array(CURLOPT_URL => "http://expire.eset.com/getlicexp", CURLOPT_POSTFIELDS => $xml, CURLOPT_POST => 1, CURLOPT_HEADER => 'Content-type: application/x-www-form-urlencoded', CURLOPT_RETURNTRANSFER => 1));
         $LicInfo = array();
 
         if ($response == "unknownlic\n") return false;
