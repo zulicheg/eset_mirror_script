@@ -96,7 +96,7 @@ class Mirror
         $test_mirrors = array();
 
         foreach (Config::get('mirror') as $mirror) {
-            $info = Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror . "/" . static::$mirror_dir, CURLOPT_NOBODY => 1));
+            $info = Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror . "/" . static::$mirror_dir . "/update.ver", CURLOPT_NOBODY => 1));
             if ($info['http_code'] == 200) {
                 $test_mirrors[$mirror] = round($info['total_time'] * 1000);
                 Log::write_log(Language::t("Mirror %s active", $mirror), 3, static::$version);
