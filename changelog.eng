@@ -1,3 +1,7 @@
+20180126:
+ Changed:
+  - All network functions replaced with curl(Tools::download_file)
+
 20171228:
  Added:
   - 11 version support
