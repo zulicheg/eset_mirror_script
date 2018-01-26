@@ -341,7 +341,7 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         static $found_key = false;
-        $search = Tools::download_file(array(CURLOPT_URL => $this_link, CURLOPT_RETURNTRANSFER => 1, CURLOPT_NOBODY => 0, CURLOPT_USERAGENT => "Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201"));
+        $search = Tools::download_file(array(CURLOPT_URL => $this_link, CURLOPT_RETURNTRANSFER => 1, CURLOPT_NOBODY => 0, CURLOPT_USERAGENT => "Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201"), $headers);
 
         if ($search === false) {
             Log::write_log(Language::t("Link wasn't found [%s]", $this_link), 4, Mirror::$version);

@@ -8,9 +8,10 @@ class Tools
 
     /**
      * @param array $options
+     * @param var $headers
      * @return array|bool
      */
-    static public function download_file($options = array())
+    static public function download_file($options = array(), &$headers)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $out = FALSE;
@@ -46,7 +47,7 @@ class Tools
         $ch = curl_init();
         curl_setopt_array($ch, ($opts + $options));
         $res = curl_exec($ch);
-        $info = curl_getinfo($ch);
+        $headers = curl_getinfo($ch);
         if ($out) @fclose($out);
         curl_close($ch);
 
@@ -55,11 +56,6 @@ class Tools
                 return $res;
             }
         }
-
-        if ($info['http_code'] == 200) {
-            return $info;
-        } else
-            return false;
     }
 
     /**
@@ -124,7 +120,8 @@ class Tools
     static public function ping($hostname, $port = 80, $file = NULL)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        return (is_array(static::download_file(array(CURLOPT_URL => "http://" . $hostname . "/" . $file, CURLOPT_PORT => $port, CURLOPT_NOBODY => 1)))) ? true : false;
+        static::download_file(array(CURLOPT_URL => "http://" . $hostname . "/" . $file, CURLOPT_PORT => $port, CURLOPT_NOBODY => 1), $headers);
+        return (is_array($headers)) ? true : false;
     }
 
     /**
