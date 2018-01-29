@@ -549,19 +549,20 @@ class Nod32ms
                 $keys = Parser::parse_keys(Tools::ds(Config::get('log_dir'), KEY_FILE_VALID));
             }
 
+            $html_page .= '<tr>';
+            $html_page .= '<td>' . Language::t("Version") . '</td>';
+            $html_page .= '<td>' . Language::t("Used login") . '</td>';
+            $html_page .= '<td>' . Language::t("Used password") . '</td>';
+            $html_page .= '<td>' . Language::t("Expiration date") . '</td>';
+            $html_page .= '</tr>';
+
             foreach ($keys as $k) {
                 $key = explode(":", $k);
                 $html_page .= '<tr>';
-                $html_page .= '<td>' . Language::t("Version %d", $key[2]) . '</td>';
-                $html_page .= '<td>' . Language::t("Used login") . '</td>';
-                $html_page .= '<td colspan="2">' . $key[0] . '</td>';
-                $html_page .= '</tr>';
-                $html_page .= '<tr>';
-                $html_page .= '<td colspan="2">' . Language::t("Used password") . '</td>';
-                $html_page .= '<td colspan="2">' . $key[1] . '</td>';
-                $html_page .= '</tr>';
-                $html_page .= '<tr><td colspan="2">' . Language::t("Expiration date") . '</td>';
-                $html_page .= '<td colspan="2">' . $key[3] . '</td>';
+                $html_page .= '<td>' . $key[2] . '</td>';
+                $html_page .= '<td>' . $key[0] . '</td>';
+                $html_page .= '<td>' . $key[1] . '</td>';
+                $html_page .= '<td>' . $key[3] . '</td>';
                 $html_page .= '</tr>';
             }
         }

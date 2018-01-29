@@ -1,3 +1,9 @@
+20180129:
+ Fixed:
+  - Nod32ms::generate_html function
+ Changed:
+  - For each version show it's key at html-page
+
 20180126:
  Changed:
   - All network functions replaced with curl(Tools::download_file)
