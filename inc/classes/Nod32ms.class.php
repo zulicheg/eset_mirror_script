@@ -559,7 +559,7 @@ class Nod32ms
             $html_page .= '<td colspan="2">' . Language::t("Used password") . '</td>';
             $html_page .= '<td colspan="2">' . $key[1] . '</td>';
             $html_page .= '</tr>';
-            $html_page .= (isset($key[3])) ? '<tr><td colspan="2">' . Language::t("Expiration date") . '</td><td colspan="2">' . $key[3] . '</td></tr>' : '';
+            $html_page .= '<tr><td colspan="2">' . Language::t("Expiration date") . '</td><td colspan="2">' . $key[3] . '</td></tr>';
         }
         $html_page .= '</table>';
         $html_page .= (Config::get('generate_only_table') == '0') ? '</td></tr></table></body></html>' : '';
