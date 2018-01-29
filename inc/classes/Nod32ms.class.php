@@ -502,7 +502,7 @@ class Nod32ms
         $html_page .= '<table>';
         $html_page .= '<tr><td colspan="4">' . Language::t("ESET NOD32 update server") . '</td></tr>';
         $html_page .= '<tr>';
-        $html_page .= '<td></td>';
+        $html_page .= '<td>' . Language::t("Version") . '</td>';
         $html_page .= '<td>' . Language::t("Database version") . '</td>';
         $html_page .= '<td>' . Language::t("Database size") . '</td>';
         $html_page .= '<td>' . Language::t("Last update") . '</td>';
@@ -516,7 +516,7 @@ class Nod32ms
                 $version = Tools::get_DB_version($update_ver);
                 $timestamp = $this->check_time_stamp($ver, true);
                 $html_page .= '<tr>';
-                $html_page .= '<td>' . Language::t("Version %d", $ver) . '</td>';
+                $html_page .= '<td>' . $ver . '</td>';
                 $html_page .= '<td>' . $version . '</td>';
                 $html_page .= '<td>' . (isset($total_size[$ver]) ? Tools::bytesToSize1024($total_size[$ver]) : Language::t("n/a")) . '</td>';
                 $html_page .= '<td>' . ($timestamp ? date("Y-m-d, H:i:s", $timestamp) : Language::t("n/a")) . '</td>';
@@ -545,21 +545,25 @@ class Nod32ms
         $html_page .= '</tr>';
 
         if (Config::get('show_login_password')) {
-            $key = null;
             if (file_exists(Tools::ds(Config::get('log_dir'), KEY_FILE_VALID))) {
                 $keys = Parser::parse_keys(Tools::ds(Config::get('log_dir'), KEY_FILE_VALID));
-                $key = (is_array($keys)) ? explode(":", $keys[0]) : null;
             }
 
-            $html_page .= '<tr>';
-            $html_page .= '<td colspan="2">' . Language::t("Used login") . '</td>';
-            $html_page .= '<td colspan="2">' . $key[0] . '</td>';
-            $html_page .= '</tr>';
-            $html_page .= '<tr>';
-            $html_page .= '<td colspan="2">' . Language::t("Used password") . '</td>';
-            $html_page .= '<td colspan="2">' . $key[1] . '</td>';
-            $html_page .= '</tr>';
-            $html_page .= '<tr><td colspan="2">' . Language::t("Expiration date") . '</td><td colspan="2">' . $key[3] . '</td></tr>';
+            foreach ($keys as $k) {
+                $key = explode(":", $k);
+                $html_page .= '<tr>';
+                $html_page .= '<td>' . Language::t("Version %d", $key[2]) . '</td>';
+                $html_page .= '<td>' . Language::t("Used login") . '</td>';
+                $html_page .= '<td colspan="2">' . $key[0] . '</td>';
+                $html_page .= '</tr>';
+                $html_page .= '<tr>';
+                $html_page .= '<td colspan="2">' . Language::t("Used password") . '</td>';
+                $html_page .= '<td colspan="2">' . $key[1] . '</td>';
+                $html_page .= '</tr>';
+                $html_page .= '<tr><td colspan="2">' . Language::t("Expiration date") . '</td>';
+                $html_page .= '<td colspan="2">' . $key[3] . '</td>';
+                $html_page .= '</tr>';
+            }
         }
         $html_page .= '</table>';
         $html_page .= (Config::get('generate_only_table') == '0') ? '</td></tr></table></body></html>' : '';
