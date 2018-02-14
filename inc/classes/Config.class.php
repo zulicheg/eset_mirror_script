@@ -33,7 +33,7 @@ class Config
         'update_version_x64' => 1,
         'update_version_ess' => 1,
         'update_version_lang' => 'bgr,chs,cht,csy,dan,deu,enu,esl,esn,eti,fin,fra,frc,hrv,hun,ita,kor,lth,nld,nor,plk,ptb,rom,rus,sky,slv,sve,tha,trk,ukr',
-        'update_version_filter' => 'rel-sta',
+        'update_version_filter' => 'rel-sta, rel-bat',
         'find_auto_enable' => 1,
         'find_system' => null,
         'remove_invalid_keys' => 1,
@@ -154,7 +154,7 @@ class Config
         self::$CONF['update_version_lang'] = $languages;
 
         // Convert update_version_filter string to pcre
-        self::$CONF['update_version_filter'] = preg_quote(implode('|', array_map("trim", (explode(",", self::$CONF['update_version_filter'])))));
+        self::$CONF['update_version_filter'] = implode('|', array_map("trim", (explode(",", self::$CONF['update_version_filter']))));
         return null;
     }
 

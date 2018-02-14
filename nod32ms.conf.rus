@@ -113,7 +113,7 @@ update_version_lang = "rus,enu,ukr"
 ; Названия файлов и директорий, попадающие под фильтр, будут исключены из списка файлов для загрузки.
 ; 'rel-sta' по умолчанию.
 
-; update_version_filter = "rel-sta"
+; update_version_filter = "rel-sta, rel-bat"
 
 
 ; Включение модуля поиска ключей. По умолчанию включено.

@@ -307,7 +307,9 @@ class Tools
             new RecursiveIteratorIterator(
                 new RecursiveRegexIterator(
                     new RecursiveDirectoryIterator($dir),
-                    '/v\d+-' . Config::get('update_version_filter') . '/i')),
+                    '/v\d+-(' . Config::get('update_version_filter') . ')/i'
+                )
+            ),
             '/\.nup$/i'
         );
 
@@ -390,7 +392,7 @@ class Tools
         $upd = Parser::parse_line($content, "versionid");
         $max = 0;
 
-        if (isset($upd) && preg_match('/' . Config::get('update_version_filter') . '/', $content)) {
+        if (isset($upd) && preg_match('/(' . Config::get('update_version_filter') . ')/', $content)) {
             foreach ($upd as $key) {
                 $max = $max < intval($key) ? $key : $max;
             }

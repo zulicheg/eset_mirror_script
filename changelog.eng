@@ -1,3 +1,9 @@
+20180214:
+ Fixed:
+  - Update version filter(update_version_filter), multiset work now
+ Added:
+  - To config param update_version_filter added rel-bat
+
 20180129:
  Fixed:
   - Nod32ms::generate_html function

@@ -113,7 +113,7 @@ update_version_lang = "rus,enu,ukr"
 ; them from download list.
 ; 'rel-sta' by default
 
-; update_version_filter = "rel-sta"
+; update_version_filter = "rel-sta, rel-bat"
 
 
 ; Enabling internal key autosearch build-in module, default value is "1".
