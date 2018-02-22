@@ -1,3 +1,9 @@
+20180222:
+ Added:
+  - Mirror::$updated - flag indicates result of db version updates
+ Fixed:
+  - Tools::compare_files - using for compare files size
+
 20180214:
  Fixed:
   - Update version filter(update_version_filter), multiset work now

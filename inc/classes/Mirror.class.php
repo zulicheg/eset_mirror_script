@@ -36,6 +36,11 @@ class Mirror
     static public $key = array();
 
     /**
+     * @var bool
+     */
+    static public $updated = false;
+
+    /**
      *
      */
     static private function fix_time_stamp()
@@ -169,27 +174,30 @@ class Mirror
             list($new_files, $total_size, $new_content) = static::parse_update_file($matches[0]);
 
             // Create hardlinks/copy file for empty needed files (name, size)
-            list($download_files, $needed_files) = Tools::create_links($dir, $new_files, static::$version);
+            list($download_files, $needed_files) = Tools::create_links($dir, $new_files);
 
             // Download files
             if (!empty($download_files)) {
+                static::$updated = true;
                 static::download_files($download_files);
             }
 
             // Delete not needed files
-            $del_files = 0;
             foreach (glob(Tools::ds($dir, static::$dir), GLOB_ONLYDIR) as $file) {
                 $del_files = Tools::del_files($file, $needed_files);
-                if ($del_files > 0)
+                if ($del_files > 0) {
+                    static::$updated = true;
                     Log::write_log(Language::t("Deleted files: %s", $del_files), 3, static::$version);
+                }
             }
 
             // Delete empty folders
-            $del_folders = 0;
             foreach (glob(Tools::ds($dir, static::$dir), GLOB_ONLYDIR) as $folder) {
                 $del_folders = Tools::del_folders($folder);
-                if ($del_folders > 0)
+                if ($del_folders > 0) {
+                    static::$updated = true;
                     Log::write_log(Language::t("Deleted folders: %s", $del_folders), 3, static::$version);
+                }
             }
 
             Tools::create_dir(dirname($cur_update_ver));
@@ -203,7 +211,7 @@ class Mirror
                 Log::write_log(Language::t("Average speed: %s/s", Tools::bytesToSize1024($average_speed)), 3, static::$version);
             }
 
-            if (count($download_files) > 0 || $del_files > 0 || $del_folders > 0) static::fix_time_stamp();
+            if (static::$updated) static::fix_time_stamp();
         } else {
             Log::write_log(Language::t("Error while parsing update.ver from %s", current(static::$mirrors)['host']), 3, static::$version);
         }
@@ -537,6 +545,7 @@ class Mirror
         static::$version = $version;
         static::$dir = 'v' . static::$version . '-rel-*';
         static::$mirror_dir = $dir;
+        static::$updated = false;
         Log::write_log(Language::t("Mirror initiliazed with dir=%s, mirror_dir=%s", static::$dir, static::$mirror_dir), 5, static::$version);
     }
 
@@ -561,5 +570,6 @@ class Mirror
         static::$mirror_dir = null;
         static::$mirrors = array();
         static::$key = array();
+        static::$updated = false;
     }
 }

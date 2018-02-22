@@ -8,7 +8,7 @@ class Tools
 
     /**
      * @param array $options
-     * @param var $headers
+     * @param $headers
      * @return array|bool
      */
     static public function download_file($options = array(), &$headers)
@@ -56,6 +56,8 @@ class Tools
                 return $res;
             }
         }
+
+        return false;
     }
 
     /**
@@ -294,10 +296,9 @@ class Tools
     /**
      * @param $dir
      * @param $new_files
-     * @param null $version
      * @return array
      */
-    static public function create_links($dir, $new_files, $version = null)
+    static public function create_links($dir, $new_files)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $old_files = array();
@@ -321,7 +322,7 @@ class Tools
             $path = static::ds($dir, $array['file']);
             $needed_files[] = $path;
 
-            if (file_exists($path) and (@filesize($path) != $array['size'])) {
+            if (file_exists($path) && static::compare_files(@stat($path), $array)) {
                 unlink($path);
             }
 
@@ -330,7 +331,7 @@ class Tools
 
                 if (!empty($results)) {
                     foreach ($results as $result) {
-                        if (@filesize($result) == $array['size']) {
+                        if (static::compare_files(@stat($result), $array)) {
                             $res = dirname($path);
 
                             if (!file_exists($res)) {
@@ -340,18 +341,20 @@ class Tools
                             switch (Config::get('create_hard_links')) {
                                 case 'link':
                                     link($result, $path);
-                                    Log::write_log(Language::t("Created hard link for %s", basename($array['file'])), 3, $version);
+                                    Log::write_log(Language::t("Created hard link for %s", basename($array['file'])), 3, Mirror::$version);
                                     break;
                                 case 'fsutil':
                                     shell_exec(sprintf("fsutil hardlink create %s %s", $path, $result));
-                                    Log::write_log(Language::t("Created hard link for %s", basename($array['file'])), 3, $version);
+                                    Log::write_log(Language::t("Created hard link for %s", basename($array['file'])), 3, Mirror::$version);
                                     break;
                                 case 'copy':
                                 default:
                                     copy($result, $path);
-                                    Log::write_log(Language::t("Copied file %s", basename($array['file'])), 3, $version);
+                                    Log::write_log(Language::t("Copied file %s", basename($array['file'])), 3, Mirror::$version);
                                     break;
                             }
+
+                            Mirror::$updated = true;
 
                             break;
                         }
