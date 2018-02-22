@@ -322,7 +322,7 @@ class Tools
             $path = static::ds($dir, $array['file']);
             $needed_files[] = $path;
 
-            if (file_exists($path) && static::compare_files(@stat($path), $array)) {
+            if (file_exists($path) && !static::compare_files(@stat($path), $array)) {
                 unlink($path);
             }
 

@@ -627,7 +627,7 @@ class Nod32ms
                             list($size, $downloads, $speed) = Mirror::download_signature();
                             $this->set_database_size($size);
 
-                            if (Mirror::$updated === false) {
+                            if (!Mirror::$updated && !$this->compare_versions($old_version, $mirror['db_version'])) {
                                 Log::informer(Language::t("Your database has not been updated!"), Mirror::$version, 1);
                             } else {
                                 $total_size[Mirror::$version] = $size;
@@ -636,7 +636,7 @@ class Nod32ms
                                     $average_speed[Mirror::$version] = $speed;
                                 }
 
-                                if ($this->compare_versions($old_version, $mirror['db_version']) === false) {
+                                if (!$this->compare_versions($old_version, $mirror['db_version'])) {
                                     Log::informer(Language::t("Your database was successfully updated from %s to %s", $old_version, $mirror['db_version']), Mirror::$version, 2);
                                 } else {
                                     Log::informer(Language::t("Your database was successfully updated to %s", $mirror['db_version']), Mirror::$version, 2);
