@@ -425,11 +425,12 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         global $CONSTANTS;
+        $sys = Config::get('find_system');
 
         if (Config::get('find_auto_enable') != 1)
             return null;
 
-        if (($sys = Config::get('find_system')) === null) {
+        if ($sys === null) {
             $patterns = $this->get_all_patterns();
             shuffle($patterns);
         } else {
