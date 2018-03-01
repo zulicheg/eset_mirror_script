@@ -42,14 +42,14 @@ define('SELFUPDATE_FILE', "files.md5");
 define('SELFUPDATE_NEW_VERSION', "version.txt");
 define("CONNECTTIMEOUT", 5); # Seconds
 
-function autoload($class)
+$autoload = function ($class)
 {
     @include_once CLASSES . "$class.class.php";
-}
+};
 
-spl_autoload_register('autoload');
+spl_autoload_register($autoload);
 
-function try_self_update() {
+$try_self_update = function () {
     if (($err = Config::init(CONF_FILE)) || ($err = Language::init(Config::get('default_language'))) || ($err = Language::t(Config::check_config()))) {
         Log::write_log(Language::t($err), 0);
         exit;
@@ -76,5 +76,5 @@ function try_self_update() {
     }
 
     return 1;
-}
+};
 
