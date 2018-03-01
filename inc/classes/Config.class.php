@@ -241,10 +241,10 @@ class Config
         if (empty(self::$CONF['web_dir']))
             return "Please, check set up of WWW directory in your config file!";
 
-        while (substr(self::$CONF['web_dir'], -1) == $CONSTANTS['DS'])
+        while (substr(self::$CONF['web_dir'], -1) == DS)
             self::$CONF['web_dir'] = substr(self::$CONF['web_dir'], 0, -1);
 
-        while (substr(self::$CONF['log_dir'], -1) == $CONSTANTS['DS'])
+        while (substr(self::$CONF['log_dir'], -1) == DS)
             self::$CONF['log_dir'] = substr(self::$CONF['log_dir'], 0, -1);
 
         @mkdir($CONSTANTS['PATTERN'], 0755, true);

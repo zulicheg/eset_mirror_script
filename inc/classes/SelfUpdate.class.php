@@ -52,9 +52,9 @@ class SelfUpdate
                 continue;
 
             (is_dir($directory . $entry)) ?
-                $hashes = array_merge(static::get_hashes_from_local($directory . $entry . $CONSTANTS['DS']), $hashes)
+                $hashes = array_merge(static::get_hashes_from_local($directory . $entry . DS), $hashes)
                 :
-                $hashes[str_replace($CONSTANTS['DS'], "/", $directory . $entry)] = array(md5_file($directory . $entry), filesize($directory . $entry));
+                $hashes[str_replace(DS, "/", $directory . $entry)] = array(md5_file($directory . $entry), filesize($directory . $entry));
         }
         $d->close();
         return $hashes;
@@ -80,7 +80,7 @@ class SelfUpdate
         global $CONSTANTS;
 
         foreach (static::$list_to_update as $filename => $info) {
-            $fs_filename = str_replace("/", $CONSTANTS['DS'], str_replace("./", "", $filename));
+            $fs_filename = str_replace("/", DS, str_replace("./", "", $filename));
             $remote_full_path = sprintf("http://%s/%s/%s", $CONSTANTS['SELFUPDATE_SERVER'], $CONSTANTS['SELFUPDATE_DIR'], $filename);
             Log::write_log(Language::t("Downloading %s [%s Bytes]", basename($filename), $info), 0);
             Tools::download_file(array(CURLOPT_URL => $remote_full_path, CURLOPT_PORT => $CONSTANTS['SELFUPDATE_PORT'], CURLOPT_FILE => $fs_filename), $headers);
@@ -92,7 +92,7 @@ class SelfUpdate
         global $SELFUPDATE_POSTFIX;
 
         foreach ($SELFUPDATE_POSTFIX as $file) {
-            $out = str_replace("/", $CONSTANTS['DS'], $file);
+            $out = str_replace("/", DS, $file);
             Tools::download_file(array(CURLOPT_URL => "http://" . $CONSTANTS['SELFUPDATE_SERVER'] . "/" . $CONSTANTS['SELFUPDATE_DIR'] . "/" . $file, CURLOPT_PORT => $CONSTANTS['SELFUPDATE_PORT'], CURLOPT_FILE => $out), $headers);
         }
     }

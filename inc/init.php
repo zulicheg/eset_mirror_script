@@ -19,13 +19,14 @@ $SELFUPDATE_POSTFIX = [
     "changelog.eng",
 ];
 
+@define('DS', DIRECTORY_SEPARATOR);
+
 $CONSTANTS = [
-    'DS' => DIRECTORY_SEPARATOR,
     'VERSION' => '20180301 [Freedom for Ukraine by harmless]',
-    'SELF' => dirname(__DIR__) . $CONSTANTS['DS'],
-    'INC' => $CONSTANTS['SELF'] . "inc" . $CONSTANTS['DS'],
-    'CLASSES' => $CONSTANTS['INC'] . "classes" . $CONSTANTS['DS'],
-    'PATTERN' => $CONSTANTS['SELF'] . "patterns" . $CONSTANTS['DS'],
+    'SELF' => dirname(__DIR__) . DS,
+    'INC' => $CONSTANTS['SELF'] . "inc" . DS,
+    'CLASSES' => $CONSTANTS['INC'] . "classes" . DS,
+    'PATTERN' => $CONSTANTS['SELF'] . "patterns" . DS,
     'CONF_FILE' => $CONSTANTS['SELF'] . "nod32ms.conf",
     'LANGPACKS_DIR' => 'langpacks',
     'DEBUG_DIR' => 'debug',
