@@ -73,6 +73,6 @@ function try_self_update() {
             Log::write_log(Language::t("Update server is down!"), 0);
     }
 
-    return 0;
+    return 1;
 }
 
