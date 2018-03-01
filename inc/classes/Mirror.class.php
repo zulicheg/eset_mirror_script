@@ -318,7 +318,7 @@ class Mirror
             CURLOPT_MAXREDIRS => 5,
         );
 
-        if ($limit = Config::get('download_speed_limit') !== 0) {
+        if (($limit = Config::get('download_speed_limit')) !== 0) {
             $options[CURLOPT_MAX_RECV_SPEED_LARGE] = $limit;
         }
 
@@ -326,7 +326,7 @@ class Mirror
             $options[CURLOPT_PROXY] = Config::get('proxy_server');
             $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
 
-            if ($user = Config::get('proxy_user') !== NULL) {
+            if (($user = Config::get('proxy_user')) !== NULL) {
                 $options[CURLOPT_PROXYUSERNAME] = $user;
                 $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
             }

@@ -62,7 +62,7 @@ $try_self_update = function () {
 
     @ini_set('memory_limit', Config::get('memory_limit'));
 
-    if ($level = Config::get('self_update') > 0) {
+    if (($level = Config::get('self_update')) > 0) {
         if (Tools::ping($CONSTANTS['SELFUPDATE_SERVER'], $CONSTANTS['SELFUPDATE_PORT']) === true) {
             SelfUpdate::init();
 

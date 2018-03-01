@@ -429,7 +429,7 @@ class Nod32ms
         if (Config::get('find_auto_enable') != 1)
             return null;
 
-        if ($sys = Config::get('find_system') === null) {
+        if (($sys = Config::get('find_system')) === null) {
             $patterns = $this->get_all_patterns();
             shuffle($patterns);
         } else {

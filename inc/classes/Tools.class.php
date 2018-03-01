@@ -31,7 +31,7 @@ class Tools
             $options[CURLOPT_FILE] = $out;
         }
 
-        if ($speed = Config::get('download_speed_limit') !== 0) {
+        if (($speed = Config::get('download_speed_limit')) !== 0) {
             $opts[CURLOPT_MAX_RECV_SPEED_LARGE] = $speed;
         }
 
@@ -39,7 +39,7 @@ class Tools
             $opts[CURLOPT_PROXY] = Config::get('proxy_server');
             $opts[CURLOPT_PROXYPORT] = Config::get('proxy_port');
 
-            if ($user = Config::get('proxy_user') !== NULL) {
+            if (($user = Config::get('proxy_user')) !== NULL) {
                 $opts[CURLOPT_PROXYUSERNAME] = $user;
                 $opts[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
             }
