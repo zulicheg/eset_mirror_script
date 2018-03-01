@@ -15,9 +15,10 @@ class Tools
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $out = FALSE;
+        global $CONSTANTS;
         $opts = array(
             CURLOPT_BINARYTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => CONNECTTIMEOUT,
+            CURLOPT_CONNECTTIMEOUT => $CONSTANTS['CONNECTTIMEOUT'],
             CURLOPT_HEADER => false,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,

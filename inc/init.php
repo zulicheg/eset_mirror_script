@@ -2,7 +2,7 @@
 
 chdir(__DIR__ . "/..");
 
-$DIRECTORIES = array(
+$DIRECTORIES = [
     3 => 'eset_upd',
     4 => 'eset_upd/v4',
     5 => 'eset_upd/v5',
@@ -12,45 +12,49 @@ $DIRECTORIES = array(
     9 => 'eset_upd/v9',
     10 => 'eset_upd/v10',
     11 => 'eset_upd/v11',
-);
+];
 
-$SELFUPDATE_POSTFIX = array(
+$SELFUPDATE_POSTFIX = [
     "changelog.rus",
     "changelog.eng",
-);
+];
 
-define('DS', DIRECTORY_SEPARATOR);
-define('VERSION', '20180301 [Freedom for Ukraine by harmless]');
-define('SELF', dirname(__DIR__) . DS);
-define('INC', SELF . "inc" . DS);
-define('CLASSES', INC . "classes" . DS);
-define('PATTERN', SELF . "patterns" . DS);
-define('CONF_FILE', SELF . "nod32ms.conf");
-define('LANGPACKS_DIR', 'langpacks');
-define('DEBUG_DIR', 'debug');
-define('KEY_FILE_VALID', 'nod_keys.valid');
-define('KEY_FILE_INVALID', 'nod_keys.invalid');
-define('LOG_FILE', 'nod32ms.log');
-define('SUCCESSFUL_TIMESTAMP', 'nod_lastupdate');
-define('LINKTEST', 'nod_linktest');
-define('DATABASES_SIZE', 'nod_databases_size');
-define('TMP_PATH', 'tmp');
-define('SELFUPDATE_SERVER', "eset.contra.net.ua");
-define('SELFUPDATE_PORT', "2221");
-define('SELFUPDATE_DIR', "nod32ms");
-define('SELFUPDATE_FILE', "files.md5");
-define('SELFUPDATE_NEW_VERSION', "version.txt");
-define("CONNECTTIMEOUT", 5); # Seconds
+$CONSTANTS = [
+    'DS' => DIRECTORY_SEPARATOR,
+    'VERSION' => '20180301 [Freedom for Ukraine by harmless]',
+    'SELF' => dirname(__DIR__) . $CONSTANTS['DS'],
+    'INC' => $CONSTANTS['SELF'] . "inc" . $CONSTANTS['DS'],
+    'CLASSES' => $CONSTANTS['INC'] . "classes" . $CONSTANTS['DS'],
+    'PATTERN' => $CONSTANTS['SELF'] . "patterns" . $CONSTANTS['DS'],
+    'CONF_FILE' => $CONSTANTS['SELF'] . "nod32ms.conf",
+    'LANGPACKS_DIR' => 'langpacks',
+    'DEBUG_DIR' => 'debug',
+    'KEY_FILE_VALID' => 'nod_keys.valid',
+    'KEY_FILE_INVALID' => 'nod_keys.invalid',
+    'LOG_FILE' => 'nod32ms.log',
+    'SUCCESSFUL_TIMESTAMP' => 'nod_lastupdate',
+    'LINKTEST' => 'nod_linktest',
+    'DATABASES_SIZE' => 'nod_databases_size',
+    'TMP_PATH' => 'tmp',
+    'SELFUPDATE_SERVER' => "eset.contra.net.ua",
+    'SELFUPDATE_PORT' => "2221",
+    'SELFUPDATE_DIR' => "nod32ms",
+    'SELFUPDATE_FILE' => "files.md5",
+    'SELFUPDATE_NEW_VERSION' => "version.txt",
+    "CONNECTTIMEOUT" => 5
+];
 
 $autoload = function ($class)
 {
-    @include_once CLASSES . "$class.class.php";
+    global $CONSTANTS;
+    @include_once $CONSTANTS['CLASSES'] . "$class.class.php";
 };
 
 spl_autoload_register($autoload);
 
 $try_self_update = function () {
-    if (($err = Config::init(CONF_FILE)) || ($err = Language::init(Config::get('default_language'))) || ($err = Language::t(Config::check_config()))) {
+    global $CONSTANTS;
+    if (($err = Config::init($CONSTANTS['CONF_FILE'])) || ($err = Language::init(Config::get('default_language'))) || ($err = Language::t(Config::check_config()))) {
         Log::write_log(Language::t($err), 0);
         exit;
     }
@@ -58,7 +62,7 @@ $try_self_update = function () {
     @ini_set('memory_limit', Config::get('memory_limit'));
 
     if ($level = Config::get('self_update') > 0) {
-        if (Tools::ping(SELFUPDATE_SERVER, SELFUPDATE_PORT) === true) {
+        if (Tools::ping($CONSTANTS['SELFUPDATE_SERVER'], $CONSTANTS['SELFUPDATE_PORT']) === true) {
             SelfUpdate::init();
 
             if (SelfUpdate::is_need_to_update()) {

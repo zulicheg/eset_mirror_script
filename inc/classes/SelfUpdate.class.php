@@ -24,8 +24,9 @@ class SelfUpdate
      */
     static private function get_hashes_from_server()
     {
+        global $CONSTANTS;
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        $content = Tools::download_file(array(CURLOPT_URL => "http://" . SELFUPDATE_SERVER . "/" . SELFUPDATE_DIR . "/" . SELFUPDATE_FILE, CURLOPT_PORT => SELFUPDATE_PORT, CURLOPT_RETURNTRANSFER => 1), $headers);
+        $content = Tools::download_file(array(CURLOPT_URL => "http://" . $CONSTANTS['SELFUPDATE_SERVER'] . "/" . $CONSTANTS['SELFUPDATE_DIR'] . "/" . $CONSTANTS['SELFUPDATE_FILE'], CURLOPT_PORT => $CONSTANTS['SELFUPDATE_PORT'], CURLOPT_RETURNTRANSFER => 1), $headers);
         $arr = array();
 
         if (preg_match_all("/(.+)=(.+)=(.+)/", $content, $result, PREG_OFFSET_CAPTURE))
@@ -42,6 +43,7 @@ class SelfUpdate
     static private function get_hashes_from_local($directory = "./")
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
+        global $CONSTANTS;
         $hashes = array();
         $d = dir($directory);
 
@@ -50,9 +52,9 @@ class SelfUpdate
                 continue;
 
             (is_dir($directory . $entry)) ?
-                $hashes = array_merge(static::get_hashes_from_local($directory . $entry . DS), $hashes)
+                $hashes = array_merge(static::get_hashes_from_local($directory . $entry . $CONSTANTS['DS']), $hashes)
                 :
-                $hashes[str_replace(DS, "/", $directory . $entry)] = array(md5_file($directory . $entry), filesize($directory . $entry));
+                $hashes[str_replace($CONSTANTS['DS'], "/", $directory . $entry)] = array(md5_file($directory . $entry), filesize($directory . $entry));
         }
         $d->close();
         return $hashes;
@@ -64,7 +66,8 @@ class SelfUpdate
     static public function get_version_on_server()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        $response = Tools::download_file(array(CURLOPT_URL => "http://" . SELFUPDATE_SERVER . "/" . SELFUPDATE_DIR . "/" . SELFUPDATE_NEW_VERSION, CURLOPT_PORT => SELFUPDATE_PORT, CURLOPT_RETURNTRANSFER => 1), $headers);
+        global $CONSTANTS;
+        $response = Tools::download_file(array(CURLOPT_URL => "http://" . $CONSTANTS['SELFUPDATE_SERVER'] . "/" . $CONSTANTS['SELFUPDATE_DIR'] . "/" . $CONSTANTS['SELFUPDATE_NEW_VERSION'], CURLOPT_PORT => $CONSTANTS['SELFUPDATE_PORT'], CURLOPT_RETURNTRANSFER => 1), $headers);
         return trim($response);
     }
 
@@ -74,12 +77,13 @@ class SelfUpdate
     static public function start_to_update()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
+        global $CONSTANTS;
 
         foreach (static::$list_to_update as $filename => $info) {
-            $fs_filename = str_replace("/", DS, str_replace("./", "", $filename));
-            $remote_full_path = sprintf("http://%s/%s/%s", SELFUPDATE_SERVER, SELFUPDATE_DIR, $filename);
+            $fs_filename = str_replace("/", $CONSTANTS['DS'], str_replace("./", "", $filename));
+            $remote_full_path = sprintf("http://%s/%s/%s", $CONSTANTS['SELFUPDATE_SERVER'], $CONSTANTS['SELFUPDATE_DIR'], $filename);
             Log::write_log(Language::t("Downloading %s [%s Bytes]", basename($filename), $info), 0);
-            Tools::download_file(array(CURLOPT_URL => $remote_full_path, CURLOPT_PORT => SELFUPDATE_PORT, CURLOPT_FILE => $fs_filename), $headers);
+            Tools::download_file(array(CURLOPT_URL => $remote_full_path, CURLOPT_PORT => $CONSTANTS['SELFUPDATE_PORT'], CURLOPT_FILE => $fs_filename), $headers);
 
             if (is_string($headers))
                 Log::write_log(Language::t("Error while downloading file %s [%s]", basename($filename), $headers), 0);
@@ -88,8 +92,8 @@ class SelfUpdate
         global $SELFUPDATE_POSTFIX;
 
         foreach ($SELFUPDATE_POSTFIX as $file) {
-            $out = str_replace("/", DS, $file);
-            Tools::download_file(array(CURLOPT_URL => "http://" . SELFUPDATE_SERVER . "/" . SELFUPDATE_DIR . "/" . $file, CURLOPT_PORT => SELFUPDATE_PORT, CURLOPT_FILE => $out), $headers);
+            $out = str_replace("/", $CONSTANTS['DS'], $file);
+            Tools::download_file(array(CURLOPT_URL => "http://" . $CONSTANTS['SELFUPDATE_SERVER'] . "/" . $CONSTANTS['SELFUPDATE_DIR'] . "/" . $file, CURLOPT_PORT => $CONSTANTS['SELFUPDATE_PORT'], CURLOPT_FILE => $out), $headers);
         }
     }
 

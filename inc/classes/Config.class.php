@@ -190,6 +190,7 @@ class Config
      */
     static public function check_config()
     {
+        global $CONSTANTS;
         if (array_search(PHP_OS, array("Darwin", "Linux", "FreeBSD", "OpenBSD", "WINNT")) === false)
             return "This script doesn't support your OS. Please, contact developer!";
 
@@ -240,19 +241,19 @@ class Config
         if (empty(self::$CONF['web_dir']))
             return "Please, check set up of WWW directory in your config file!";
 
-        while (substr(self::$CONF['web_dir'], -1) == DS)
+        while (substr(self::$CONF['web_dir'], -1) == $CONSTANTS['DS'])
             self::$CONF['web_dir'] = substr(self::$CONF['web_dir'], 0, -1);
 
-        while (substr(self::$CONF['log_dir'], -1) == DS)
+        while (substr(self::$CONF['log_dir'], -1) == $CONSTANTS['DS'])
             self::$CONF['log_dir'] = substr(self::$CONF['log_dir'], 0, -1);
 
-        @mkdir(PATTERN, 0755, true);
+        @mkdir($CONSTANTS['PATTERN'], 0755, true);
         @mkdir(self::$CONF['log_dir'], 0755, true);
         @mkdir(self::$CONF['web_dir'], 0755, true);
-        @mkdir(Tools::ds(self::$CONF['web_dir'], TMP_PATH, 0755, true));
+        @mkdir(Tools::ds(self::$CONF['web_dir'], $CONSTANTS['TMP_PATH'], 0755, true));
 
         if (self::$CONF['debug_html'] == 1)
-            @mkdir(Tools::ds(self::$CONF['log_dir'], DEBUG_DIR, 0755, true));
+            @mkdir(Tools::ds(self::$CONF['log_dir'], $CONSTANTS['DEBUG_DIR'], 0755, true));
 
         if (self::$CONF['phpmailer_enable'] == 1) {
             if (empty(self::$CONF['phpmailer_sender']) ||
@@ -280,7 +281,7 @@ class Config
         if (intval(self::$CONF['default_errors_quantity']) <= 0)
             self::$CONF['default_errors_quantity'] = 1;
 
-        if (!is_readable(PATTERN))
+        if (!is_readable($CONSTANTS['PATTERN']))
             return "Pattern directory is not readable. Check your permissions!";
 
         if (!is_writable(self::$CONF['log_dir']))
@@ -293,7 +294,7 @@ class Config
             return "Incorrect value of self_update parameter. Must be 0,1 or 2!";
 
         // Link test
-        $linktestfile = Tools::ds(Config::get('log_dir'), LINKTEST);
+        $linktestfile = Tools::ds(Config::get('log_dir'), $CONSTANTS['LINKTEST']);
         $test = false;
         $status = false;
         if (file_exists($linktestfile)) {
