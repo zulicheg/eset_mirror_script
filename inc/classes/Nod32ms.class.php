@@ -11,14 +11,25 @@ class Nod32ms
     static private $start_time;
 
     /**
+     * @var
+     */
+    static private $key_valid_file;
+
+    /**
+     * @var
+     */
+    static private $key_invalid_file;
+
+    /**
      * Nod32ms constructor.
      */
     public function __construct()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        global $CONSTANTS;
         static::$start_time = time();
-        Log::write_log(Language::t("Run script %s", $CONSTANTS['VERSION']), 0);
+        static::$key_valid_file = Tools::ds(Config::get('log_dir'), Config::get('KEY_FILE_VALID'));
+        static::$key_invalid_file = Tools::ds(Config::get('log_dir'), Config::get('KEY_FILE_INVALID'));
+        Log::write_log(Language::t("Run script %s", Config::get('VERSION')), 0);
         $this->run_script();
     }
 
@@ -41,9 +52,8 @@ class Nod32ms
     private function check_time_stamp($version, $return_time_stamp = false)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, $version);
-        global $CONSTANTS;
         $days = Config::get('icq_informer_days') * 24 * 60 * 60;
-        $fn = Tools::ds(Config::get('log_dir'), $CONSTANTS['SUCCESSFUL_TIMESTAMP']);
+        $fn = Tools::ds(Config::get('log_dir'), Config::get('SUCCESSFUL_TIMESTAMP'));
         $timestamps = array();
 
         if (file_exists($fn)) {
@@ -74,8 +84,7 @@ class Nod32ms
     private function set_database_size($size)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        global $CONSTANTS;
-        $fn = Tools::ds(Config::get('log_dir'), $CONSTANTS['DATABASES_SIZE']);
+        $fn = Tools::ds(Config::get('log_dir'), Config::get('DATABASES_SIZE'));
         $sizes = array();
 
         if (file_exists($fn)) {
@@ -94,7 +103,7 @@ class Nod32ms
         @unlink($fn);
 
         foreach ($sizes as $key => $name)
-            Log::write_to_file($CONSTANTS['DATABASES_SIZE'], "$key:$name\r\n");
+            Log::write_to_file(Config::get('DATABASES_SIZE'), "$key:$name\r\n");
     }
 
     /**
@@ -103,8 +112,7 @@ class Nod32ms
     private function get_databases_size()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        global $CONSTANTS;
-        $fn = Tools::ds(Config::get('log_dir'), $CONSTANTS['DATABASES_SIZE']);
+        $fn = Tools::ds(Config::get('log_dir'), Config::get('DATABASES_SIZE'));
         $sizes = array();
 
         if (file_exists($fn)) {
@@ -126,11 +134,10 @@ class Nod32ms
      * @param string $directory
      * @return array
      */
-    private function get_all_patterns($directory = NULL)
+    private function get_all_patterns($directory = PATTERN)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        global $CONSTANTS;
-        $d = ($directory === NULL) ? dir($CONSTANTS['PATTERN']) : dir($directory);
+        $d = dir($directory);
         static $ar_patterns = array();
 
         while (false !== ($entry = $d->read())) {
@@ -142,7 +149,7 @@ class Nod32ms
                 continue;
             }
 
-            $ar_patterns[] = Tools::ds($d, $entry);
+            $ar_patterns[] = Tools::ds($directory, $entry);
         }
 
         $d->close();
@@ -156,12 +163,11 @@ class Nod32ms
     private function validate_key($key)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        global $CONSTANTS;
         $result = explode(":", $key);
         $format = 'd.m.Y';
         $current_date = date_parse_from_format($format, strftime('%d.%m.%Y'));
         Log::write_log(Language::t("Validating key [%s:%s]", $result[0], $result[1]), 4, Mirror::$version);
-        if ($this->key_exists_in_file($result[0], $result[1], $CONSTANTS['KEY_FILE_INVALID'])) return false;
+        if ($this->key_exists_in_file($result[0], $result[1], static::$key_invalid_file)) return false;
 
         Mirror::set_key(array($result[0], $result[1]));
         $date = $this->get_expire_date();
@@ -220,15 +226,13 @@ class Nod32ms
     private function read_keys()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        global $CONSTANTS;
-        $log_dir = Config::get('log_dir');
 
-        if (!file_exists(Tools::ds($log_dir, $CONSTANTS['KEY_FILE_VALID']))) {
-            $h = fopen(Tools::ds($log_dir, $CONSTANTS['KEY_FILE_VALID']), 'w');
+        if (!file_exists(static::$key_valid_file)) {
+            $h = fopen(static::$key_valid_file, 'w');
             fclose($h);
         }
 
-        $keys = Parser::parse_keys(Tools::ds($log_dir, $CONSTANTS['KEY_FILE_VALID']));
+        $keys = Parser::parse_keys(static::$key_valid_file);
 
         if (!isset($keys) || !count($keys)) {
             Log::write_log(Language::t("Keys file is empty!"), 4, Mirror::$version);
@@ -236,8 +240,7 @@ class Nod32ms
         }
 
         foreach ($keys as $value) {
-            if ($this->validate_key($value))
-                return explode(":", $value);
+            if ($this->validate_key($value)) return explode(":", $value);
         }
 
         Log::write_log(Language::t("No working keys were found!"), 4, Mirror::$version);
@@ -253,9 +256,8 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         Log::write_log(Language::t("Found valid key [%s:%s] Expiration date %s", $login, $password, $date), 4, Mirror::$version);
-        global $CONSTANTS;
-        ($this->key_exists_in_file($login, $password, $CONSTANTS['KEY_FILE_VALID']) == false) ?
-            Log::write_to_file(Tools::ds(Config::get('log_dir'), $CONSTANTS['KEY_FILE_VALID']), "$login:$password:" . Mirror::$version . ":$date\r\n", true) :
+        ($this->key_exists_in_file($login, $password, static::$key_valid_file) == false) ?
+            Log::write_to_file(static::$key_valid_file, "$login:$password:" . Mirror::$version . ":$date\r\n", true) :
             Log::write_log(Language::t("Key [%s:%s:%s:%s] already exists", $login, $password, Mirror::$version, $date), 4, Mirror::$version);
     }
 
@@ -267,15 +269,14 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         Log::write_log(Language::t("Invalid key [%s:%s]", $login, $password), 4, Mirror::$version);
-        global $CONSTANTS;
         $log_dir = Config::get('log_dir');
 
-        ($this->key_exists_in_file($login, $password, $CONSTANTS['KEY_FILE_INVALID']) == false) ?
-            Log::write_to_file(Tools::ds($log_dir, $CONSTANTS['KEY_FILE_INVALID']), "$login:$password:" . Mirror::$version . "\r\n", true) :
+        ($this->key_exists_in_file($login, $password, static::$key_invalid_file) == false) ?
+            Log::write_to_file(Tools::ds($log_dir, static::$key_invalid_file), "$login:$password:" . Mirror::$version . "\r\n", true) :
             Log::write_log(Language::t("Key [%s:%s] already exists", $login, $password), 4, Mirror::$version);
 
         if (Config::get('remove_invalid_keys') == 1)
-            Parser::delete_parse_line_in_file($login . ':' . $password . ':' . Mirror::$version, Tools::ds($log_dir, $CONSTANTS['KEY_FILE_VALID']));
+            Parser::delete_parse_line_in_file($login . ':' . $password . ':' . Mirror::$version, static::$key_valid_file);
     }
 
     /**
@@ -287,7 +288,7 @@ class Nod32ms
     private function key_exists_in_file($login, $password, $file)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $keys = Parser::parse_keys(Tools::ds(Config::get('log_dir'), $file));
+        $keys = Parser::parse_keys($file);
 
         if (isset($keys) && count($keys)) {
             foreach ($keys as $value) {
@@ -350,7 +351,6 @@ class Nod32ms
     private function parse_www_page($this_link, $level, $pattern)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        global $CONSTANTS;
         static $found_key = false;
         $search = Tools::download_file(array(CURLOPT_URL => $this_link, CURLOPT_RETURNTRANSFER => 1, CURLOPT_NOBODY => 0, CURLOPT_USERAGENT => "Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201"), $headers);
 
@@ -365,7 +365,7 @@ class Nod32ms
 
         if (Config::get('debug_html') == 1) {
             $path_info = pathinfo($this_link);
-            $dir = Tools::ds(Config::get('log_dir'), $CONSTANTS['DEBUG_DIR'], $path_info['basename']);
+            $dir = Tools::ds(Config::get('log_dir'), Config::get('DEBUG_DIR'), $path_info['basename']);
             @mkdir($dir, 0755, true);
             $filename = Tools::ds($dir, $path_info['filename'] . ".log");
             file_put_contents($filename, $this->strip_tags_and_css($search));
@@ -380,7 +380,7 @@ class Nod32ms
 
             for ($b = 0; $b < $logins; $b++) {
                 if (preg_match("/script|googleuser/i", $password[$b]) and
-                    $this->key_exists_in_file($login[$b], $password[$b], $CONSTANTS['KEY_FILE_VALID'])
+                    $this->key_exists_in_file($login[$b], $password[$b], static::$key_valid_file)
                 )
                     continue;
 
@@ -424,7 +424,6 @@ class Nod32ms
     private function find_keys()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        global $CONSTANTS;
         $sys = Config::get('find_system');
 
         if (Config::get('find_auto_enable') != 1)
@@ -434,7 +433,7 @@ class Nod32ms
             $patterns = $this->get_all_patterns();
             shuffle($patterns);
         } else {
-            $patterns = array($CONSTANTS['PATTERN'] . $sys . '.pattern');
+            $patterns = array(PATTERN . $sys . '.pattern');
         }
 
         while ($elem = array_shift($patterns)) {
@@ -495,7 +494,6 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         Log::write_log(Language::t("Generating html..."), 0);
-        global $CONSTANTS;
         $total_size = $this->get_databases_size();
         $web_dir = Config::get('web_dir');
         $html_page = '';
@@ -560,9 +558,8 @@ class Nod32ms
         $html_page .= '</tr>';
 
         if (Config::get('show_login_password')) {
-            $keys_file = Tools::ds(Config::get('log_dir'), $CONSTANTS['KEY_FILE_VALID']);
-            if (file_exists($keys_file)) {
-                $keys = Parser::parse_keys($keys_file);
+            if (file_exists(static::$key_valid_file)) {
+                $keys = Parser::parse_keys(static::$key_valid_file);
 
 
                 $html_page .= '<tr>';
@@ -587,8 +584,7 @@ class Nod32ms
         $html_page .= (Config::get('generate_only_table') == '0') ? '</td></tr></table></body></html>' : '';
         $file = Tools::ds($web_dir, Config::get('filename_html'));
 
-        if (file_exists($file))
-            @unlink($file);
+        if (file_exists($file)) @unlink($file);
 
         Log::write_to_file($file, Tools::conv($html_page, Config::get('html_codepage')), true);
     }

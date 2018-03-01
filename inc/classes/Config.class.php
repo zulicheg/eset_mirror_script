@@ -77,6 +77,21 @@ class Config
         'proxy_port' => 3128,
         'proxy_user' => null,
         'proxy_passwd' => null,
+        'DEBUG_DIR' => 'debug',
+        'KEY_FILE_VALID' => 'nod_keys.valid',
+        'KEY_FILE_INVALID' => 'nod_keys.invalid',
+        'LOG_FILE' => 'nod32ms.log',
+        'SUCCESSFUL_TIMESTAMP' => 'nod_lastupdate',
+        'LINKTEST' => 'nod_linktest',
+        'DATABASES_SIZE' => 'nod_databases_size',
+        'TMP_PATH' => 'tmp',
+        'SELFUPDATE_SERVER' => "eset.contra.net.ua",
+        'SELFUPDATE_PORT' => "2221",
+        'SELFUPDATE_DIR' => "nod32ms",
+        'SELFUPDATE_FILE' => "files.md5",
+        'SELFUPDATE_NEW_VERSION' => "version.txt",
+        'CONNECTTIMEOUT' => 5,
+        'VERSION' => '20180302 [Freedom for Ukraine by harmless]',
     );
 
     /**
@@ -190,7 +205,6 @@ class Config
      */
     static public function check_config()
     {
-        global $CONSTANTS;
         if (array_search(PHP_OS, array("Darwin", "Linux", "FreeBSD", "OpenBSD", "WINNT")) === false)
             return "This script doesn't support your OS. Please, contact developer!";
 
@@ -247,13 +261,13 @@ class Config
         while (substr(self::$CONF['log_dir'], -1) == DS)
             self::$CONF['log_dir'] = substr(self::$CONF['log_dir'], 0, -1);
 
-        @mkdir($CONSTANTS['PATTERN'], 0755, true);
+        @mkdir(PATTERN, 0755, true);
         @mkdir(self::$CONF['log_dir'], 0755, true);
         @mkdir(self::$CONF['web_dir'], 0755, true);
-        @mkdir(Tools::ds(self::$CONF['web_dir'], $CONSTANTS['TMP_PATH'], 0755, true));
+        @mkdir(Tools::ds(self::$CONF['web_dir'], self::$CONF['TMP_PATH'], 0755, true));
 
         if (self::$CONF['debug_html'] == 1)
-            @mkdir(Tools::ds(self::$CONF['log_dir'], $CONSTANTS['DEBUG_DIR'], 0755, true));
+            @mkdir(Tools::ds(self::$CONF['log_dir'], self::$CONF['DEBUG_DIR'], 0755, true));
 
         if (self::$CONF['phpmailer_enable'] == 1) {
             if (empty(self::$CONF['phpmailer_sender']) ||
@@ -281,7 +295,7 @@ class Config
         if (intval(self::$CONF['default_errors_quantity']) <= 0)
             self::$CONF['default_errors_quantity'] = 1;
 
-        if (!is_readable($CONSTANTS['PATTERN']))
+        if (!is_readable(PATTERN))
             return "Pattern directory is not readable. Check your permissions!";
 
         if (!is_writable(self::$CONF['log_dir']))
@@ -294,7 +308,7 @@ class Config
             return "Incorrect value of self_update parameter. Must be 0,1 or 2!";
 
         // Link test
-        $linktestfile = Tools::ds(Config::get('log_dir'), $CONSTANTS['LINKTEST']);
+        $linktestfile = Tools::ds(Config::get('log_dir'), self::$CONF['LINKTEST']);
         $test = false;
         $status = false;
         if (file_exists($linktestfile)) {

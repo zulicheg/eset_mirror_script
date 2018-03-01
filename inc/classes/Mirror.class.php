@@ -46,8 +46,7 @@ class Mirror
     static private function fix_time_stamp()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        global $CONSTANTS;
-        $fn = Tools::ds(Config::get('log_dir'), $CONSTANTS['SUCCESSFUL_TIMESTAMP']);
+        $fn = Tools::ds(Config::get('log_dir'), Config::get('SUCCESSFUL_TIMESTAMP'));
         $timestamps = array();
 
         if (file_exists($fn)) {
@@ -66,7 +65,7 @@ class Mirror
         @unlink($fn);
 
         foreach ($timestamps as $key => $name)
-            Log::write_to_file($CONSTANTS['SUCCESSFUL_TIMESTAMP'], "$key:$name\r\n");
+            Log::write_to_file(Config::get('SUCCESSFUL_TIMESTAMP'), "$key:$name\r\n");
     }
 
     /**
@@ -76,14 +75,13 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         Log::write_log(Language::t("Testing key [%s:%s]", static::$key[0], static::$key[1]), 4, static::$version);
-        global $CONSTANTS;
 
         foreach (Config::get('mirror') as $mirror) {
             $tries = 0;
             $quantity = Config::get('default_errors_quantity');
 
             while (++$tries <= $quantity) {
-                if ($tries > 1) usleep($CONSTANTS['CONNECTTIMEOUT'] * 1000000);
+                if ($tries > 1) usleep(Config::get('CONNECTTIMEOUT') * 1000000);
                 Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror . "/" . static::$mirror_dir . "/update.ver", CURLOPT_NOBODY => 1), $headers);
                 return ($headers['http_code'] === 200 or $headers['http_code'] === 404) ? true : false;
             }
@@ -122,9 +120,8 @@ class Mirror
     static public function check_mirror($mirror)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        global $CONSTANTS;
         $new_version = null;
-        $file = Tools::ds(Tools::ds(Config::get('web_dir'), $CONSTANTS['TMP_PATH'], static::$mirror_dir), 'update.ver');
+        $file = Tools::ds(Tools::ds(Config::get('web_dir'), Config::get('TMP_PATH'), static::$mirror_dir), 'update.ver');
         Log::write_log(Language::t("Checking mirror %s with key [%s:%s]", $mirror, static::$key[0], static::$key[1]), 4, static::$version);
         static::download_update_ver($mirror);
         $new_version = Tools::get_DB_version($file);
@@ -139,8 +136,7 @@ class Mirror
     static public function download_update_ver($mirror)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        global $CONSTANTS;
-        $tmp_path = Tools::ds(Config::get('web_dir'), $CONSTANTS['TMP_PATH'], static::$mirror_dir);
+        $tmp_path = Tools::ds(Config::get('web_dir'), Config::get('TMP_PATH'), static::$mirror_dir);
         @mkdir($tmp_path, 0755, true);
         $archive = Tools::ds($tmp_path, 'update.rar');
         $extracted = Tools::ds($tmp_path, 'update.ver');
@@ -163,11 +159,10 @@ class Mirror
     static public function download_signature()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        global $CONSTANTS;
         static::download_update_ver(current(static::$mirrors)['host']);
         $dir = Config::get('web_dir');
         $cur_update_ver = Tools::ds($dir, static::$mirror_dir, 'update.ver');
-        $tmp_update_ver = Tools::ds($dir, $CONSTANTS['TMP_PATH'], static::$mirror_dir, 'update.ver');
+        $tmp_update_ver = Tools::ds($dir, Config::get('TMP_PATH'), static::$mirror_dir, 'update.ver');
         $content = @file_get_contents($tmp_update_ver);
         $start_time = microtime(true);
         preg_match_all('#\[\w+\][^\[]+#', $content, $matches);
@@ -305,14 +300,13 @@ class Mirror
     static protected function multi_download($download_files)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        global $CONSTANTS;
         $web_dir = Config::get('web_dir');
         $num_threads = Config::get('threads');
         $master = curl_multi_init();
         $options = array(
             CURLOPT_USERPWD => static::$key[0] .":" . static::$key[1],
             CURLOPT_BINARYTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => $CONSTANTS['CONNECTTIMEOUT'],
+            CURLOPT_CONNECTTIMEOUT => Config::get('CONNECTTIMEOUT'),
             CURLOPT_HEADER => false,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,

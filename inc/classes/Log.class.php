@@ -103,7 +103,6 @@ class Log
 
         $log_type = Config::get('log_type');
         $codepage = Config::get('default_codepage');
-        global $CONSTANTS;
 
         if ($log_type == '0')
             return null;
@@ -111,7 +110,7 @@ class Log
         if (Config::get('log_level') < $level)
             return null;
 
-        $fn = Tools::ds(Config::get('log_dir'), $CONSTANTS['LOG_FILE']);
+        $fn = Tools::ds(Config::get('log_dir'), Config::get('LOG_FILE'));
 
         if (Config::get('log_rotate_enable') == 1) {
             if (file_exists($fn) && !$ignore_rotate) {
@@ -126,7 +125,7 @@ class Log
                     }
 
                     @unlink($fn . ".1" . $arch_ext);
-                    Tools::archive_file(Tools::ds(Config::get("log_dir"), $CONSTANTS['LOG_FILE']));
+                    Tools::archive_file(Tools::ds(Config::get("log_dir"), Config::get('LOG_FILE')));
                     @unlink($fn);
                     static::write_log(Language::t("Log file was cutted due rotation..."), 0, null, true);
                     array_pop(static::$log);
@@ -140,7 +139,7 @@ class Log
             $text = sprintf("[%s] %s%s", date("Y-m-d, H:i:s"), ($version ? '[ver. ' . strval($version) . '] ' : ''), $text);
 
             if ($log_type == '1' || $log_type == '3')
-                static::write_to_file($CONSTANTS['LOG_FILE'], Tools::conv($text . "\r\n", $codepage));
+                static::write_to_file(Config::get('LOG_FILE'), Tools::conv($text . "\r\n", $codepage));
 
             if ($log_type == '2' || $log_type == '3')
                 echo Tools::conv($text, $codepage) . chr(10);

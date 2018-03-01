@@ -21,41 +21,21 @@ $SELFUPDATE_POSTFIX = [
 
 @define('DS', DIRECTORY_SEPARATOR);
 @define('SELF', dirname(__DIR__) . DS);
-
-$CONSTANTS = [
-    'VERSION' => '20180302 [Freedom for Ukraine by harmless]',
-    'INC' => SELF . "inc" . DS,
-    'CLASSES' => SELF. "inc" . DS . "classes" . DS,
-    'PATTERN' => SELF . "patterns" . DS,
-    'CONF_FILE' => SELF . "nod32ms.conf",
-    'LANGPACKS_DIR' => SELF . 'langpacks',
-    'DEBUG_DIR' => 'debug',
-    'KEY_FILE_VALID' => 'nod_keys.valid',
-    'KEY_FILE_INVALID' => 'nod_keys.invalid',
-    'LOG_FILE' => 'nod32ms.log',
-    'SUCCESSFUL_TIMESTAMP' => 'nod_lastupdate',
-    'LINKTEST' => 'nod_linktest',
-    'DATABASES_SIZE' => 'nod_databases_size',
-    'TMP_PATH' => 'tmp',
-    'SELFUPDATE_SERVER' => "eset.contra.net.ua",
-    'SELFUPDATE_PORT' => "2221",
-    'SELFUPDATE_DIR' => "nod32ms",
-    'SELFUPDATE_FILE' => "files.md5",
-    'SELFUPDATE_NEW_VERSION' => "version.txt",
-    "CONNECTTIMEOUT" => 5
-];
+@define('INC', SELF . "inc" . DS);
+@define('CLASSES', INC . "classes" . DS);
+@define('PATTERN', SELF . "patterns" . DS);
+@define('CONF_FILE', SELF . "nod32ms.conf");
+@define('LANGPACKS_DIR', SELF . 'langpacks');
 
 $autoload = function ($class)
 {
-    global $CONSTANTS;
-    @include_once $CONSTANTS['CLASSES'] . "$class.class.php";
+    @include_once CLASSES . "$class.class.php";
 };
 
 spl_autoload_register($autoload);
 
 $try_self_update = function () {
-    global $CONSTANTS;
-    if (($err = Config::init($CONSTANTS['CONF_FILE'])) || ($err = Language::init(Config::get('default_language'))) || ($err = Language::t(Config::check_config()))) {
+    if (($err = Config::init(CONF_FILE)) || ($err = Language::init(Config::get('default_language'))) || ($err = Language::t(Config::check_config()))) {
         Log::write_log(Language::t($err), 0);
         exit;
     }
@@ -63,7 +43,7 @@ $try_self_update = function () {
     @ini_set('memory_limit', Config::get('memory_limit'));
 
     if (($level = Config::get('self_update')) > 0) {
-        if (Tools::ping($CONSTANTS['SELFUPDATE_SERVER'], $CONSTANTS['SELFUPDATE_PORT']) === true) {
+        if (SelfUpdate::ping() === true) {
             SelfUpdate::init();
 
             if (SelfUpdate::is_need_to_update()) {
