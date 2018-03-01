@@ -4,7 +4,7 @@ require __DIR__ . "/inc/init.php";
 
 if ($try_self_update()) {
     spl_autoload_unregister($autoload);
-    unset($autoload, $try_self_update);
+    unset($autoload, $try_self_update, $CONSTANTS);
     require __DIR__ . "/inc/init.php";
 }
 
