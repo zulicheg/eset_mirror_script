@@ -142,7 +142,7 @@ class Nod32ms
                 continue;
             }
 
-            $ar_patterns[] = Tools::ds($directory, $entry);
+            $ar_patterns[] = Tools::ds($d, $entry);
         }
 
         $d->close();
