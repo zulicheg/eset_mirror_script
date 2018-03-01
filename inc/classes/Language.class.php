@@ -34,8 +34,8 @@ class Language
     {
         global $CONSTANTS;
         static::$language = $lang;
-        static::$language_file = Tools::ds($CONSTANTS['SELF'], $CONSTANTS['LANGPACKS_DIR'], $lang . '.lng');
-        static::$default_language_file = Tools::ds($CONSTANTS['SELF'], $CONSTANTS['LANGPACKS_DIR'], Config::get_default_config_parameter('default_language') . '.lng');
+        static::$language_file = Tools::ds($CONSTANTS['LANGPACKS_DIR'], $lang . '.lng');
+        static::$default_language_file = Tools::ds($CONSTANTS['LANGPACKS_DIR'], Config::get_default_config_parameter('default_language') . '.lng');
 
         if ($lang != 'en') {
             if (!file_exists(static::$language_file)) {

@@ -20,15 +20,15 @@ $SELFUPDATE_POSTFIX = [
 ];
 
 @define('DS', DIRECTORY_SEPARATOR);
+@define('SELF', dirname(__DIR__) . DS);
 
 $CONSTANTS = [
-    'VERSION' => '20180301 [Freedom for Ukraine by harmless]',
-    'SELF' => dirname(__DIR__) . DS,
-    'INC' => $CONSTANTS['SELF'] . "inc" . DS,
-    'CLASSES' => $CONSTANTS['INC'] . "classes" . DS,
-    'PATTERN' => $CONSTANTS['SELF'] . "patterns" . DS,
-    'CONF_FILE' => $CONSTANTS['SELF'] . "nod32ms.conf",
-    'LANGPACKS_DIR' => 'langpacks',
+    'VERSION' => '20180302 [Freedom for Ukraine by harmless]',
+    'INC' => SELF . "inc" . DS,
+    'CLASSES' => SELF. "inc" . DS . "classes" . DS,
+    'PATTERN' => SELF . "patterns" . DS,
+    'CONF_FILE' => SELF . "nod32ms.conf",
+    'LANGPACKS_DIR' => SELF . 'langpacks',
     'DEBUG_DIR' => 'debug',
     'KEY_FILE_VALID' => 'nod_keys.valid',
     'KEY_FILE_INVALID' => 'nod_keys.invalid',
