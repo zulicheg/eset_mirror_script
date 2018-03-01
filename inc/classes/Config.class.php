@@ -212,14 +212,17 @@ class Config
                     return "Please, check set up of log_rotate_size in your config file!";
 
                 switch (trim($result[2][0])) {
+                    case "g":
                     case "G":
-                        self::$CONF['log_rotate_size'] = self::$CONF['log_rotate_size'] * 1024 * 1024 * 1024;
+                        self::$CONF['log_rotate_size'] = self::$CONF['log_rotate_size'] << 30;
                         break;
+                    case "m":
                     case "M":
-                        self::$CONF['log_rotate_size'] = self::$CONF['log_rotate_size'] * 1024 * 1024;
+                        self::$CONF['log_rotate_size'] = self::$CONF['log_rotate_size'] << 20;
                         break;
+                    case "k":
                     case "K":
-                        self::$CONF['log_rotate_size'] = self::$CONF['log_rotate_size'] * 1024;
+                        self::$CONF['log_rotate_size'] = self::$CONF['log_rotate_size'] << 10;
                         break;
                 }
             }

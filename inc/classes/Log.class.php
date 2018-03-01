@@ -16,6 +16,7 @@ class Log
 
     /**
      *
+     * @throws phpmailerException
      */
     static public function destruct()
     {
@@ -39,12 +40,12 @@ class Log
             }
 
             $mailer->Priority = 3;
-            $mailer->Subject = Tools::conv(Config::get('phpmailer_subject'), Config::get('phpmailer_codepage'));
+            $mailer->Subject = Tools::conv(Config::get('phpmailer_subject'), $mailer->CharSet);
 
             if (Config::get('phpmailer_level') == '3')
                 static::$mailer_log = implode("\r\n", static::$log);
 
-            $mailer->Body = Tools::conv(static::$mailer_log, Config::get('phpmailer_codepage'));
+            $mailer->Body = Tools::conv(static::$mailer_log, $mailer->CharSet);
             $mailer->SetFrom(Config::get('phpmailer_sender'), "NOD32 mirror script");
             $mailer->AddAddress(Config::get('phpmailer_recipient'), "Admin");
             $mailer->SMTPDebug = 1;
@@ -100,7 +101,10 @@ class Log
         if (empty($text))
             return null;
 
-        if (Config::get('log_type') == '0')
+        $log_type = Config::get('log_type');
+        $codepage = Config::get('default_codepage');
+
+        if ($log_type == '0')
             return null;
 
         if (Config::get('log_level') < $level)
@@ -110,16 +114,17 @@ class Log
 
         if (Config::get('log_rotate_enable') == 1) {
             if (file_exists($fn) && !$ignore_rotate) {
+                $arch_ext = Tools::get_archive_extension();
                 if (filesize($fn) >= Config::get('log_rotate_size')) {
                     static::write_log(Language::t("Log file was cutted due rotation..."), 0, null, true);
                     array_pop(static::$log);
 
                     for ($i = Config::get('log_rotate_qty'); $i > 1; $i--) {
-                        @unlink($fn . "." . strval($i) . Tools::get_archive_extension());
-                        @rename($fn . "." . strval($i - 1) . Tools::get_archive_extension(), $fn . "." . strval($i) . Tools::get_archive_extension());
+                        @unlink($fn . "." . strval($i) . $arch_ext);
+                        @rename($fn . "." . strval($i - 1) . $arch_ext, $fn . "." . strval($i) . $arch_ext);
                     }
 
-                    @unlink($fn . ".1" . Tools::get_archive_extension());
+                    @unlink($fn . ".1" . $arch_ext);
                     Tools::archive_file(Tools::ds(Config::get("log_dir"), LOG_FILE));
                     @unlink($fn);
                     static::write_log(Language::t("Log file was cutted due rotation..."), 0, null, true);
@@ -133,11 +138,11 @@ class Log
         } else {
             $text = sprintf("[%s] %s%s", date("Y-m-d, H:i:s"), ($version ? '[ver. ' . strval($version) . '] ' : ''), $text);
 
-            if (Config::get('log_type') == '1' || Config::get('log_type') == '3')
-                static::write_to_file(LOG_FILE, Tools::conv($text . "\r\n", Config::get('default_codepage')));
+            if ($log_type == '1' || $log_type == '3')
+                static::write_to_file(LOG_FILE, Tools::conv($text . "\r\n", $codepage));
 
-            if (Config::get('log_type') == '2' || Config::get('log_type') == '3')
-                echo Tools::conv($text, Config::get('default_codepage')) . chr(10);
+            if ($log_type == '2' || $log_type == '3')
+                echo Tools::conv($text, $codepage) . chr(10);
         }
         static::$log[] = $text;
         return;

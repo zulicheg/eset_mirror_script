@@ -300,6 +300,8 @@ class Mirror
     static protected function multi_download($download_files)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
+        $web_dir = Config::get('web_dir');
+        $num_threads = Config::get('threads');
         $master = curl_multi_init();
         $options = array(
             CURLOPT_USERPWD => static::$key[0] .":" . static::$key[1],
@@ -310,16 +312,16 @@ class Mirror
             CURLOPT_MAXREDIRS => 5,
         );
 
-        if (Config::get('download_speed_limit') !== 0) {
-            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = Config::get('download_speed_limit');
+        if ($limit = Config::get('download_speed_limit') !== 0) {
+            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = $limit;
         }
 
         if (Config::get('proxy_enable') !== 0) {
             $options[CURLOPT_PROXY] = Config::get('proxy_server');
             $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
 
-            if (Config::get('proxy_user') !== NULL) {
-                $options[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
+            if ($user = Config::get('proxy_user') !== NULL) {
+                $options[CURLOPT_PROXYUSERNAME] = $user;
                 $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
             }
         }
@@ -331,16 +333,16 @@ class Mirror
         foreach ($download_files as $i => $file) {
             $ch = curl_init();
             $handles[Tools::get_resource_id($ch)] = current(static::$mirrors)['host'];
-            $res = dirname(Tools::ds(Config::get('web_dir'), $file['file']));
+            $res = dirname(Tools::ds($web_dir, $file['file']));
             if (!@file_exists($res)) @mkdir($res, 0755, true);
             $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $file['file'];
-            $options[CURLOPT_FILE] = $files['url'] = fopen(Tools::ds(Config::get('web_dir'), $download_files[$i]['file']), 'w');
+            $options[CURLOPT_FILE] = $files['url'] = fopen(Tools::ds($web_dir, $download_files[$i]['file']), 'w');
             curl_setopt_array($ch, $options);
             curl_multi_add_handle($master, $ch);
             $threads++;
 
-            if ($threads >= Config::get('threads')) {
-                while ($threads >= Config::get('threads')) {
+            if ($threads >= $num_threads) {
+                while ($threads >= $num_threads) {
                     usleep(100);
                     while (($execrun = curl_multi_exec($master, $running)) === -1) {}
                     curl_multi_select($master);
@@ -457,7 +459,7 @@ class Mirror
                     static::$total_downloads += $header['size_download'];
                     break;
                 } else {
-                    @unlink(Tools::ds(Config::get('web_dir'), $file['file']));
+                    @unlink($out);
                 }
             }
         }
@@ -491,6 +493,10 @@ class Mirror
         $new_content = '';
         $new_files = array();
         $total_size = 0;
+        $update_version_x32 = Config::get('update_version_x32');
+        $update_version_x64 = Config::get('update_version_x64');
+        $update_version_ess = Config::get('update_version_ess');
+        $update_version_lang = Config::get('update_version_lang');
 
         foreach ($matches as $container) {
 
@@ -499,16 +505,16 @@ class Mirror
 
             if (intval(static::$version) < 10) {
                 if (empty($output['file']) or empty($output['size']) or empty($output['date']) or
-                    (!empty($output['language']) and !in_array($output['language'], Config::get('update_version_lang'))) or
-                    (Config::get('update_version_x32') != 1 and preg_match("/32|86/", $output['platform'])) or
-                    (Config::get('update_version_x64') != 1 and preg_match("/64/", $output['platform'])) or
-                    (Config::get('update_version_ess') != 1 and preg_match("/ess/", $output['type']))
+                    (!empty($output['language']) and !in_array($output['language'], $update_version_lang)) or
+                    ($update_version_x32 != 1 and preg_match("/32|86/", $output['platform'])) or
+                    ($update_version_x64 != 1 and preg_match("/64/", $output['platform'])) or
+                    ($update_version_ess != 1 and preg_match("/ess/", $output['type']))
                 )
                     continue;
             } else {
                 if (empty($output['file']) or empty($output['size']) or
-                    (Config::get('update_version_x32') != 1 and preg_match("/32|86/", $output['platform'])) or
-                    (Config::get('update_version_x64') != 1 and preg_match("/64/", $output['platform']))
+                    ($update_version_x32 != 1 and preg_match("/32|86/", $output['platform'])) or
+                    ($update_version_x64 != 1 and preg_match("/64/", $output['platform']))
                 )
                     continue;
             }

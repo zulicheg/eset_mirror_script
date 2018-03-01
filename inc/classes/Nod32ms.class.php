@@ -155,9 +155,7 @@ class Nod32ms
         $format = 'd.m.Y';
         $current_date = date_parse_from_format($format, strftime('%d.%m.%Y'));
         Log::write_log(Language::t("Validating key [%s:%s]", $result[0], $result[1]), 4, Mirror::$version);
-        if ($this->key_exists_in_file($result[0], $result[1], KEY_FILE_INVALID)) {
-            return false;
-        }
+        if ($this->key_exists_in_file($result[0], $result[1], KEY_FILE_INVALID)) return false;
 
         Mirror::set_key(array($result[0], $result[1]));
         $date = $this->get_expire_date();
@@ -216,13 +214,14 @@ class Nod32ms
     private function read_keys()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
+        $log_dir = Config::get('log_dir');
 
-        if (!file_exists(Tools::ds(Config::get('log_dir'), KEY_FILE_VALID))) {
-            $h = fopen(Tools::ds(Config::get('log_dir'), KEY_FILE_VALID), 'w');
+        if (!file_exists(Tools::ds($log_dir, KEY_FILE_VALID))) {
+            $h = fopen(Tools::ds($log_dir, KEY_FILE_VALID), 'w');
             fclose($h);
         }
 
-        $keys = Parser::parse_keys(Tools::ds(Config::get('log_dir'), KEY_FILE_VALID));
+        $keys = Parser::parse_keys(Tools::ds($log_dir, KEY_FILE_VALID));
 
         if (!isset($keys) || !count($keys)) {
             Log::write_log(Language::t("Keys file is empty!"), 4, Mirror::$version);
@@ -260,12 +259,14 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         Log::write_log(Language::t("Invalid key [%s:%s]", $login, $password), 4, Mirror::$version);
+        $log_dir = Config::get('log_dir');
+
         ($this->key_exists_in_file($login, $password, KEY_FILE_INVALID) == false) ?
-            Log::write_to_file(Tools::ds(Config::get('log_dir'), KEY_FILE_INVALID), "$login:$password:" . Mirror::$version . "\r\n", true) :
+            Log::write_to_file(Tools::ds($log_dir, KEY_FILE_INVALID), "$login:$password:" . Mirror::$version . "\r\n", true) :
             Log::write_log(Language::t("Key [%s:%s] already exists", $login, $password), 4, Mirror::$version);
 
         if (Config::get('remove_invalid_keys') == 1)
-            Parser::delete_parse_line_in_file($login . ':' . $password . ':' . Mirror::$version, Tools::ds(Config::get('log_dir'), KEY_FILE_VALID));
+            Parser::delete_parse_line_in_file($login . ':' . $password . ':' . Mirror::$version, Tools::ds($log_dir, KEY_FILE_VALID));
     }
 
     /**
@@ -417,11 +418,11 @@ class Nod32ms
         if (Config::get('find_auto_enable') != 1)
             return null;
 
-        if (Config::get('find_system') === null) {
+        if ($sys = Config::get('find_system') === null) {
             $patterns = $this->get_all_patterns();
             shuffle($patterns);
         } else {
-            $patterns = array(PATTERN . Config::get('find_system') . '.pattern');
+            $patterns = array(PATTERN . $sys . '.pattern');
         }
 
         while ($elem = array_shift($patterns)) {
@@ -483,6 +484,7 @@ class Nod32ms
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         Log::write_log(Language::t("Generating html..."), 0);
         $total_size = $this->get_databases_size();
+        $web_dir = Config::get('web_dir');
         $html_page = '';
 
         if (Config::get('generate_only_table') == '0') {
@@ -512,7 +514,7 @@ class Nod32ms
 
         foreach ($DIRECTORIES as $ver => $dir) {
             if (Config::upd_version_is_set($ver) == '1') {
-                $update_ver = Tools::ds(Config::get('web_dir'), $dir, 'update.ver');
+                $update_ver = Tools::ds($web_dir, $dir, 'update.ver');
                 $version = Tools::get_DB_version($update_ver);
                 $timestamp = $this->check_time_stamp($ver, true);
                 $html_page .= '<tr>';
@@ -545,8 +547,9 @@ class Nod32ms
         $html_page .= '</tr>';
 
         if (Config::get('show_login_password')) {
-            if (file_exists(Tools::ds(Config::get('log_dir'), KEY_FILE_VALID))) {
-                $keys = Parser::parse_keys(Tools::ds(Config::get('log_dir'), KEY_FILE_VALID));
+            $keys_file = Tools::ds(Config::get('log_dir'), KEY_FILE_VALID);
+            if (file_exists($keys_file)) {
+                $keys = Parser::parse_keys($keys_file);
             }
 
             $html_page .= '<tr>';
@@ -568,7 +571,7 @@ class Nod32ms
         }
         $html_page .= '</table>';
         $html_page .= (Config::get('generate_only_table') == '0') ? '</td></tr></table></body></html>' : '';
-        $file = Tools::ds(Config::get('web_dir'), Config::get('filename_html'));
+        $file = Tools::ds($web_dir, Config::get('filename_html'));
 
         if (file_exists($file))
             @unlink($file);

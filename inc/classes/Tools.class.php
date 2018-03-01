@@ -30,16 +30,16 @@ class Tools
             $options[CURLOPT_FILE] = $out;
         }
 
-        if (Config::get('download_speed_limit') !== 0) {
-            $opts[CURLOPT_MAX_RECV_SPEED_LARGE] = Config::get('download_speed_limit');
+        if ($speed = Config::get('download_speed_limit') !== 0) {
+            $opts[CURLOPT_MAX_RECV_SPEED_LARGE] = $speed;
         }
 
         if (Config::get('proxy_enable') !== 0) {
             $opts[CURLOPT_PROXY] = Config::get('proxy_server');
             $opts[CURLOPT_PROXYPORT] = Config::get('proxy_port');
 
-            if (Config::get('proxy_user') !== NULL) {
-                $opts[CURLOPT_PROXYUSERNAME] = Config::get('proxy_user');
+            if ($user = Config::get('proxy_user') !== NULL) {
+                $opts[CURLOPT_PROXYUSERNAME] = $user;
                 $opts[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
             }
         }
@@ -87,13 +87,14 @@ class Tools
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $date = date("Y-m-d-H-i-s-") . explode('.', microtime(1))[1];
+        $unrar = Config::get('unrar_binary');
 
-        if (!file_exists(Config::get('unrar_binary'))) {
-            Log::write_log(Language::t("Unrar not exists at %s", Config::get('unrar_binary')), 0, Mirror::$version);
+        if (!file_exists($unrar)) {
+            Log::write_log(Language::t("Unrar not exists at %s", $unrar), 0, Mirror::$version);
         }
 
-        if (!is_executable(Config::get('unrar_binary'))) {
-            Log::write_log(Language::t("Unrar not executable at %s", Config::get('unrar_binary')), 0, Mirror::$version);
+        if (!is_executable($unrar)) {
+            Log::write_log(Language::t("Unrar not executable at %s", $unrar), 0, Mirror::$version);
         }
 
         switch (PHP_OS) {
@@ -101,10 +102,10 @@ class Tools
             case "Linux":
             case "FreeBSD":
             case "OpenBSD":
-                exec(sprintf("%s x -inul -y %s %s", Config::get('unrar_binary'), $source, $destination));
+                exec(sprintf("%s x -inul -y %s %s", $unrar, $source, $destination));
                 break;
             case "WINNT":
-                shell_exec(sprintf("%s e -y %s %s", Config::get('unrar_binary'), $source, $destination));
+                shell_exec(sprintf("%s e -y %s %s", $unrar, $source, $destination));
                 break;
         }
 
