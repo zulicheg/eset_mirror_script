@@ -43,7 +43,6 @@ class SelfUpdate
     static private function get_hashes_from_local($directory = "./")
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        global $CONSTANTS;
         $hashes = array();
         $d = dir($directory);
 
