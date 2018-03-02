@@ -2,6 +2,8 @@
 
 require __DIR__ . "/inc/init.php";
 
+Tools::init();
+
 if ($try_self_update()) {
     spl_autoload_unregister($autoload);
     unset($autoload, $try_self_update);
