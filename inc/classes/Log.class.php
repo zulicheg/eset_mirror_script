@@ -101,13 +101,14 @@ class Log
         if (empty($text)) return null;
 
         $log_type = Config::get('LOG')['type'];
-        $codepage = Config::get('LOG')['codepage'];
+        $log_dir = Config::get('LOG')['dir'];
+        $codepage = Config::get('SCRIPT')['codepage'];
 
         if ($log_type == '0') return null;
 
         if (Config::get('LOG')['level'] < $level) return null;
 
-        $fn = Tools::ds(Config::get('LOG')['dir'], LOG_FILE);
+        $fn = Tools::ds($log_dir, LOG_FILE);
 
         if (Config::get('LOG')['rotate'] == 1) {
             if (file_exists($fn) && !$ignore_rotate) {
@@ -122,7 +123,7 @@ class Log
                     }
 
                     @unlink($fn . ".1" . $arch_ext);
-                    Tools::archive_file(Tools::ds(Config::get('LOG')['dir'], LOG_FILE));
+                    Tools::archive_file(Tools::ds($log_dir, LOG_FILE));
                     @unlink($fn);
                     static::write_log(Language::t("Log file was cutted due rotation..."), 0, null, true);
                     array_pop(static::$log);
