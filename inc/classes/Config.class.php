@@ -75,7 +75,7 @@ class Config
 
         // Convert update_version_filter string to pcre
         static::$CONF['ESET']['filter'] = implode('|', array_map("trim", (explode(",", static::$CONF['ESET']['filter']))));
-        return null;
+        return static::check_config();
     }
 
     /**
@@ -99,7 +99,7 @@ class Config
     /**
      * @return string|null
      */
-    static public function check_config()
+    static private function check_config()
     {
         if (array_search(PHP_OS, array("Darwin", "Linux", "FreeBSD", "OpenBSD", "WINNT")) === false)
             return "This script doesn't support your OS. Please, contact developer!";

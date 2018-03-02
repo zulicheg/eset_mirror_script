@@ -8,7 +8,7 @@ if ($try_self_update()) {
     require __DIR__ . "/inc/init.php";
 }
 
-if (($err = Config::init()) || ($err = Language::init()) || ($err = Language::t(Config::check_config()))) {
+if (($err = Config::init()) || ($err = Language::init())) {
     Log::write_log(Language::t($err), 0);
     exit;
 }
