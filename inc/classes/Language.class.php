@@ -58,6 +58,7 @@ class Language
     {
         $text = func_get_arg(0);
         $params = @array_shift(func_get_args());
+        var_dump(static::$language_pack);
         return (($key = array_search($text, static::$language_pack)) != FALSE) ? vsprintf($key, $params) : vsprintf($text, $params);
     }
 }
