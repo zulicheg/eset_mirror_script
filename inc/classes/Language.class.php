@@ -64,6 +64,10 @@ class Language
     {
         $text = func_get_arg(0);
         $params = @array_shift(func_get_args());
-        return (($key = array_search($text, static::$language_pack)) != FALSE) ? vsprintf($key, $params) : vsprintf($text, $params);
+        $key = array_search($text, static::$language_pack);
+        var_dump($text);
+        var_dump($params);
+        var_dump($key);
+        return ($key != FALSE) ? vsprintf($key, $params) : vsprintf($text, $params);
     }
 }
