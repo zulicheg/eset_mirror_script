@@ -48,6 +48,7 @@ class Language
 
         for ($i = 0; $i < count($tmp); $i++)
             static::$language_pack[trim($tmp[$i])] = trim(static::$default_language_pack[$i]);
+        var_dump(static::$language_pack);
         return null;
     }
 
