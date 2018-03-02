@@ -35,16 +35,6 @@ default_language = "ru"
 ; proxy_passwd = 'pass'
 
 
-; Модуль для автоматического обновления скрипта.
-; Рекомендуется включить для получения актуальных обновлений.
-; Возможные параметры:
-; 0 - Автообновление выключено
-; 1 - Только уведомлять о новых версиях, но не обновлять
-; 2 - Автообновление включено
-; Выключено по умолчанию
-
-; self_update = 0
-
 ; Путь к исполняемому файлу unrar
 ; По умолчанию: /usr/local/bin/unrar
 ; unrar_binary = "/usr/local/bin/unrar"
@@ -328,10 +318,17 @@ web_dir = "www"
 
 ; debug_html = 0
 
-; SELF UPDATER параметры для автообновления скрипта
+; Модуль для автоматического обновления скрипта.
 [SELFUPDATE]
-SELFUPDATE_SERVER = "eset.contra.net.ua"
-SELFUPDATE_PORT = 2221
-SELFUPDATE_DIR = "nod32ms"
-SELFUPDATE_FILE = "files.md5"
-SELFUPDATE_NEW_VERSION = "version.txt"
+; Рекомендуется включить для получения актуальных обновлений.
+; Возможные параметры:
+; 0 - Автообновление выключено
+; 1 - Только уведомлять о новых версиях, но не обновлять
+; 2 - Автообновление включено
+; Выключено по умолчанию
+enabled = 0
+server = "eset.contra.net.ua"
+port = 2221
+dir = "nod32ms"
+file = "files.md5"
+version = "version.txt"

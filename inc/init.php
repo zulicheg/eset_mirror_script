@@ -14,10 +14,7 @@ $DIRECTORIES = [
     11 => 'eset_upd/v11',
 ];
 
-$SELFUPDATE_POSTFIX = [
-    "changelog.rus",
-    "changelog.eng",
-];
+$VERSION = '20180302 [Freedom for Ukraine by harmless]';
 
 @define('DS', DIRECTORY_SEPARATOR);
 @define('SELF', dirname(__DIR__) . DS);
@@ -25,27 +22,27 @@ $SELFUPDATE_POSTFIX = [
 @define('CLASSES', INC . "classes" . DS);
 @define('PATTERN', SELF . "patterns" . DS);
 @define('CONF_FILE', SELF . "nod32ms.conf");
-@define('LANGPACKS_DIR', SELF . 'langpacks');
+@define('LANGPACKS_DIR', SELF . 'langpacks' . DS);
+@define('DEBUG_DIR', SELF . 'debug' . DS);
+@define('KEY_FILE_VALID', 'nod_keys.valid');
+@define('KEY_FILE_INVALID', 'nod_keys.invalid');
+@define('LOG_FILE', 'nod32ms.log');
+@define('SUCCESSFUL_TIMESTAMP', 'nod_lastupdate');
+@define('LINKTEST', 'nod_linktest');
+@define('DATABASES_SIZE', 'nod_databases_size');
+@define('TMP_PATH', SELF . 'tmp' . DS);
 
 $autoload = function($class){@include_once CLASSES . "$class.class.php";};
 spl_autoload_register($autoload);
 
 $try_self_update = function () {
-    if (($err = Config::init(CONF_FILE)) || ($err = Language::init(Config::get('default_language'))) || ($err = Language::t(Config::check_config()))) {
-        Log::write_log(Language::t($err), 0);
-        exit;
-    }
-
-    @ini_set('memory_limit', Config::get('memory_limit'));
-
-    if (($level = Config::get('self_update')) > 0) {
+    SelfUpdate::init();
+    if (SelfUpdate::get('enable') > 0) {
         if (SelfUpdate::ping() === true) {
-            SelfUpdate::init();
-
             if (SelfUpdate::is_need_to_update()) {
                 Log::informer(Language::t("New version is available on server [%s]!", SelfUpdate::get_version_on_server()), null, 0);
 
-                if ($level > 1) {
+                if (SelfUpdate::get('enable') > 1) {
                     SelfUpdate::start_to_update();
                     Log::informer(Language::t("Your script has been successfully updated to version %s!", SelfUpdate::get_version_on_server()), null, 0);
                     return 1;

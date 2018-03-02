@@ -13,85 +13,6 @@ class Config
     /**
      * @var array
      */
-    static private $DEFAULT_CONF = array(
-        'memory_limit' => '32M',
-        'default_language' => 'en',
-        'default_codepage' => 'UTF-8',
-        'default_timezone' => null,
-        'self_update' => 0,
-        'mirror' => 'update.eset.com',
-        'update_version3' => 1,
-        'update_version4' => 1,
-        'update_version5' => 1,
-        'update_version6' => 1,
-        'update_version7' => 1,
-        'update_version8' => 1,
-        'update_version9' => 1,
-        'update_version10' => 1,
-        'update_version11' => 1,
-        'update_version_x32' => 1,
-        'update_version_x64' => 1,
-        'update_version_ess' => 1,
-        'update_version_lang' => 'bgr,chs,cht,csy,dan,deu,enu,esl,esn,eti,fin,fra,frc,hrv,hun,ita,kor,lth,nld,nor,plk,ptb,rom,rus,sky,slv,sve,tha,trk,ukr',
-        'update_version_filter' => 'rel-sta, rel-bat',
-        'find_auto_enable' => 1,
-        'find_system' => null,
-        'remove_invalid_keys' => 1,
-        'default_search_query' => 'nod32+username+password',
-        'default_pageindex' => 1,
-        'default_page_qty' => 5,
-        'default_pattern' => "((EAV|TRIAL)-[0-9]{10}).+?([a-z0-9]{10})",
-        'default_recursion_level' => 2,
-        'default_errors_quantity' => 5,
-        'phpmailer_enable' => 0,
-        'phpmailer_codepage' => 'utf-8',
-        'phpmailer_smtp' => 0,
-        'phpmailer_smtp_host' => null,
-        'phpmailer_smtp_port' => 25,
-        'phpmailer_smtp_auth' => 0,
-        'phpmailer_smtp_login' => null,
-        'phpmailer_smtp_password' => null,
-        'phpmailer_subject' => null,
-        'phpmailer_sender' => null,
-        'phpmailer_recipient' => null,
-        'phpmailer_level' => 1,
-        'phpmailer_days' => 3,
-        'log_type' => 1,
-        'log_level' => 4,
-        'log_dir' => 'log',
-        'log_rotate_enable' => 1,
-        'log_rotate_size' => '100K',
-        'log_rotate_qty' => 5,
-        'generate_html' => 0,
-        'filename_html' => 'index.html',
-        'generate_only_table' => 0,
-        'html_codepage' => 'UTF-8',
-        'show_login_password' => 0,
-        'debug_html' => 0,
-        'debug_update' => 0,
-        'unrar_binary' => '/usr/local/bin/unrar',
-        'download_speed_limit' => 0,
-        'threads' => 32,
-        'proxy_enable' => 0,
-        'proxy_server' => null,
-        'proxy_port' => 3128,
-        'proxy_user' => null,
-        'proxy_passwd' => null,
-        'DEBUG_DIR' => 'debug',
-        'KEY_FILE_VALID' => 'nod_keys.valid',
-        'KEY_FILE_INVALID' => 'nod_keys.invalid',
-        'LOG_FILE' => 'nod32ms.log',
-        'SUCCESSFUL_TIMESTAMP' => 'nod_lastupdate',
-        'LINKTEST' => 'nod_linktest',
-        'DATABASES_SIZE' => 'nod_databases_size',
-        'TMP_PATH' => 'tmp',
-        'CONNECTTIMEOUT' => 5,
-        'VERSION' => '20180302 [Freedom for Ukraine by harmless]',
-    );
-
-    /**
-     * @var array
-     */
     static private $LCID = array(
         'bgr' => 1026,
         'chs' => 2052,
@@ -131,40 +52,32 @@ class Config
      */
     static public function init($filename)
     {
-        if (!file_exists($filename))
-            return "Config file does not exist!";
+        if (!file_exists($filename)) return "Config file does not exist!";
 
-        if (!is_readable($filename))
-            return "Can't read config file! Check the file and its permissions!";
+        if (!is_readable($filename)) return "Can't read config file! Check the file and its permissions!";
 
-        self::$CONF = parse_ini_file($filename, true);
-
-        foreach (self::$DEFAULT_CONF as $key => $value) {
-            if (!isset(self::$CONF[$key]) || (empty(self::$CONF[$key]) && self::$CONF[$key] != '0'))
-                self::$CONF[$key] = $value;
-        }
+        static::$CONF = parse_ini_file($filename, true);
+        
+        var_dump(static::$CONF);
 
         // Parse mirrors
-        if (empty(self::$CONF['mirror']))
-            self::$CONF['mirror'] = 'update.eset.com';
+        if (empty(static::$CONF['mirror'])) static::$CONF['mirror'] = 'update.eset.com';
 
-        self::$CONF['mirror'] = array_map("trim", (explode(",", self::$CONF['mirror'])));
+        static::$CONF['mirror'] = array_map("trim", (explode(",", static::$CONF['mirror'])));
 
         // Convert string languages in array LCID
-        $lang = explode(",", strtoupper(self::$CONF['update_version_lang']));
+        $lang = explode(",", strtoupper(static::$CONF['update_version_lang']));
         sort($lang);
-        self::$CONF['present_languages'] = implode(", ", array_map("trim", ($lang)));
+        static::$CONF['present_languages'] = implode(", ", array_map("trim", ($lang)));
         $languages = array();
-        $langs = array_map("trim", (explode(",", strtolower(self::$CONF['update_version_lang']))));
+        $langs = array_map("trim", (explode(",", strtolower(static::$CONF['update_version_lang']))));
 
-        foreach ($langs as $key) {
-            $languages[] = self::$LCID[$key];
-        }
+        foreach ($langs as $key) $languages[] = static::$LCID[$key];
 
-        self::$CONF['update_version_lang'] = $languages;
+        static::$CONF['update_version_lang'] = $languages;
 
         // Convert update_version_filter string to pcre
-        self::$CONF['update_version_filter'] = implode('|', array_map("trim", (explode(",", self::$CONF['update_version_filter']))));
+        static::$CONF['update_version_filter'] = implode('|', array_map("trim", (explode(",", static::$CONF['update_version_filter']))));
         return null;
     }
 
@@ -174,16 +87,7 @@ class Config
      */
     static function get($nm)
     {
-        return isset(self::$CONF[$nm]) ? self::$CONF[$nm] : null;
-    }
-
-    /**
-     * @param $parameter
-     * @return mixed|null
-     */
-    static public function get_default_config_parameter($parameter)
-    {
-        return isset(self::$DEFAULT_CONF[$parameter]) ? self::$DEFAULT_CONF[$parameter] : null;
+        return isset(static::$CONF[$nm]) ? static::$CONF[$nm] : null;
     }
 
     /**
@@ -192,7 +96,7 @@ class Config
      */
     static public function upd_version_is_set($i)
     {
-        return (isset(self::$CONF['update_version' . strval($i)]) ? self::$CONF['update_version' . strval($i)] : 0);
+        return (isset(static::$CONF['update_version' . strval($i)]) ? static::$CONF['update_version' . strval($i)] : 0);
     }
 
     /**
@@ -204,132 +108,138 @@ class Config
             return "This script doesn't support your OS. Please, contact developer!";
 
         if (function_exists("date_default_timezone_set") and function_exists("date_default_timezone_get")) {
-            if (empty(self::$CONF['default_timezone'])) {
+            if (empty(static::$CONF['SCRIPT']['timezone'])) {
                 date_default_timezone_set(@date_default_timezone_get());
             } else {
-                if (@date_default_timezone_set(self::$CONF['default_timezone']) === false) {
-                    self::$CONF['log_rotate_enable'] = 0;
+                if (@date_default_timezone_set(static::$CONF['SCRIPT']['timezone']) === false) {
+                    static::$CONF['LOG']['rotate'] = 0;
                     return "Error in timezone settings! Please, check your config file!";
                 }
             }
         }
 
-        if (self::$CONF['log_rotate_enable'] == 1) {
-            if (preg_match_all("/([0-9]+)([BKMG])/i", self::$CONF['log_rotate_size'], $result, PREG_PATTERN_ORDER)) {
-                self::$CONF['log_rotate_size'] = intval(trim($result[1][0]));
+        if (static::$CONF['LOG']['rotate'] == 1) {
+            if (preg_match_all("/([0-9]+)([BKMG])/i", static::$CONF['LOG']['rotate_size'], $result, PREG_PATTERN_ORDER)) {
+                static::$CONF['LOG']['rotate_size'] = intval(trim($result[1][0]));
 
-                if (count($result) != 3 || self::$CONF['log_rotate_size'] < 1 || empty($result[1][0]) || empty($result[2][0]))
-                    return "Please, check set up of log_rotate_size in your config file!";
+                if (count($result) != 3 || static::$CONF['LOG']['rotate_size'] < 1 || empty($result[1][0]) || empty($result[2][0]))
+                    return "Please, check set up of rotate_size in your config file!";
 
                 switch (trim($result[2][0])) {
                     case "g":
                     case "G":
-                        self::$CONF['log_rotate_size'] = self::$CONF['log_rotate_size'] << 30;
+                        static::$CONF['LOG']['rotate_size'] = static::$CONF['LOG']['rotate_size'] << 30;
                         break;
                     case "m":
                     case "M":
-                        self::$CONF['log_rotate_size'] = self::$CONF['log_rotate_size'] << 20;
+                        static::$CONF['log_rotate_size'] = static::$CONF['LOG']['rotate_size'] << 20;
                         break;
                     case "k":
                     case "K":
-                        self::$CONF['log_rotate_size'] = self::$CONF['log_rotate_size'] << 10;
+                        static::$CONF['LOG']['rotate_size'] = static::$CONF['LOG']['rotate_size'] << 10;
                         break;
                 }
             }
 
-            if (intval(self::$CONF['log_rotate_qty']) < 1) {
-                return "Please, check set up of log_rotate_qty in your config file!";
+            if (intval(static::$CONF['LOG']['rotate_qty']) < 1) {
+                return "Please, check set up of rotate_qty in your config file!";
             } else {
-                self::$CONF['log_rotate_qty'] = intval(self::$CONF['log_rotate_qty']);
+                static::$CONF['LOG']['rotate_qty'] = intval(static::$CONF['LOG']['rotate_qty']);
             }
 
-            if (intval(self::$CONF['log_type']) < 0 || intval(self::$CONF['log_type']) > 3)
-                return "Please, check set up of log_type in your config file!";
+            if (intval(static::$CONF['LOG']['type']) < 0 || intval(static::$CONF['LOG']['type']) > 3)
+                return "Please, check set up of type in your config file!";
         }
 
-        if (empty(self::$CONF['web_dir']))
+        if (empty(static::$CONF['SCRIPT']['web_dir']))
             return "Please, check set up of WWW directory in your config file!";
 
-        while (substr(self::$CONF['web_dir'], -1) == DS)
-            self::$CONF['web_dir'] = substr(self::$CONF['web_dir'], 0, -1);
+        while (substr(static::$CONF['SCRIPT']['web_dir'], -1) == DS)
+            static::$CONF['SCRIPT']['web_dir'] = substr(static::$CONF['SCRIPT']['web_dir'], 0, -1);
 
-        while (substr(self::$CONF['log_dir'], -1) == DS)
-            self::$CONF['log_dir'] = substr(self::$CONF['log_dir'], 0, -1);
+        while (substr(static::$CONF['LOG']['dir'], -1) == DS)
+            static::$CONF['LOG']['dir'] = substr(static::$CONF['LOG']['dir'], 0, -1);
 
         @mkdir(PATTERN, 0755, true);
-        @mkdir(self::$CONF['log_dir'], 0755, true);
-        @mkdir(self::$CONF['web_dir'], 0755, true);
-        @mkdir(Tools::ds(self::$CONF['web_dir'], self::$CONF['TMP_PATH'], 0755, true));
+        @mkdir(static::$CONF['LOG']['dir'], 0755, true);
+        @mkdir(static::$CONF['SCRIPT']['web_dir'], 0755, true);
+        @mkdir(Tools::ds(static::$CONF['SCRIPT']['web_dir'], TMP_PATH, 0755, true));
 
-        if (self::$CONF['debug_html'] == 1)
-            @mkdir(Tools::ds(self::$CONF['log_dir'], self::$CONF['DEBUG_DIR'], 0755, true));
+        if (static::$CONF['SCRIPT']['debug_html'] == 1)
+            @mkdir(Tools::ds(static::$CONF['LOG']['dir'], DEBUG_DIR, 0755, true));
 
-        if (self::$CONF['phpmailer_enable'] == 1) {
-            if (empty(self::$CONF['phpmailer_sender']) ||
-                strpos(self::$CONF['phpmailer_sender'], "@") === FALSE ||
-                empty(self::$CONF['phpmailer_recipient']) ||
-                strpos(self::$CONF['phpmailer_recipient'], "@") === FALSE
+        if (static::$CONF['MAILER']['enable'] == 1) {
+            if (empty(static::$CONF['MAILER']['sender']) ||
+                strpos(static::$CONF['MAILER']['sender'], "@") === FALSE ||
+                empty(static::$CONF['MAILER']['recipient']) ||
+                strpos(static::$CONF['MAILER']['recipient'], "@") === FALSE
             )
                 return "You didn't set up email address of sender/recipient or it is wrong.Please, check your config file.";
 
-            if (self::$CONF['phpmailer_smtp'] == 1) {
-                if (empty(self::$CONF['phpmailer_smtp_host']) ||
-                    empty(self::$CONF['phpmailer_smtp_port'])
+            if (static::$CONF['MAILER']['smtp'] == 1) {
+                if (empty(static::$CONF['MAILER']['host']) ||
+                    empty(static::$CONF['MAILER']['port'])
                 )
                     return "Please, check SMTP host/port for using SMTP server in your config file.Or disable SMTP server if you don't wanna use it.";
 
-                if (self::$CONF['phpmailer_smtp_auth'] == 1) {
-                    if (empty(self::$CONF['phpmailer_smtp_login']) ||
-                        empty(self::$CONF['phpmailer_smtp_password'])
+                if (static::$CONF['MAILER']['auth'] == 1) {
+                    if (empty(static::$CONF['MAILER']['login']) ||
+                        empty(static::$CONF['MAILER']['password'])
                     )
                         return "Please, check login/password for using SMTP authorization.";
                 }
             }
         }
 
-        if (intval(self::$CONF['default_errors_quantity']) <= 0)
-            self::$CONF['default_errors_quantity'] = 1;
+        if (intval(static::$CONF['default_errors_quantity']) <= 0) static::$CONF['default_errors_quantity'] = 1;
 
         if (!is_readable(PATTERN))
             return "Pattern directory is not readable. Check your permissions!";
 
-        if (!is_writable(self::$CONF['log_dir']))
+        if (!is_writable(static::$CONF['SCRIPT']['log_dir']))
             return "Log directory is not writable. Check your permissions!";
 
-        if (!is_writable(self::$CONF['web_dir']))
+        if (!is_writable(static::$CONF['SCRIPT']['web_dir']))
             return "Web directory is not writable. Check your permissions!";
 
-        if (self::$CONF['self_update'] < 0 || self::$CONF['self_update'] > 2)
-            return "Incorrect value of self_update parameter. Must be 0,1 or 2!";
-
         // Link test
-        $linktestfile = Tools::ds(Config::get('log_dir'), self::$CONF['LINKTEST']);
+        $linktestfile = Tools::ds(static::$CONF['LOG']['dir'], LINKTEST);
         $test = false;
         $status = false;
         if (file_exists($linktestfile)) {
             $status = file_get_contents($linktestfile);
 
-            if (preg_match("/link|fsutil|false/", $status))
-                $test = true;
+            if (preg_match("/link|fsutil|false/", $status)) $test = true;
         }
         if ($test == false) {
-            file_put_contents(Tools::ds(self::$CONF['web_dir'], 'linktest'), '');
+            file_put_contents(Tools::ds(static::$CONF['SCRIPT']['web_dir'], 'linktest'), '');
 
-            if (function_exists('link') && link(Tools::ds(self::$CONF['web_dir'], 'linktest'), Tools::ds(self::$CONF['web_dir'], 'linktest2'))) {
+            if (
+                function_exists('link') &&
+                link(
+                    Tools::ds(static::$CONF['SCRIPT']['web_dir'], 'linktest'),
+                    Tools::ds(static::$CONF['SCRIPT']['web_dir'], 'linktest2')
+                )
+            ) {
                 $status = 'link';
-            } elseif (preg_match("/^win/i", PHP_OS) && shell_exec(sprintf("fsutil hardlink create %s %s", Tools::ds(self::$CONF['web_dir'], 'linktest'), Tools::ds(self::$CONF['web_dir'], 'linktest2'))) != 0) {
+            } elseif (
+                preg_match("/^win/i", PHP_OS) &&
+                shell_exec(
+                    sprintf(
+                        "fsutil hardlink create %s %s",
+                        Tools::ds(static::$CONF['SCRIPT']['web_dir'], 'linktest'),
+                        Tools::ds(static::$CONF['SCRIPT']['web_dir'], 'linktest2'))
+                ) != 0
+            ) {
                 $status = 'fsutil';
-            } else {
-                $status = 'false';
-            }
+            } else $status = 'false';
 
-            if ($status)
-                unlink(Tools::ds(self::$CONF['web_dir'], 'linktest2'));
+            if ($status) unlink(Tools::ds(static::$CONF['SCRIPT']['web_dir'], 'linktest2'));
 
-            unlink(Tools::ds(self::$CONF['web_dir'], 'linktest'));
+            unlink(Tools::ds(static::$CONF['SCRIPT']['web_dir'], 'linktest'));
             @file_put_contents($linktestfile, $status);
         }
-        self::$CONF['create_hard_links'] = ($status != 'false' ? $status : false);
+        static::$CONF['create_hard_links'] = ($status != 'false' ? $status : false);
 
         return null;
     }

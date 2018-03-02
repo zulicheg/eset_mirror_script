@@ -32,8 +32,8 @@ class SelfUpdate
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         $content = Tools::download_file(
             array(
-                CURLOPT_URL => "http://" . self::$CONF['SELFUPDATE_SERVER'] . "/" . self::$CONF['SELFUPDATE_DIR'] . "/" . self::$CONF['SELFUPDATE_FILE'],
-                CURLOPT_PORT => self::$CONF['SELFUPDATE_PORT'],
+                CURLOPT_URL => "http://" . static::$CONF['server'] . "/" . static::$CONF['dir'] . "/" . static::$CONF['file'],
+                CURLOPT_PORT => static::$CONF['port'],
                 CURLOPT_RETURNTRANSFER => 1),
             $headers);
         $arr = array();
@@ -76,8 +76,8 @@ class SelfUpdate
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         $response = Tools::download_file(
             array(
-                CURLOPT_URL => "http://" . self::$CONF['SELFUPDATE_SERVER'] . "/" . self::$CONF['SELFUPDATE_DIR'] . "/" . self::$CONF['SELFUPDATE_NEW_VERSION'],
-                CURLOPT_PORT => self::$CONF['SELFUPDATE_PORT'],
+                CURLOPT_URL => "http://" . static::$CONF['server'] . "/" . static::$CONF['dir'] . "/" . static::$CONF['version'],
+                CURLOPT_PORT => static::$CONF['port'],
                 CURLOPT_RETURNTRANSFER => 1),
             $headers);
         return trim($response);
@@ -92,29 +92,17 @@ class SelfUpdate
 
         foreach (static::$list_to_update as $filename => $info) {
             $fs_filename = str_replace("/", DS, str_replace("./", "", $filename));
-            $remote_full_path = sprintf("http://%s/%s/%s", self::$CONF['SELFUPDATE_SERVER'], self::$CONF['SELFUPDATE_DIR'], $filename);
+            $remote_full_path = sprintf("http://%s/%s/%s", static::$CONF['server'], static::$CONF['dir'], $filename);
             Log::write_log(Language::t("Downloading %s [%s Bytes]", basename($filename), $info), 0);
             Tools::download_file(
                 array(
                     CURLOPT_URL => $remote_full_path,
-                    CURLOPT_PORT => Config::get('SELFUPDATE_PORT'),
+                    CURLOPT_PORT => static::$CONF['port'],
                     CURLOPT_FILE => $fs_filename),
                 $headers);
 
             if (is_string($headers))
                 Log::write_log(Language::t("Error while downloading file %s [%s]", basename($filename), $headers), 0);
-        }
-
-        global $SELFUPDATE_POSTFIX;
-
-        foreach ($SELFUPDATE_POSTFIX as $file) {
-            $out = str_replace("/", DS, $file);
-            Tools::download_file(
-                array(
-                    CURLOPT_URL => "http://" . self::$CONF['SELFUPDATE_SERVER'] . "/" . self::$CONF['SELFUPDATE_DIR'] . "/" . $file,
-                    CURLOPT_PORT => self::$CONF['SELFUPDATE_PORT'],
-                    CURLOPT_FILE => $out),
-                $headers);
         }
     }
 
@@ -134,19 +122,16 @@ class SelfUpdate
     }
 
     /**
-     * @param $filename
      * @return null|string
      */
-    static public function load($filename)
+    static public function load()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        if (!file_exists($filename))
-            return "Config file does not exist!";
+        if (!file_exists(CONF_FILE)) return "Config file does not exist!";
 
-        if (!is_readable($filename))
-            return "Can't read config file! Check the file and its permissions!";
+        if (!is_readable(CONF_FILE)) return "Can't read config file! Check the file and its permissions!";
 
-        self::$CONF = (parse_ini_file($filename, true))['SELFUPDATE'];
+        static::$CONF = (parse_ini_file(CONF_FILE, true))['SELFUPDATE'];
 
         return null;
     }
@@ -156,6 +141,16 @@ class SelfUpdate
      */
     static public function ping()
     {
-        return Tools::ping(self::$CONF['SELFUPDATE_SERVER'], self::$CONF['SELFUPDATE_PORT']);
+        return Tools::ping(static::$CONF['server'], static::$CONF['port']);
     }
+
+    /**
+     * @param $nm
+     * @return mixed|null
+     */
+    static function get($nm)
+    {
+        return isset(static::$CONF[$nm]) ? static::$CONF[$nm] : null;
+    }
+
 }

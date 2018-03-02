@@ -6,6 +6,27 @@
 class Tools
 {
 
+    static private $CONF;
+    static private $unrar;
+
+    /**
+     *
+     */
+    static public function init()
+    {
+        Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
+
+        if (!file_exists(CONF_FILE)) return "Config file does not exist!";
+
+        if (!is_readable(CONF_FILE)) return "Can't read config file! Check the file and its permissions!";
+
+        $ini = parse_ini_file(CONF_FILE, true);
+        static::$CONF = $ini['CONNECTION'];
+        static::$unrar = $ini['SCRIPT']['unrar_binary'];
+
+        return null;
+    }
+
     /**
      * @param array $options
      * @param $headers
@@ -17,7 +38,7 @@ class Tools
         $out = FALSE;
         $opts = array(
             CURLOPT_BINARYTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => Config::get('CONNECTTIMEOUT'),
+            CURLOPT_CONNECTTIMEOUT => static::$CONF['timeout'],
             CURLOPT_HEADER => false,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
@@ -30,15 +51,15 @@ class Tools
             $options[CURLOPT_FILE] = $out;
         }
 
-        if (($speed = Config::get('download_speed_limit')) !== 0) $opts[CURLOPT_MAX_RECV_SPEED_LARGE] = $speed;
+        if (($speed = static::$CONF['download_speed_limit']) !== 0) $opts[CURLOPT_MAX_RECV_SPEED_LARGE] = $speed;
 
-        if (Config::get('proxy_enable') !== 0) {
-            $opts[CURLOPT_PROXY] = Config::get('proxy_server');
-            $opts[CURLOPT_PROXYPORT] = Config::get('proxy_port');
+        if (static::$CONF['proxy'] !== 0) {
+            $opts[CURLOPT_PROXY] = static::$CONF['server'];
+            $opts[CURLOPT_PROXYPORT] = static::$CONF['port'];
 
-            if (($user = Config::get('proxy_user')) !== NULL) {
+            if (($user = static::$CONF['user']) !== NULL) {
                 $opts[CURLOPT_PROXYUSERNAME] = $user;
-                $opts[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
+                $opts[CURLOPT_PROXYPASSWORD] = static::$CONF['password'];
             }
         }
 
@@ -83,31 +104,27 @@ class Tools
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $date = date("Y-m-d-H-i-s-") . explode('.', microtime(1))[1];
-        $unrar = Config::get('unrar_binary');
 
-        if (!file_exists($unrar)) {
-            Log::write_log(Language::t("Unrar not exists at %s", $unrar), 0, Mirror::$version);
-        }
+        if (!file_exists(static::$unrar))
+            Log::write_log(Language::t("Unrar not exists at %s", static::$unrar), 0, Mirror::$version);
 
-        if (!is_executable($unrar)) {
-            Log::write_log(Language::t("Unrar not executable at %s", $unrar), 0, Mirror::$version);
-        }
+        if (!is_executable(static::$unrar))
+            Log::write_log(Language::t("Unrar not executable at %s", static::$unrar), 0, Mirror::$version);
 
         switch (PHP_OS) {
             case "Darwin":
             case "Linux":
             case "FreeBSD":
             case "OpenBSD":
-                exec(sprintf("%s x -inul -y %s %s", $unrar, $source, $destination));
+                exec(sprintf("%s x -inul -y %s %s", static::$unrar, $source, $destination));
                 break;
             case "WINNT":
-                shell_exec(sprintf("%s e -y %s %s", $unrar, $source, $destination));
+                shell_exec(sprintf("%s e -y %s %s", static::$unrar, $source, $destination));
                 break;
         }
 
-        if (Config::get('debug_update') == 1) {
+        if (Config::get('debug_update') == 1)
             copy("${destination}/update.ver", "${destination}/update_${date}.ver");
-        }
     }
 
     /**
@@ -234,8 +251,7 @@ class Tools
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
 
-        if (!file_exists($dir))
-            @mkdir($dir, 0755, true);
+        if (!file_exists($dir)) @mkdir($dir, 0755, true);
     }
 
     /**
@@ -319,9 +335,7 @@ class Tools
             $path = static::ds($dir, $array['file']);
             $needed_files[] = $path;
 
-            if (file_exists($path) && !static::compare_files(@stat($path), $array)) {
-                unlink($path);
-            }
+            if (file_exists($path) && !static::compare_files(@stat($path), $array)) unlink($path);
 
             if (!file_exists($path)) {
                 $results = preg_grep('/' . basename($array['file']) . '$/', $old_files);
@@ -331,9 +345,7 @@ class Tools
                         if (static::compare_files(@stat($result), $array)) {
                             $res = dirname($path);
 
-                            if (!file_exists($res)) {
-                                mkdir($res, 0755, true);
-                            }
+                            if (!file_exists($res)) mkdir($res, 0755, true);
 
                             switch (Config::get('create_hard_links')) {
                                 case 'link':
@@ -356,12 +368,8 @@ class Tools
                             break;
                         }
                     }
-                    if (!file_exists($path) && !array_search($array['file'], $download_files)) {
-                        $download_files[] = $array;
-                    }
-                } else {
-                    $download_files[] = $array;
-                }
+                    if (!file_exists($path) && !array_search($array['file'], $download_files)) $download_files[] = $array;
+                } else $download_files[] = $array;
             }
         }
         return array($download_files, $needed_files);
@@ -385,18 +393,14 @@ class Tools
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
 
-        if (!file_exists($file))
-            return null;
+        if (!file_exists($file)) return null;
 
         $content = file_get_contents($file);
         $upd = Parser::parse_line($content, "versionid");
         $max = 0;
 
-        if (isset($upd) && preg_match('/(' . Config::get('update_version_filter') . ')/', $content)) {
-            foreach ($upd as $key) {
-                $max = $max < intval($key) ? $key : $max;
-            }
-        }
+        if (isset($upd) && preg_match('/(' . Config::get('update_version_filter') . ')/', $content))
+            foreach ($upd as $key) $max = $max < intval($key) ? $key : $max;
 
         return $max;
     }
