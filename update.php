@@ -8,6 +8,8 @@ if ($try_self_update()) {
     require __DIR__ . "/inc/init.php";
 }
 
+Tools::init();
+
 if (($err = Config::init(CONF_FILE)) || ($err = Language::init(Config::get('SCRIPT')['language'])) || ($err = Language::t(Config::check_config()))) {
     Log::write_log(Language::t($err), 0);
     exit;
