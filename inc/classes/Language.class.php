@@ -27,13 +27,12 @@ class Language
     static private $default_language_file = null;
 
     /**
-     * @param $lang
      * @return null|string
      */
-    static public function init($lang = 'en')
+    static public function init()
     {
-        static::$language = $lang;
-        static::$language_file = Tools::ds(LANGPACKS_DIR, $lang . '.lng');
+        static::$language = Config::get('SCRIPT')['language'];
+        static::$language_file = Tools::ds(LANGPACKS_DIR, static::$language . '.lng');
         static::$default_language_file = Tools::ds(LANGPACKS_DIR, 'en.lng');
 
         if (static::$language != 'en') {

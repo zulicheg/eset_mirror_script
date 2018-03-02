@@ -47,16 +47,15 @@ class Config
     );
 
     /**
-     * @param $filename
      * @return null|string
      */
-    static public function init($filename)
+    static public function init()
     {
-        if (!file_exists($filename)) return "Config file does not exist!";
+        if (!file_exists(CONF_FILE)) return "Config file does not exist!";
 
-        if (!is_readable($filename)) return "Can't read config file! Check the file and its permissions!";
+        if (!is_readable(CONF_FILE)) return "Can't read config file! Check the file and its permissions!";
 
-        static::$CONF = parse_ini_file($filename, true);
+        static::$CONF = parse_ini_file(CONF_FILE, true);
         
         var_dump(static::$CONF);
 
