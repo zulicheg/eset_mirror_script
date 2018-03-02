@@ -35,6 +35,12 @@ class Language
         static::$language_file = Tools::ds(LANGPACKS_DIR, static::$language . '.lng');
         static::$default_language_file = Tools::ds(LANGPACKS_DIR, 'en.lng');
 
+
+        var_dump(static::$language);
+        var_dump(static::$language_file);
+        var_dump(static::$default_language_file);
+        var_dump(static::$language_pack);
+
         if (static::$language != 'en') {
             if (!file_exists(static::$language_file))
                 return sprintf("Language file [%s.lng] does not exist!", static::$language);
@@ -49,10 +55,7 @@ class Language
         for ($i = 0; $i < count($tmp); $i++) {
             static::$language_pack[trim($tmp[$i])] = trim(static::$default_language_pack[$i]);
         }
-        var_dump(static::$language);
-        var_dump(static::$language_file);
-        var_dump(static::$default_language_file);
-        var_dump(static::$language_pack);
+
         var_dump(static::$default_language_pack);
         return null;
     }
