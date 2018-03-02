@@ -48,7 +48,11 @@ class Language
 
         for ($i = 0; $i < count($tmp); $i++)
             static::$language_pack[trim($tmp[$i])] = trim(static::$default_language_pack[$i]);
+        var_dump(static::$language);
+        var_dump(static::$language_file);
+        var_dump(static::$default_language_file);
         var_dump(static::$language_pack);
+        var_dump(static::$default_language_pack);
         return null;
     }
 
@@ -59,7 +63,6 @@ class Language
     {
         $text = func_get_arg(0);
         $params = @array_shift(func_get_args());
-        var_dump(static::$language_pack);
         return (($key = array_search($text, static::$language_pack)) != FALSE) ? vsprintf($key, $params) : vsprintf($text, $params);
     }
 }
