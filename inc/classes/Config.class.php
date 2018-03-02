@@ -137,7 +137,7 @@ class Config
         if (!is_readable($filename))
             return "Can't read config file! Check the file and its permissions!";
 
-        self::$CONF = parse_ini_file($filename);
+        self::$CONF = parse_ini_file($filename, true);
 
         foreach (self::$DEFAULT_CONF as $key => $value) {
             if (!isset(self::$CONF[$key]) || (empty(self::$CONF[$key]) && self::$CONF[$key] != '0'))
