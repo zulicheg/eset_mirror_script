@@ -27,7 +27,8 @@ $SELFUPDATE_POSTFIX = [
 @define('CONF_FILE', SELF . "nod32ms.conf");
 @define('LANGPACKS_DIR', SELF . 'langpacks');
 
-spl_autoload_register(function($class){@include_once CLASSES . "$class.class.php";});
+$autoload = function($class){@include_once CLASSES . "$class.class.php";};
+spl_autoload_register($autoload);
 
 $try_self_update = function () {
     if (($err = Config::init(CONF_FILE)) || ($err = Language::init(Config::get('default_language'))) || ($err = Language::t(Config::check_config()))) {
