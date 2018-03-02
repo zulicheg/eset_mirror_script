@@ -327,3 +327,11 @@ web_dir = "www"
 ; По умолчанию параметр выключен.
 
 ; debug_html = 0
+
+; SELF UPDATER параметры для автообновления скрипта
+[SELFUPDATE]
+SELFUPDATE_SERVER = "eset.contra.net.ua"
+SELFUPDATE_PORT = 2221
+SELFUPDATE_DIR = "nod32ms"
+SELFUPDATE_FILE = "files.md5"
+SELFUPDATE_NEW_VERSION = "version.txt"

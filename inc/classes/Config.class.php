@@ -85,11 +85,6 @@ class Config
         'LINKTEST' => 'nod_linktest',
         'DATABASES_SIZE' => 'nod_databases_size',
         'TMP_PATH' => 'tmp',
-        'SELFUPDATE_SERVER' => 'eset.contra.net.ua',
-        'SELFUPDATE_PORT' => '2221',
-        'SELFUPDATE_DIR' => 'nod32ms',
-        'SELFUPDATE_FILE' => 'files.md5',
-        'SELFUPDATE_NEW_VERSION' => 'version.txt',
         'CONNECTTIMEOUT' => 5,
         'VERSION' => '20180302 [Freedom for Ukraine by harmless]',
     );

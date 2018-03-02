@@ -11,6 +11,11 @@ class SelfUpdate
     static private $list_to_update;
 
     /**
+ * @var
+ */
+    static private $CONF;
+
+    /**
      * @return bool
      */
     static public function is_need_to_update()
@@ -27,8 +32,8 @@ class SelfUpdate
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         $content = Tools::download_file(
             array(
-                CURLOPT_URL => "http://" . Config::get('SELFUPDATE_SERVER') . "/" . Config::get('SELFUPDATE_DIR') . "/" . Config::get('SELFUPDATE_FILE'),
-                CURLOPT_PORT => Config::get('SELFUPDATE_PORT'),
+                CURLOPT_URL => "http://" . self::$CONF['SELFUPDATE_SERVER'] . "/" . self::$CONF['SELFUPDATE_DIR'] . "/" . self::$CONF['SELFUPDATE_FILE'],
+                CURLOPT_PORT => self::$CONF['SELFUPDATE_PORT'],
                 CURLOPT_RETURNTRANSFER => 1),
             $headers);
         $arr = array();
@@ -71,8 +76,8 @@ class SelfUpdate
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         $response = Tools::download_file(
             array(
-                CURLOPT_URL => "http://" . Config::get('SELFUPDATE_SERVER') . "/" . Config::get('SELFUPDATE_DIR') . "/" . Config::get('SELFUPDATE_NEW_VERSION'),
-                CURLOPT_PORT => Config::get('SELFUPDATE_PORT'),
+                CURLOPT_URL => "http://" . self::$CONF['SELFUPDATE_SERVER'] . "/" . self::$CONF['SELFUPDATE_DIR'] . "/" . self::$CONF['SELFUPDATE_NEW_VERSION'],
+                CURLOPT_PORT => self::$CONF['SELFUPDATE_PORT'],
                 CURLOPT_RETURNTRANSFER => 1),
             $headers);
         return trim($response);
@@ -87,7 +92,7 @@ class SelfUpdate
 
         foreach (static::$list_to_update as $filename => $info) {
             $fs_filename = str_replace("/", DS, str_replace("./", "", $filename));
-            $remote_full_path = sprintf("http://%s/%s/%s", Config::get('SELFUPDATE_SERVER'), Config::get('SELFUPDATE_DIR'), $filename);
+            $remote_full_path = sprintf("http://%s/%s/%s", self::$CONF['SELFUPDATE_SERVER'], self::$CONF['SELFUPDATE_DIR'], $filename);
             Log::write_log(Language::t("Downloading %s [%s Bytes]", basename($filename), $info), 0);
             Tools::download_file(
                 array(
@@ -106,8 +111,8 @@ class SelfUpdate
             $out = str_replace("/", DS, $file);
             Tools::download_file(
                 array(
-                    CURLOPT_URL => "http://" . Config::get('SELFUPDATE_SERVER') . "/" . Config::get('SELFUPDATE_DIR') . "/" . $file,
-                    CURLOPT_PORT => Config::get('SELFUPDATE_PORT'),
+                    CURLOPT_URL => "http://" . self::$CONF['SELFUPDATE_SERVER'] . "/" . self::$CONF['SELFUPDATE_DIR'] . "/" . $file,
+                    CURLOPT_PORT => self::$CONF['SELFUPDATE_PORT'],
                     CURLOPT_FILE => $out),
                 $headers);
         }
@@ -119,6 +124,7 @@ class SelfUpdate
     static public function init()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
+        static::load(CONF_FILE);
         $remote_hashes = static::get_hashes_from_server();
         $local_hashes = static::get_hashes_from_local();
 
@@ -128,10 +134,28 @@ class SelfUpdate
     }
 
     /**
+     * @param $filename
+     * @return null|string
+     */
+    static public function load($filename)
+    {
+        Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
+        if (!file_exists($filename))
+            return "Config file does not exist!";
+
+        if (!is_readable($filename))
+            return "Can't read config file! Check the file and its permissions!";
+
+        self::$CONF = (parse_ini_file($filename, true))['SELFUPDATE'];
+
+        return null;
+    }
+
+    /**
      * @return bool
      */
     static public function ping()
     {
-        return Tools::ping(Config::get('SELFUPDATE_SERVER'), Config::get('SELFUPDATE_PORT'));
+        return Tools::ping(self::$CONF['SELFUPDATE_SERVER'], self::$CONF['SELFUPDATE_PORT']);
     }
 }
