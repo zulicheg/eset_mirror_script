@@ -25,7 +25,12 @@ class SelfUpdate
     static private function get_hashes_from_server()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        $content = Tools::download_file(array(CURLOPT_URL => "http://" . Config::get('SELFUPDATE_SERVER') . "/" . Config::get('SELFUPDATE_DIR') . "/" . Config::get('SELFUPDATE_FILE'), CURLOPT_PORT => Config::get('SELFUPDATE_PORT'), CURLOPT_RETURNTRANSFER => 1), $headers);
+        $content = Tools::download_file(
+            array(
+                CURLOPT_URL => "http://" . Config::get('SELFUPDATE_SERVER') . "/" . Config::get('SELFUPDATE_DIR') . "/" . Config::get('SELFUPDATE_FILE'),
+                CURLOPT_PORT => Config::get('SELFUPDATE_PORT'),
+                CURLOPT_RETURNTRANSFER => 1),
+            $headers);
         $arr = array();
 
         if (preg_match_all("/(.+)=(.+)=(.+)/", $content, $result, PREG_OFFSET_CAPTURE))
@@ -64,7 +69,12 @@ class SelfUpdate
     static public function get_version_on_server()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        $response = Tools::download_file(array(CURLOPT_URL => "http://" . Config::get('SELFUPDATE_SERVER') . "/" . Config::get('SELFUPDATE_DIR') . "/" . Config::get('SELFUPDATE_NEW_VERSION'), CURLOPT_PORT => Config::get('SELFUPDATE_PORT'), CURLOPT_RETURNTRANSFER => 1), $headers);
+        $response = Tools::download_file(
+            array(
+                CURLOPT_URL => "http://" . Config::get('SELFUPDATE_SERVER') . "/" . Config::get('SELFUPDATE_DIR') . "/" . Config::get('SELFUPDATE_NEW_VERSION'),
+                CURLOPT_PORT => Config::get('SELFUPDATE_PORT'),
+                CURLOPT_RETURNTRANSFER => 1),
+            $headers);
         return trim($response);
     }
 
@@ -79,7 +89,12 @@ class SelfUpdate
             $fs_filename = str_replace("/", DS, str_replace("./", "", $filename));
             $remote_full_path = sprintf("http://%s/%s/%s", Config::get('SELFUPDATE_SERVER'), Config::get('SELFUPDATE_DIR'), $filename);
             Log::write_log(Language::t("Downloading %s [%s Bytes]", basename($filename), $info), 0);
-            Tools::download_file(array(CURLOPT_URL => $remote_full_path, CURLOPT_PORT => Config::get('SELFUPDATE_PORT'), CURLOPT_FILE => $fs_filename), $headers);
+            Tools::download_file(
+                array(
+                    CURLOPT_URL => $remote_full_path,
+                    CURLOPT_PORT => Config::get('SELFUPDATE_PORT'),
+                    CURLOPT_FILE => $fs_filename),
+                $headers);
 
             if (is_string($headers))
                 Log::write_log(Language::t("Error while downloading file %s [%s]", basename($filename), $headers), 0);
@@ -89,7 +104,12 @@ class SelfUpdate
 
         foreach ($SELFUPDATE_POSTFIX as $file) {
             $out = str_replace("/", DS, $file);
-            Tools::download_file(array(CURLOPT_URL => "http://" . Config::get('SELFUPDATE_SERVER') . "/" . Config::get('SELFUPDATE_DIR') . "/" . $file, CURLOPT_PORT => Config::get('SELFUPDATE_PORT'), CURLOPT_FILE => $out), $headers);
+            Tools::download_file(
+                array(
+                    CURLOPT_URL => "http://" . Config::get('SELFUPDATE_SERVER') . "/" . Config::get('SELFUPDATE_DIR') . "/" . $file,
+                    CURLOPT_PORT => Config::get('SELFUPDATE_PORT'),
+                    CURLOPT_FILE => $out),
+                $headers);
         }
     }
 
