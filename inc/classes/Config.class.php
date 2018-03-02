@@ -61,23 +61,23 @@ class Config
         var_dump(static::$CONF);
 
         // Parse mirrors
-        if (empty(static::$CONF['mirror'])) static::$CONF['mirror'] = 'update.eset.com';
+        if (empty(static::$CONF['ESET']['mirror'])) static::$CONF['ESET']['mirror'] = 'update.eset.com';
 
-        static::$CONF['mirror'] = array_map("trim", (explode(",", static::$CONF['mirror'])));
+        static::$CONF['ESET']['mirror'] = array_map("trim", (explode(",", static::$CONF['ESET']['mirror'])));
 
         // Convert string languages in array LCID
-        $lang = explode(",", strtoupper(static::$CONF['update_version_lang']));
+        $lang = explode(",", strtoupper(static::$CONF['ESET']['lang']));
         sort($lang);
         static::$CONF['present_languages'] = implode(", ", array_map("trim", ($lang)));
         $languages = array();
-        $langs = array_map("trim", (explode(",", strtolower(static::$CONF['update_version_lang']))));
+        $langs = array_map("trim", (explode(",", strtolower(static::$CONF['ESET']['lang']))));
 
         foreach ($langs as $key) $languages[] = static::$LCID[$key];
 
-        static::$CONF['update_version_lang'] = $languages;
+        static::$CONF['ESET']['lang'] = $languages;
 
         // Convert update_version_filter string to pcre
-        static::$CONF['update_version_filter'] = implode('|', array_map("trim", (explode(",", static::$CONF['update_version_filter']))));
+        static::$CONF['ESET']['filter'] = implode('|', array_map("trim", (explode(",", static::$CONF['ESET']['filter']))));
         return null;
     }
 
@@ -96,7 +96,7 @@ class Config
      */
     static public function upd_version_is_set($i)
     {
-        return (isset(static::$CONF['update_version' . strval($i)]) ? static::$CONF['update_version' . strval($i)] : 0);
+        return (isset(static::$CONF['ESET']['version' . strval($i)]) ? static::$CONF['ESET']['version' . strval($i)] : 0);
     }
 
     /**
@@ -191,12 +191,12 @@ class Config
             }
         }
 
-        if (intval(static::$CONF['default_errors_quantity']) <= 0) static::$CONF['default_errors_quantity'] = 1;
+        if (intval(static::$CONF['FIND']['errors_quantity']) <= 0) static::$CONF['FIND']['errors_quantity'] = 1;
 
         if (!is_readable(PATTERN))
             return "Pattern directory is not readable. Check your permissions!";
 
-        if (!is_writable(static::$CONF['SCRIPT']['log_dir']))
+        if (!is_writable(static::$CONF['LOG']['dir']))
             return "Log directory is not writable. Check your permissions!";
 
         if (!is_writable(static::$CONF['SCRIPT']['web_dir']))
