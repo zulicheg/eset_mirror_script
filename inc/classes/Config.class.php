@@ -56,8 +56,6 @@ class Config
         if (!is_readable(CONF_FILE)) return "Can't read config file! Check the file and its permissions!";
 
         static::$CONF = parse_ini_file(CONF_FILE, true);
-        
-        var_dump(static::$CONF);
 
         // Parse mirrors
         if (empty(static::$CONF['ESET']['mirror'])) static::$CONF['ESET']['mirror'] = 'update.eset.com';
