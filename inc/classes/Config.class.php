@@ -129,7 +129,7 @@ class Config
                         break;
                     case "m":
                     case "M":
-                        static::$CONF['log_rotate_size'] = static::$CONF['LOG']['rotate_size'] << 20;
+                        static::$CONF['LOG']['rotate_size'] = static::$CONF['LOG']['rotate_size'] << 20;
                         break;
                     case "k":
                     case "K":
