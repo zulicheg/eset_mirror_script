@@ -159,7 +159,7 @@ class SelfUpdate
      */
     static public function ping()
     {
-        return Tools::ping(static::$CONF['server'], static::$CONF['port']);
+        return Tools::ping(static::$CONF['server'], static::$CONF['port'], static::$CONF['dir'] . '/' . static::$CONF['file']);
     }
 
     /**
