@@ -34,7 +34,3 @@ $VERSION = '20180302 [Freedom for Ukraine by harmless]';
 
 $autoload = function($class){@include_once CLASSES . "$class.class.php";};
 spl_autoload_register($autoload);
-
-$try_self_update = function () {
-    SelfUpdate::init();
-};

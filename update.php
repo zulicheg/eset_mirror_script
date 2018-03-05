@@ -6,9 +6,9 @@ require __DIR__ . "/inc/init.php";
 try {
     Tools::init();
 
-    if ($try_self_update()) {
+    if (SelfUpdate::init()) {
         spl_autoload_unregister($autoload);
-        unset($autoload, $try_self_update);
+        unset($autoload);
         require __DIR__ . "/inc/init.php";
     }
 
@@ -34,6 +34,10 @@ catch (SelfUpdateException $e) {
 }
 
 catch (phpmailerException $e) {
+    Log::write_log($e->getMessage(), 0);
+}
+
+catch (Exception $e) {
     Log::write_log($e->getMessage(), 0);
 }
 
