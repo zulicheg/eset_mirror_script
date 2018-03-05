@@ -617,7 +617,7 @@ class Nod32ms
                 }
 
                 Mirror::find_best_mirrors();
-                $old_version = Tools::get_DB_version(Tools::ds($web_dir, $dir, 'update.ver'));
+                $old_version = Mirror::get_DB_version(Tools::ds($web_dir, $dir, 'update.ver'));
 
                 if (!empty(Mirror::$mirrors)) {
                     foreach (Mirror::$mirrors as $id => $mirror) {
