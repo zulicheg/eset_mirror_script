@@ -78,6 +78,7 @@ class Tools
         if ($out) @fclose($out);
         curl_close($ch);
 
+        var_dump($headers);
         if (key_exists(CURLOPT_RETURNTRANSFER, $options)) {
             var_dump($res);
             if ($options[CURLOPT_RETURNTRANSFER] == 1) return $res;
