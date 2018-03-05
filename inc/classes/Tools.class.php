@@ -79,6 +79,7 @@ class Tools
         curl_close($ch);
 
         if (key_exists(CURLOPT_RETURNTRANSFER, $options)) {
+            var_dump($res);
             if ($options[CURLOPT_RETURNTRANSFER] == 1) return $res;
         }
 
