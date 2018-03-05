@@ -55,6 +55,6 @@ $try_self_update = function () {
             Log::write_log(Language::t("Update server is down!"), 0);
     }
 
-    return 1;
+    return 0;
 };
 
