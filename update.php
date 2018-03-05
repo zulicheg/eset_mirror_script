@@ -37,3 +37,6 @@ catch (phpmailerException $e) {
     Log::write_log($e->getMessage(), 0);
 }
 
+finally {
+    Log::write_log("Script stopped!", 0);
+}

@@ -113,11 +113,11 @@ class SelfUpdate
     }
 
     /**
+     * @return int
      * @throws SelfUpdateException
      */
     static public function init()
     {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
 
         if (!file_exists(CONF_FILE))
@@ -127,12 +127,24 @@ class SelfUpdate
             throw new SelfUpdateException("Can't read config file! Check the file and its permissions!");
 
         static::$CONF = (parse_ini_file(CONF_FILE, true))['SELFUPDATE'];
-        $remote_hashes = static::get_hashes_from_server();
-        $local_hashes = static::get_hashes_from_local();
 
-        foreach ($remote_hashes as $filename => $info)
-            if (!isset($local_hashes[$filename]) || $local_hashes[$filename][0] !== $remote_hashes[$filename][0])
-                static::$list_to_update[$filename] = $info[1];
+        if (static::$CONF['enabled'] > 0) {
+            if (static::ping() === true) {
+                if (static::is_need_to_update()) {
+                    Log::informer(Language::t("New version is available on server [%s]!", static::get_version_on_server()), null, 0);
+
+                    if (static::$CONF['enabled'] > 1) {
+                        static::start_to_update();
+                        Log::informer(Language::t("Your script has been successfully updated to version %s!", static::get_version_on_server()), null, 0);
+                        return 1;
+                    }
+                } else
+                    Log::write_log(Language::t("You already have actual version of script! No need to update!"), 0);
+            } else
+                Log::write_log(Language::t("Update server is down!"), 0);
+        }
+
+        return 0;
     }
 
     /**
