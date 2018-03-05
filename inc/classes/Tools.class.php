@@ -59,7 +59,7 @@ class Tools
             $options[CURLOPT_FILE] = $out;
         }
 
-        if (($speed = static::$CONF['download_speed_limit']) !== 0) $opts[CURLOPT_MAX_RECV_SPEED_LARGE] = $speed;
+        if (($speed = static::$CONF['download_speed_limit']) != 0) $opts[CURLOPT_MAX_RECV_SPEED_LARGE] = $speed;
 
         if (static::$CONF['proxy'] != 0) {
             $opts[CURLOPT_PROXY] = static::$CONF['server'];
@@ -133,9 +133,6 @@ class Tools
                 shell_exec(sprintf("%s e -y %s %s", static::$unrar, $source, $destination));
                 break;
         }
-
-        if (Config::get('debug_update') == 1)
-            copy("${destination}/update.ver", "${destination}/update_${date}.ver");
     }
 
     /**
@@ -266,127 +263,6 @@ class Tools
     }
 
     /**
-     * @param $folder
-     * @return int
-     */
-    static public function del_folders($folder)
-    {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $del_folders_count = 0;
-        $directory = new RecursiveDirectoryIterator($folder);
-
-        foreach ($directory as $fileObject) {
-            $test_folder = $fileObject->getPathname();
-
-            if (count(glob(static::ds($test_folder, '*'))) === 0) {
-                @rmdir($test_folder);
-                $del_folders_count++;
-            }
-        }
-
-        if (count(glob(static::ds($folder, '*'))) === 0) {
-            @rmdir($folder);
-            $del_folders_count++;
-        }
-
-        return $del_folders_count;
-    }
-
-    /**
-     * @param $file
-     * @param $needed_files
-     * @return int
-     */
-    static public function del_files($file, $needed_files)
-    {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $del_files_count = 0;
-        $directory = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file), RecursiveIteratorIterator::SELF_FIRST);
-
-        foreach ($directory as $fileObject) {
-            if (!$fileObject->isDir()) {
-                $test_file = $fileObject->getPathname();
-
-                if (!in_array($test_file, $needed_files)) {
-                    @unlink($test_file);
-                    $del_files_count++;
-                }
-            }
-        }
-
-        return $del_files_count;
-    }
-
-    /**
-     * @param $dir
-     * @param $new_files
-     * @return array
-     */
-    static public function create_links($dir, $new_files)
-    {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $old_files = array();
-        $needed_files = array();
-        $download_files = array();
-        $iterator = new RegexIterator(
-            new RecursiveIteratorIterator(
-                new RecursiveRegexIterator(
-                    new RecursiveDirectoryIterator($dir),
-                    '/v\d+-(' . Config::get('update_version_filter') . ')/i'
-                )
-            ),
-            '/\.nup$/i'
-        );
-
-        foreach ($iterator as $file) {
-            $old_files[] = $file->getPathname();
-        }
-
-        foreach ($new_files as $array) {
-            $path = static::ds($dir, $array['file']);
-            $needed_files[] = $path;
-
-            if (file_exists($path) && !static::compare_files(@stat($path), $array)) unlink($path);
-
-            if (!file_exists($path)) {
-                $results = preg_grep('/' . basename($array['file']) . '$/', $old_files);
-
-                if (!empty($results)) {
-                    foreach ($results as $result) {
-                        if (static::compare_files(@stat($result), $array)) {
-                            $res = dirname($path);
-
-                            if (!file_exists($res)) mkdir($res, 0755, true);
-
-                            switch (Config::get('create_hard_links')) {
-                                case 'link':
-                                    link($result, $path);
-                                    Log::write_log(Language::t("Created hard link for %s", basename($array['file'])), 3, Mirror::$version);
-                                    break;
-                                case 'fsutil':
-                                    shell_exec(sprintf("fsutil hardlink create %s %s", $path, $result));
-                                    Log::write_log(Language::t("Created hard link for %s", basename($array['file'])), 3, Mirror::$version);
-                                    break;
-                                case 'copy':
-                                default:
-                                    copy($result, $path);
-                                    Log::write_log(Language::t("Copied file %s", basename($array['file'])), 3, Mirror::$version);
-                                    break;
-                            }
-
-                            Mirror::$updated = true;
-
-                            break;
-                        }
-                    }
-                    if (!file_exists($path) && !array_search($array['file'], $download_files)) $download_files[] = $array;
-                } else $download_files[] = $array;
-            }
-        }
-        return array($download_files, $needed_files);
-    }
-
-    /**
      * @param $file1
      * @param $file2
      * @return bool
@@ -394,25 +270,5 @@ class Tools
     static public function compare_files($file1, $file2)
     {
         return ($file1['size'] == $file2['size']);
-    }
-
-    /**
-     * @param $file
-     * @return int|null
-     */
-    static public function get_DB_version($file)
-    {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-
-        if (!file_exists($file)) return null;
-
-        $content = file_get_contents($file);
-        $upd = Parser::parse_line($content, "versionid");
-        $max = 0;
-
-        if (isset($upd) && preg_match('/(' . Config::get('update_version_filter') . ')/', $content))
-            foreach ($upd as $key) $max = $max < intval($key) ? $key : $max;
-
-        return $max;
     }
 }

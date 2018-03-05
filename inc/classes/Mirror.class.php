@@ -87,7 +87,14 @@ class Mirror
 
             while (++$tries <= $quantity) {
                 if ($tries > 1) usleep(Config::get('CONNECTION')['timeout'] * 1000000);
-                Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror . "/" . static::$mirror_dir . "/update.ver", CURLOPT_NOBODY => 1), $headers);
+                Tools::download_file(
+                    [
+                        CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
+                        CURLOPT_URL => "http://" . $mirror . "/" . static::$mirror_dir . "/update.ver",
+                        CURLOPT_NOBODY => 1
+                    ],
+                    $headers
+                );
                 return ($headers['http_code'] === 200 or $headers['http_code'] === 404) ? true : false;
             }
         }
@@ -138,7 +145,7 @@ class Mirror
         $file = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, static::$mirror_dir, 'update.ver');
         Log::write_log(Language::t("Checking mirror %s with key [%s:%s]", $mirror, static::$key[0], static::$key[1]), 4, static::$version);
         static::download_update_ver($mirror);
-        $new_version = Tools::get_DB_version($file);
+        $new_version = static::get_DB_version($file);
         @unlink($file);
 
         return $new_version;
@@ -171,6 +178,8 @@ class Mirror
                 Log::write_log(Language::t("Extracting file %s to %s", $archive, $tmp_path), 5, static::$version);
                 Tools::extract_file($archive, $tmp_path);
                 @unlink($archive);
+                if (Config::get('SCRIPT')['debug_update'] == 1)
+                    copy("${$tmp_path}/update.ver", "${$tmp_path}/update_${mirror}_${date}.ver");
             }
         }
     }
@@ -197,7 +206,7 @@ class Mirror
             list($new_files, $total_size, $new_content) = static::parse_update_file($matches[0]);
 
             // Create hardlinks/copy file for empty needed files (name, size)
-            list($download_files, $needed_files) = Tools::create_links($dir, $new_files);
+            list($download_files, $needed_files) = static::create_links($dir, $new_files);
 
             // Download files
             if (!empty($download_files)) {
@@ -207,7 +216,7 @@ class Mirror
 
             // Delete not needed files
             foreach (glob(Tools::ds($dir, static::$dir), GLOB_ONLYDIR) as $file) {
-                $del_files = Tools::del_files($file, $needed_files);
+                $del_files = static::del_files($file, $needed_files);
                 if ($del_files > 0) {
                     static::$updated = true;
                     Log::write_log(Language::t("Deleted files: %s", $del_files), 3, static::$version);
@@ -216,7 +225,7 @@ class Mirror
 
             // Delete empty folders
             foreach (glob(Tools::ds($dir, static::$dir), GLOB_ONLYDIR) as $folder) {
-                $del_folders = Tools::del_folders($folder);
+                $del_folders = static::del_folders($folder);
                 if ($del_folders > 0) {
                     static::$updated = true;
                     Log::write_log(Language::t("Deleted folders: %s", $del_folders), 3, static::$version);
@@ -335,29 +344,8 @@ class Mirror
         $web_dir = Config::get('SCRIPT')['web_dir'];
         $CONNECTION = Config::get('CONNECTION');
         $master = curl_multi_init();
-        $options = [
-            CURLOPT_USERPWD => static::$key[0] .":" . static::$key[1],
-            CURLOPT_BINARYTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => $CONNECTION['timeout'],
-            CURLOPT_HEADER => false,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5,
-        ];
-
-        if (($limit = $CONNECTION['download_speed_limit']) !== 0) {
-            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = $limit;
-        }
-
-        if ($CONNECTION['proxy'] !== 0) {
-            $options[CURLOPT_PROXY] = $CONNECTION['server'];
-            $options[CURLOPT_PROXYPORT] = $CONNECTION['port'];
-
-            if ($CONNECTION['user'] !== NULL) {
-                $options[CURLOPT_PROXYUSERNAME] = $CONNECTION['user'];
-                $options[CURLOPT_PROXYPASSWORD] = $CONNECTION['password'];
-            }
-        }
-
+        $options = Config::getConnectionInfo();
+        $options[CURLOPT_USERPWD] = static::$key[0] .":" . static::$key[1];
         $files = [];
         $handles = [];
         $threads = 0;
@@ -619,5 +607,147 @@ class Mirror
         static::$mirrors = array();
         static::$key = array();
         static::$updated = false;
+    }
+
+
+    /**
+     * @param $folder
+     * @return int
+     */
+    static public function del_folders($folder)
+    {
+        Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
+        $del_folders_count = 0;
+        $directory = new RecursiveDirectoryIterator($folder);
+
+        foreach ($directory as $fileObject) {
+            $test_folder = $fileObject->getPathname();
+
+            if (count(glob(Tools::ds($test_folder, '*'))) === 0) {
+                @rmdir($test_folder);
+                $del_folders_count++;
+            }
+        }
+
+        if (count(glob(Tools::ds($folder, '*'))) === 0) {
+            @rmdir($folder);
+            $del_folders_count++;
+        }
+
+        return $del_folders_count;
+    }
+
+    /**
+     * @param $file
+     * @param $needed_files
+     * @return int
+     */
+    static public function del_files($file, $needed_files)
+    {
+        Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
+        $del_files_count = 0;
+        $directory = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file), RecursiveIteratorIterator::SELF_FIRST);
+
+        foreach ($directory as $fileObject) {
+            if (!$fileObject->isDir()) {
+                $test_file = $fileObject->getPathname();
+
+                if (!in_array($test_file, $needed_files)) {
+                    @unlink($test_file);
+                    $del_files_count++;
+                }
+            }
+        }
+
+        return $del_files_count;
+    }
+
+    /**
+     * @param $dir
+     * @param $new_files
+     * @return array
+     */
+    static public function create_links($dir, $new_files)
+    {
+        Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
+        $old_files = [];
+        $needed_files = [];
+        $download_files = [];
+        $iterator = new RegexIterator(
+            new RecursiveIteratorIterator(
+                new RecursiveRegexIterator(
+                    new RecursiveDirectoryIterator($dir),
+                    '/v\d+-(' . static::$ESET['filter'] . ')/i'
+                )
+            ),
+            '/\.nup$/i'
+        );
+
+        foreach ($iterator as $file) {
+            $old_files[] = $file->getPathname();
+        }
+
+        foreach ($new_files as $array) {
+            $path = Tools::ds($dir, $array['file']);
+            $needed_files[] = $path;
+
+            if (file_exists($path) && !Tools::compare_files(@stat($path), $array)) unlink($path);
+
+            if (!file_exists($path)) {
+                $results = preg_grep('/' . basename($array['file']) . '$/', $old_files);
+
+                if (!empty($results)) {
+                    foreach ($results as $result) {
+                        if (Tools::compare_files(@stat($result), $array)) {
+                            $res = dirname($path);
+
+                            if (!file_exists($res)) mkdir($res, 0755, true);
+
+                            switch (Config::get('create_hard_links')) {
+                                case 'link':
+                                    link($result, $path);
+                                    Log::write_log(Language::t("Created hard link for %s", basename($array['file'])), 3, static::$version);
+                                    break;
+                                case 'fsutil':
+                                    shell_exec(sprintf("fsutil hardlink create %s %s", $path, $result));
+                                    Log::write_log(Language::t("Created hard link for %s", basename($array['file'])), 3, static::$version);
+                                    break;
+                                case 'copy':
+                                default:
+                                    copy($result, $path);
+                                    Log::write_log(Language::t("Copied file %s", basename($array['file'])), 3, static::$version);
+                                    break;
+                            }
+
+                            static::$updated = true;
+
+                            break;
+                        }
+                    }
+                    if (!file_exists($path) && !array_search($array['file'], $download_files)) $download_files[] = $array;
+                } else $download_files[] = $array;
+            }
+        }
+        return [$download_files, $needed_files];
+    }
+
+    /**
+     * @param $file
+     * @return int|null
+     */
+    static public function get_DB_version($file)
+    {
+        Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
+
+        if (!file_exists($file)) return null;
+
+        $content = file_get_contents($file);
+        $upd = Parser::parse_line($content, "versionid");
+        $max = 0;
+
+        if (isset($upd) && preg_match('/(' . static::$ESET['filter'] . ')/', $content))
+            foreach ($upd as $key) $max = $max < intval($key) ? $key : $max;
+
+        return $max;
     }
 }

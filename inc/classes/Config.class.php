@@ -238,4 +238,35 @@ class Config
 
         return null;
     }
+
+    /**
+     * @return array
+     */
+    static public function getConnectionInfo()
+    {
+        Log::write_log(Language::t("Running %s", __METHOD__), 5);
+        $options = [
+            CURLOPT_BINARYTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => static::$CONF['CONNECTION']['timeout'],
+            CURLOPT_HEADER => false,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+        ];
+
+        if (static::$CONF['CONNECTION']['download_speed_limit'] != 0) {
+            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = static::$CONF['CONNECTION']['download_speed_limit'];
+        }
+
+        if (static::$CONF['CONNECTION']['proxy'] != 0) {
+            $options[CURLOPT_PROXY] = static::$CONF['CONNECTION']['server'];
+            $options[CURLOPT_PROXYPORT] = static::$CONF['CONNECTION']['port'];
+
+            if (!empty(static::$CONF['CONNECTION']['user'])) {
+                $options[CURLOPT_PROXYUSERNAME] = static::$CONF['CONNECTION']['user'];
+                $options[CURLOPT_PROXYPASSWORD] = static::$CONF['CONNECTION']['password'];
+            }
+        }
+
+        return $options;
+    }
 }

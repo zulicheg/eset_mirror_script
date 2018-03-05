@@ -5,6 +5,7 @@ require __DIR__ . "/inc/init.php";
 
 try {
     Tools::init();
+    Config::init();
     Language::init();
 
     if (SelfUpdate::init()) {
