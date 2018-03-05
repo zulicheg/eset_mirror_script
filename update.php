@@ -4,7 +4,6 @@ require __DIR__ . "/inc/init.php";
 
 
 try {
-    Tools::init();
     Log::init();
     Language::init();
 
@@ -14,7 +13,6 @@ try {
         require __DIR__ . "/inc/init.php";
     }
 
-    Tools::init();
     Config::init();
     Language::init();
 
