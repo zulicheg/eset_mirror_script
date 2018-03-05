@@ -22,6 +22,8 @@ class Tools
         static::$CONF = $ini['CONNECTION'];
         static::$unrar = $ini['SCRIPT']['unrar_binary'];
 
+        var_dump(static::$unrar);
+        var_dump(static::$CONF);
         return null;
     }
 

@@ -60,7 +60,7 @@ class Language
         $text = func_get_arg(0);
         $params = func_get_args();
         @array_shift($params);
-        $key = array_search($text, static::$default_language_pack);
+        $key = array_search($text, static::$language_pack);
         return (array_search($text, static::$language_pack) != FALSE) ? vsprintf($key, $params) : vsprintf($text, $params);
     }
 }
