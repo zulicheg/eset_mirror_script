@@ -333,7 +333,6 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $web_dir = Config::get('SCRIPT')['web_dir'];
-        $num_threads = Config::get('SCRIPT')['download_threads'];
         $CONNECTION = Config::get('CONNECTION');
         $master = curl_multi_init();
         $options = [
@@ -374,8 +373,8 @@ class Mirror
             curl_multi_add_handle($master, $ch);
             $threads++;
 
-            if ($threads >= $num_threads) {
-                while ($threads >= $num_threads) {
+            if ($threads >= $CONNECTION['download_threads']) {
+                while ($threads >= $CONNECTION['download_threads']) {
                     usleep(100);
                     while (($execrun = curl_multi_exec($master, $running)) === -1) {}
                     curl_multi_select($master);
