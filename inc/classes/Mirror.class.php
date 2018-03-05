@@ -96,7 +96,7 @@ class Mirror
     }
 
     /**
-     *
+     * @throws ToolsException
      */
     static public function find_best_mirrors()
     {
@@ -129,6 +129,7 @@ class Mirror
     /**
      * @param $mirror
      * @return int|null
+     * @throws ToolsException
      */
     static public function check_mirror($mirror)
     {
@@ -176,6 +177,7 @@ class Mirror
 
     /**
      * @return array
+     * @throws ToolsException
      */
     static public function download_signature()
     {
@@ -568,6 +570,7 @@ class Mirror
 
     /**
      * @param $download_files
+     * @throws ToolsException
      */
     static protected function download_files($download_files)
     {

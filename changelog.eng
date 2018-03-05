@@ -1,3 +1,11 @@
+20180305:
+ Changed:
+  - Now configuration file is a full ini-compatible with sections
+  - Rewrited core-classes
+  - Now script restart after self-update no needed
+ Added:
+  - Exceptions
+
 20180222:
  Added:
   - Mirror::$updated - flag indicates result of db version updates

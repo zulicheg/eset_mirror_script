@@ -22,6 +22,7 @@ class Nod32ms
 
     /**
      * Nod32ms constructor.
+     * @throws ToolsException
      */
     public function __construct()
     {
@@ -35,7 +36,7 @@ class Nod32ms
     }
 
     /**
-     * Nod32ms destructor.
+     * @throws phpmailerException
      */
     public function __destruct()
     {
@@ -587,7 +588,7 @@ class Nod32ms
     }
 
     /**
-     *
+     * @throws ToolsException
      */
     private function run_script()
     {
