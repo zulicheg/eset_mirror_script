@@ -70,8 +70,6 @@ class Tools
                 $opts[CURLOPT_PROXYPASSWORD] = static::$CONF['password'];
             }
         }
-        var_dump($opts);
-        var_dump($options);
 
         $ch = curl_init();
         curl_setopt_array($ch, ($opts + $options));
@@ -80,9 +78,7 @@ class Tools
         if ($out) @fclose($out);
         curl_close($ch);
 
-        var_dump($headers);
         if (key_exists(CURLOPT_RETURNTRANSFER, $options)) {
-            var_dump($res);
             if ($options[CURLOPT_RETURNTRANSFER] == 1) return $res;
         }
 
