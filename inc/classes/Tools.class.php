@@ -65,8 +65,8 @@ class Tools
             $opts[CURLOPT_PROXY] = static::$CONF['server'];
             $opts[CURLOPT_PROXYPORT] = static::$CONF['port'];
 
-            if (($user = static::$CONF['user']) !== NULL) {
-                $opts[CURLOPT_PROXYUSERNAME] = $user;
+            if (!empty(static::$CONF['user'])) {
+                $opts[CURLOPT_PROXYUSERNAME] = static::$CONF['user'];
                 $opts[CURLOPT_PROXYPASSWORD] = static::$CONF['password'];
             }
         }
