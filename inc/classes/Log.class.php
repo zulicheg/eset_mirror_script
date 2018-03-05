@@ -147,6 +147,7 @@ class Log
 
     /**
      * @throws ConfigException
+     * @throws Exception
      */
     static public function init()
     {
@@ -162,6 +163,7 @@ class Log
             throw new ConfigException("Empty config file!");
 
         static::$CONF = $ini['LOG'];
+        static::$CONF['rotate_size'] = Tools::human2bytes(static::$CONF['rotate_size']);
         static::$CONF['MAILER'] = $ini['MAILER'];
         static::$CONF['codepage'] = $ini['SCRIPT']['codepage'];
     }

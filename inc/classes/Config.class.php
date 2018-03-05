@@ -47,13 +47,13 @@ class Config
     );
 
     /**
-     * @return null|string
+     * @throws ConfigException
      */
     static public function init()
     {
-        if (!file_exists(CONF_FILE)) return "Config file does not exist!";
+        if (!file_exists(CONF_FILE)) throw new ConfigException("Config file does not exist!");
 
-        if (!is_readable(CONF_FILE)) return "Can't read config file! Check the file and its permissions!";
+        if (!is_readable(CONF_FILE)) throw new ConfigException("Can't read config file! Check the file and its permissions!");
 
         static::$CONF = parse_ini_file(CONF_FILE, true);
 
@@ -75,7 +75,7 @@ class Config
 
         // Convert update_version_filter string to pcre
         static::$CONF['ESET']['filter'] = implode('|', array_map("trim", (explode(",", static::$CONF['ESET']['filter']))));
-        return static::check_config();
+        static::check_config();
     }
 
     /**
@@ -97,12 +97,13 @@ class Config
     }
 
     /**
-     * @return string|null
+     * @throws ConfigException
+     * @throws Exception
      */
     static private function check_config()
     {
         if (array_search(PHP_OS, array("Darwin", "Linux", "FreeBSD", "OpenBSD", "WINNT")) === false)
-            return "This script doesn't support your OS. Please, contact developer!";
+            throw new ConfigException("This script doesn't support your OS. Please, contact developer!");
 
         if (function_exists("date_default_timezone_set") and function_exists("date_default_timezone_get")) {
             if (empty(static::$CONF['SCRIPT']['timezone'])) {
@@ -110,46 +111,26 @@ class Config
             } else {
                 if (@date_default_timezone_set(static::$CONF['SCRIPT']['timezone']) === false) {
                     static::$CONF['LOG']['rotate'] = 0;
-                    return "Error in timezone settings! Please, check your config file!";
+                    throw new ConfigException("Error in timezone settings! Please, check your config file!");
                 }
             }
         }
 
         if (static::$CONF['LOG']['rotate'] == 1) {
-            if (preg_match_all("/([0-9]+)([BKMG])/i", static::$CONF['LOG']['rotate_size'], $result, PREG_PATTERN_ORDER)) {
-                static::$CONF['LOG']['rotate_size'] = intval(trim($result[1][0]));
-
-                if (count($result) != 3 || static::$CONF['LOG']['rotate_size'] < 1 || empty($result[1][0]) || empty($result[2][0]))
-                    return "Please, check set up of rotate_size in your config file!";
-
-                switch (trim($result[2][0])) {
-                    case "g":
-                    case "G":
-                        static::$CONF['LOG']['rotate_size'] = static::$CONF['LOG']['rotate_size'] << 30;
-                        break;
-                    case "m":
-                    case "M":
-                        static::$CONF['LOG']['rotate_size'] = static::$CONF['LOG']['rotate_size'] << 20;
-                        break;
-                    case "k":
-                    case "K":
-                        static::$CONF['LOG']['rotate_size'] = static::$CONF['LOG']['rotate_size'] << 10;
-                        break;
-                }
-            }
+            static::$CONF['LOG']['rotate_size'] = Tools::human2bytes(static::$CONF['LOG']['rotate_size']);
 
             if (intval(static::$CONF['LOG']['rotate_qty']) < 1) {
-                return "Please, check set up of rotate_qty in your config file!";
+                throw new ConfigException("Please, check set up of rotate_qty in your config file!");
             } else {
                 static::$CONF['LOG']['rotate_qty'] = intval(static::$CONF['LOG']['rotate_qty']);
             }
 
             if (intval(static::$CONF['LOG']['type']) < 0 || intval(static::$CONF['LOG']['type']) > 3)
-                return "Please, check set up of type in your config file!";
+                throw new ConfigException("Please, check set up of type in your config file!");
         }
 
         if (empty(static::$CONF['SCRIPT']['web_dir']))
-            return "Please, check set up of WWW directory in your config file!";
+            throw new ConfigException("Please, check set up of WWW directory in your config file!");
 
         while (substr(static::$CONF['SCRIPT']['web_dir'], -1) == DS)
             static::$CONF['SCRIPT']['web_dir'] = substr(static::$CONF['SCRIPT']['web_dir'], 0, -1);
@@ -171,30 +152,30 @@ class Config
                 empty(static::$CONF['MAILER']['recipient']) ||
                 strpos(static::$CONF['MAILER']['recipient'], "@") === FALSE
             )
-                return "You didn't set up email address of sender/recipient or it is wrong.Please, check your config file.";
+                throw new ConfigException("You didn't set up email address of sender/recipient or it is wrong.Please, check your config file.");
 
             if (static::$CONF['MAILER']['smtp'] == 1) {
                 if (empty(static::$CONF['MAILER']['host']) ||
                     empty(static::$CONF['MAILER']['port'])
                 )
-                    return "Please, check SMTP host/port for using SMTP server in your config file.Or disable SMTP server if you don't wanna use it.";
+                    throw new ConfigException("Please, check SMTP host/port for using SMTP server in your config file.Or disable SMTP server if you don't wanna use it.");
 
                 if (static::$CONF['MAILER']['auth'] == 1) {
                     if (empty(static::$CONF['MAILER']['login']) ||
                         empty(static::$CONF['MAILER']['password'])
                     )
-                        return "Please, check login/password for using SMTP authorization.";
+                        throw new ConfigException("Please, check login/password for using SMTP authorization.");
                 }
             }
         }
 
         if (intval(static::$CONF['FIND']['errors_quantity']) <= 0) static::$CONF['FIND']['errors_quantity'] = 1;
 
-        if (!is_readable(PATTERN)) return "Pattern directory is not readable. Check your permissions!";
+        if (!is_readable(PATTERN)) throw new ConfigException("Pattern directory is not readable. Check your permissions!");
 
-        if (!is_writable(static::$CONF['LOG']['dir'])) return "Log directory is not writable. Check your permissions!";
+        if (!is_writable(static::$CONF['LOG']['dir'])) throw new ConfigException("Log directory is not writable. Check your permissions!");
 
-        if (!is_writable(static::$CONF['SCRIPT']['web_dir'])) return "Web directory is not writable. Check your permissions!";
+        if (!is_writable(static::$CONF['SCRIPT']['web_dir'])) throw new ConfigException("Web directory is not writable. Check your permissions!");
 
         // Link test
         $linktestfile = Tools::ds(static::$CONF['LOG']['dir'], LINKTEST);
@@ -235,8 +216,6 @@ class Config
             @file_put_contents($linktestfile, $status);
         }
         static::$CONF['create_hard_links'] = ($status != 'false' ? $status : false);
-
-        return null;
     }
 
     /**

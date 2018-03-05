@@ -112,7 +112,6 @@ class Tools
     static public function extract_file($source, $destination)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $date = date("Y-m-d-H-i-s-") . explode('.', microtime(1))[1];
 
         if (!file_exists(static::$unrar))
             //Log::write_log(Language::t("Unrar not exists at %s", static::$unrar), 0, Mirror::$version);
@@ -270,5 +269,37 @@ class Tools
     static public function compare_files($file1, $file2)
     {
         return ($file1['size'] == $file2['size']);
+    }
+
+    /**
+     * @param $str string
+     * @return int
+     * @throws Exception
+     */
+    static public function human2bytes($str)
+    {
+        if (preg_match_all("/([0-9]+)([BKMG])/i", $str, $result, PREG_PATTERN_ORDER)) {
+            $str = intval(trim($result[1][0]));
+            $n = null;
+
+            if (count($result) != 3 || $str < 1 || empty($result[1][0]) || empty($result[2][0]))
+                throw new Exception("Please, check set up of rotate_size in your config file!");
+
+            switch (trim($result[2][0])) {
+                case "g":
+                case "G":
+                    $n = $str << 30;
+                    break;
+                case "m":
+                case "M":
+                    $n = $str << 20;
+                    break;
+                case "k":
+                case "K":
+                    $n = $str << 10;
+                    break;
+            }
+        }
+        return $n;
     }
 }
