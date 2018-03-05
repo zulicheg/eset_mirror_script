@@ -11,9 +11,14 @@ class SelfUpdate
     static private $list_to_update;
 
     /**
- * @var
- */
+     * @var
+     */
     static private $CONF;
+
+    /**
+     * @var
+     */
+    static private $CONNECTION;
 
     /**
      * @return bool
@@ -31,10 +36,11 @@ class SelfUpdate
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         $content = Tools::download_file(
-            array(
+            ([
                 CURLOPT_URL => "http://" . static::$CONF['server'] . "/" . static::$CONF['dir'] . "/" . static::$CONF['file'],
                 CURLOPT_PORT => static::$CONF['port'],
-                CURLOPT_RETURNTRANSFER => 1),
+                CURLOPT_RETURNTRANSFER => 1
+            ] + static::getConnectionInfo()),
             $headers);
         $arr = [];
 
@@ -78,11 +84,11 @@ class SelfUpdate
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         $response = Tools::download_file(
-            [
+            ([
                 CURLOPT_URL => "http://" . static::$CONF['server'] . "/" . static::$CONF['dir'] . "/" . static::$CONF['version'],
                 CURLOPT_PORT => static::$CONF['port'],
                 CURLOPT_RETURNTRANSFER => 1
-            ],
+            ] + static::getConnectionInfo()),
             $headers);
         return trim($response);
     }
@@ -99,11 +105,11 @@ class SelfUpdate
             $remote_full_path = sprintf("http://%s/%s/%s", static::$CONF['server'], static::$CONF['dir'], $filename);
             Log::write_log(Language::t("Downloading %s [%s Bytes]", basename($filename), $info), 0);
             Tools::download_file(
-                [
+                ([
                     CURLOPT_URL => $remote_full_path,
                     CURLOPT_PORT => static::$CONF['port'],
                     CURLOPT_FILE => $fs_filename
-                ],
+                ]  + static::getConnectionInfo()),
                 $headers);
 
             if (is_string($headers))
@@ -126,7 +132,9 @@ class SelfUpdate
         if (!is_readable(CONF_FILE))
             throw new SelfUpdateException("Can't read config file! Check the file and its permissions!");
 
-        static::$CONF = (parse_ini_file(CONF_FILE, true))['SELFUPDATE'];
+        $ini = (parse_ini_file(CONF_FILE, true));
+        static::$CONF = $ini['SELFUPDATE'];
+        static::$CONNECTION = $ini['CONNECTION'];
 
         if (static::$CONF['enabled'] > 0) {
             if (static::ping() === true) {
@@ -159,15 +167,38 @@ class SelfUpdate
      */
     static public function ping()
     {
-        return Tools::ping(static::$CONF['server'], static::$CONF['port'], static::$CONF['dir'] . '/' . static::$CONF['file']);
+        return Tools::ping(static::getConnectionInfo(), static::$CONF['server'], static::$CONF['port'], static::$CONF['dir'] . '/' . static::$CONF['file']);
     }
 
     /**
-     * @param $nm
-     * @return mixed|null
+     * @return array
      */
-    static function get($nm)
+    static public function getConnectionInfo()
     {
-        return isset(static::$CONF[$nm]) ? static::$CONF[$nm] : null;
+        Log::write_log(Language::t("Running %s", __METHOD__), 5);
+
+        $options = [
+            CURLOPT_BINARYTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => static::$CONNECTION['timeout'],
+            CURLOPT_HEADER => false,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 5,
+        ];
+
+        if (static::$CONNECTION['download_speed_limit'] != 0) {
+            $options[CURLOPT_MAX_RECV_SPEED_LARGE] = static::$CONNECTION['download_speed_limit'];
+        }
+
+        if (static::$CONNECTION['proxy'] != 0) {
+            $options[CURLOPT_PROXY] = static::$CONNECTION['server'];
+            $options[CURLOPT_PROXYPORT] = static::$CONNECTION['port'];
+
+            if (!empty(static::$CONNECTION['user'])) {
+                $options[CURLOPT_PROXYUSERNAME] = static::$CONNECTION['user'];
+                $options[CURLOPT_PROXYPASSWORD] = static::$CONNECTION['password'];
+            }
+        }
+
+        return $options;
     }
 }

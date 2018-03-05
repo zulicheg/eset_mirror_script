@@ -6,36 +6,6 @@
 class Tools
 {
     /**
-     * @var
-     */
-    static private $CONF;
-
-    /**
-     * @var
-     */
-    static private $unrar;
-
-    /**
-     * @throws ConfigException
-     */
-    static public function init()
-    {
-        if (!file_exists(CONF_FILE))
-            throw new ConfigException("Config file does not exist!");
-
-        if (!is_readable(CONF_FILE))
-            throw new ConfigException("Can't read config file! Check the file and its permissions!");
-
-        $ini = parse_ini_file(CONF_FILE, true);
-
-        if (empty($ini))
-            throw new ConfigException("Empty config file!");
-
-        static::$CONF = $ini['CONNECTION'];
-        static::$unrar = $ini['SCRIPT']['unrar_binary'];
-    }
-
-    /**
      * @param array $options
      * @param $headers
      * @return mixed
@@ -44,13 +14,6 @@ class Tools
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $out = FALSE;
-        $opts = [
-            CURLOPT_BINARYTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => static::$CONF['timeout'],
-            CURLOPT_HEADER => false,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5,
-        ];
 
         if (key_exists(CURLOPT_FILE, $options)) {
             $dir = dirname($options[CURLOPT_FILE]);
@@ -59,20 +22,8 @@ class Tools
             $options[CURLOPT_FILE] = $out;
         }
 
-        if (($speed = static::$CONF['download_speed_limit']) != 0) $opts[CURLOPT_MAX_RECV_SPEED_LARGE] = $speed;
-
-        if (static::$CONF['proxy'] != 0) {
-            $opts[CURLOPT_PROXY] = static::$CONF['server'];
-            $opts[CURLOPT_PROXYPORT] = static::$CONF['port'];
-
-            if (!empty(static::$CONF['user'])) {
-                $opts[CURLOPT_PROXYUSERNAME] = static::$CONF['user'];
-                $opts[CURLOPT_PROXYPASSWORD] = static::$CONF['password'];
-            }
-        }
-
         $ch = curl_init();
-        curl_setopt_array($ch, ($opts + $options));
+        curl_setopt_array($ch, $options);
         $res = curl_exec($ch);
         $headers = curl_getinfo($ch);
         if ($out) @fclose($out);
@@ -105,45 +56,49 @@ class Tools
     }
 
     /**
+     * @param $unrar_binary
      * @param $source
      * @param $destination
      * @throws ToolsException
      */
-    static public function extract_file($source, $destination)
+    static public function extract_file($unrar_binary, $source, $destination)
     {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
+        if (!file_exists($unrar_binary))
+            throw new ToolsException("Unrar not exists at %s", $unrar_binary);
 
-        if (!file_exists(static::$unrar))
-            //Log::write_log(Language::t("Unrar not exists at %s", static::$unrar), 0, Mirror::$version);
-            throw new ToolsException("Unrar not exists at %s", static::$unrar);
-
-        if (!is_executable(static::$unrar))
-            //Log::write_log(Language::t("Unrar not executable at %s", static::$unrar), 0, Mirror::$version);
-            throw new ToolsException("Unrar not executable at %s", static::$unrar);
+        if (!is_executable($unrar_binary))
+            throw new ToolsException("Unrar not executable at %s", $unrar_binary);
 
         switch (PHP_OS) {
             case "Darwin":
             case "Linux":
             case "FreeBSD":
             case "OpenBSD":
-                exec(sprintf("%s x -inul -y %s %s", static::$unrar, $source, $destination));
+                exec(sprintf("%s x -inul -y %s %s", $unrar_binary, $source, $destination));
                 break;
             case "WINNT":
-                shell_exec(sprintf("%s e -y %s %s", static::$unrar, $source, $destination));
+                shell_exec(sprintf("%s e -y %s %s", $unrar_binary, $source, $destination));
                 break;
         }
     }
 
     /**
+     * @param array $options
      * @param $hostname
      * @param int $port
      * @param null $file
      * @return bool
      */
-    static public function ping($hostname, $port = 80, $file = NULL)
+    static public function ping(array $options, $hostname, $port = 80, $file = NULL)
     {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        static::download_file(array(CURLOPT_URL => "http://" . $hostname . "/" . $file, CURLOPT_PORT => $port, CURLOPT_NOBODY => 1), $headers);
+        static::download_file(
+            ([
+                CURLOPT_URL => "http://" . $hostname . "/" . $file,
+                CURLOPT_PORT => $port,
+                CURLOPT_NOBODY => 1
+            ] + $options),
+            $headers
+        );
         return (is_array($headers)) ? true : false;
     }
 
@@ -154,8 +109,7 @@ class Tools
      */
     static public function bytesToSize1024($bytes, $precision = 2)
     {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $unit = array('Bytes', 'KBytes', 'MBytes', 'GBytes', 'TBytes', 'PBytes', 'EBytes');
+        $unit = ['Bytes', 'KBytes', 'MBytes', 'GBytes', 'TBytes', 'PBytes', 'EBytes'];
         return @round($bytes / pow(1024, ($i = floor(log($bytes, 1024)))), $precision) . ' ' . $unit[intval($i)];
     }
 
@@ -165,7 +119,6 @@ class Tools
      */
     static public function secondsToHumanReadable($secs)
     {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         return ($secs > 60 * 60 * 24) ? gmdate("H:i:s", $secs) : gmdate("i:s", $secs);
     }
 
@@ -247,18 +200,7 @@ class Tools
      */
     static public function get_resource_id($resource)
     {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         return (!is_resource($resource)) ? false : @end(explode('#', (string)$resource));
-    }
-
-    /**
-     * @param $dir
-     */
-    static public function create_dir($dir)
-    {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-
-        if (!file_exists($dir)) @mkdir($dir, 0755, true);
     }
 
     /**
@@ -278,9 +220,10 @@ class Tools
      */
     static public function human2bytes($str)
     {
+        $n = null;
+
         if (preg_match_all("/([0-9]+)([BKMG])/i", $str, $result, PREG_PATTERN_ORDER)) {
             $str = intval(trim($result[1][0]));
-            $n = null;
 
             if (count($result) != 3 || $str < 1 || empty($result[1][0]) || empty($result[2][0]))
                 throw new Exception("Please, check set up of rotate_size in your config file!");

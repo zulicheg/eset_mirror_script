@@ -48,6 +48,7 @@ class Config
 
     /**
      * @throws ConfigException
+     * @throws Exception
      */
     static public function init()
     {
@@ -224,6 +225,7 @@ class Config
     static public function getConnectionInfo()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5);
+
         $options = [
             CURLOPT_BINARYTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => static::$CONF['CONNECTION']['timeout'],

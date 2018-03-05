@@ -176,7 +176,7 @@ class Mirror
                 rename($archive, $extracted);
             } else {
                 Log::write_log(Language::t("Extracting file %s to %s", $archive, $tmp_path), 5, static::$version);
-                Tools::extract_file($archive, $tmp_path);
+                Tools::extract_file(Config::get('SCRIPT')['unrar_binary'], $archive, $tmp_path);
                 @unlink($archive);
                 if (Config::get('SCRIPT')['debug_update'] == 1) {
                     $date = date("Y-m-d-H-i-s-") . explode('.', microtime(1))[1];
@@ -234,7 +234,7 @@ class Mirror
                 }
             }
 
-            Tools::create_dir(dirname($cur_update_ver));
+            if (!file_exists(dirname($cur_update_ver))) @mkdir(dirname($cur_update_ver), 0755, true);
             @file_put_contents($cur_update_ver, $new_content);
 
             Log::write_log(Language::t("Total size database: %s", Tools::bytesToSize1024($total_size)), 3, static::$version);
