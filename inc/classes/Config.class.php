@@ -190,19 +190,17 @@ class Config
 
         if (intval(static::$CONF['FIND']['errors_quantity']) <= 0) static::$CONF['FIND']['errors_quantity'] = 1;
 
-        if (!is_readable(PATTERN))
-            return "Pattern directory is not readable. Check your permissions!";
+        if (!is_readable(PATTERN)) return "Pattern directory is not readable. Check your permissions!";
 
-        if (!is_writable(static::$CONF['LOG']['dir']))
-            return "Log directory is not writable. Check your permissions!";
+        if (!is_writable(static::$CONF['LOG']['dir'])) return "Log directory is not writable. Check your permissions!";
 
-        if (!is_writable(static::$CONF['SCRIPT']['web_dir']))
-            return "Web directory is not writable. Check your permissions!";
+        if (!is_writable(static::$CONF['SCRIPT']['web_dir'])) return "Web directory is not writable. Check your permissions!";
 
         // Link test
         $linktestfile = Tools::ds(static::$CONF['LOG']['dir'], LINKTEST);
         $test = false;
         $status = false;
+
         if (file_exists($linktestfile)) {
             $status = file_get_contents($linktestfile);
 

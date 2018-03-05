@@ -9,13 +9,13 @@ class Log
      * @var array
      */
     static private $log = array();
+
     /**
      * @var string
      */
     static private $mailer_log = "";
 
     /**
-     *
      * @throws phpmailerException
      */
     static public function destruct()

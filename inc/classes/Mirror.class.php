@@ -41,12 +41,17 @@ class Mirror
     static public $updated = false;
 
     /**
+     * @var array
+     */
+    static private $ESET;
+
+    /**
      *
      */
     static private function fix_time_stamp()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        $fn = Tools::ds(Config::get('log_dir'), Config::get('SUCCESSFUL_TIMESTAMP'));
+        $fn = Tools::ds(Config::get('LOG')['dir'], SUCCESSFUL_TIMESTAMP);
         $timestamps = array();
 
         if (file_exists($fn)) {
@@ -65,7 +70,7 @@ class Mirror
         @unlink($fn);
 
         foreach ($timestamps as $key => $name)
-            Log::write_to_file(Config::get('SUCCESSFUL_TIMESTAMP'), "$key:$name\r\n");
+            Log::write_to_file($fn, "$key:$name\r\n");
     }
 
     /**
@@ -76,12 +81,12 @@ class Mirror
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         Log::write_log(Language::t("Testing key [%s:%s]", static::$key[0], static::$key[1]), 4, static::$version);
 
-        foreach (Config::get('mirror') as $mirror) {
+        foreach (static::$ESET['mirror'] as $mirror) {
             $tries = 0;
-            $quantity = Config::get('default_errors_quantity');
+            $quantity = Config::get('FIND')['errors_quantity'];
 
             while (++$tries <= $quantity) {
-                if ($tries > 1) usleep(Config::get('CONNECTTIMEOUT') * 1000000);
+                if ($tries > 1) usleep(Config::get('CONNECTION')['timeout'] * 1000000);
                 Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror . "/" . static::$mirror_dir . "/update.ver", CURLOPT_NOBODY => 1), $headers);
                 return ($headers['http_code'] === 200 or $headers['http_code'] === 404) ? true : false;
             }
@@ -96,10 +101,18 @@ class Mirror
     static public function find_best_mirrors()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        $test_mirrors = array();
+        $test_mirrors = [];
 
-        foreach (Config::get('mirror') as $mirror) {
-            Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror . "/" . static::$mirror_dir . "/update.ver", CURLOPT_NOBODY => 1), $headers);
+        foreach (static::$ESET['mirror'] as $mirror) {
+            Tools::download_file(
+                [
+                    CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
+                    CURLOPT_URL => "http://" . $mirror . "/" . static::$mirror_dir . "/update.ver",
+                    CURLOPT_NOBODY => 1
+                ],
+                $headers
+            );
+
             if ($headers['http_code'] == 200) {
                 $test_mirrors[$mirror] = round($headers['total_time'] * 1000);
                 Log::write_log(Language::t("Mirror %s active", $mirror), 3, static::$version);
@@ -110,7 +123,7 @@ class Mirror
         asort($test_mirrors);
 
         foreach ($test_mirrors as $mirror => $time)
-            static::$mirrors[] = array('host' => $mirror, 'db_version' => static::check_mirror($mirror));
+            static::$mirrors[] = ['host' => $mirror, 'db_version' => static::check_mirror($mirror)];
     }
 
     /**
@@ -121,7 +134,7 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $new_version = null;
-        $file = Tools::ds(Tools::ds(Config::get('web_dir'), Config::get('TMP_PATH'), static::$mirror_dir), 'update.ver');
+        $file = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, static::$mirror_dir, 'update.ver');
         Log::write_log(Language::t("Checking mirror %s with key [%s:%s]", $mirror, static::$key[0], static::$key[1]), 4, static::$version);
         static::download_update_ver($mirror);
         $new_version = Tools::get_DB_version($file);
@@ -132,15 +145,23 @@ class Mirror
 
     /**
      * @param $mirror
+     * @throws ToolsException
      */
     static public function download_update_ver($mirror)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        $tmp_path = Tools::ds(Config::get('web_dir'), Config::get('TMP_PATH'), static::$mirror_dir);
+        $tmp_path = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, static::$mirror_dir);
         @mkdir($tmp_path, 0755, true);
         $archive = Tools::ds($tmp_path, 'update.rar');
         $extracted = Tools::ds($tmp_path, 'update.ver');
-        Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . "$mirror/" . static::$mirror_dir . "/update.ver", CURLOPT_FILE => $archive), $headers);
+        Tools::download_file(
+            [
+                CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
+                CURLOPT_URL => "http://" . "$mirror/" . static::$mirror_dir . "/update.ver",
+                CURLOPT_FILE => $archive
+            ],
+            $headers
+        );
 
         if (is_array($headers) and $headers['http_code'] == 200) {
             if (preg_match("/text/", $headers['content_type'])) {
@@ -160,9 +181,9 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         static::download_update_ver(current(static::$mirrors)['host']);
-        $dir = Config::get('web_dir');
+        $dir = Config::get('SCRIPT')['web_dir'];
         $cur_update_ver = Tools::ds($dir, static::$mirror_dir, 'update.ver');
-        $tmp_update_ver = Tools::ds($dir, Config::get('TMP_PATH'), static::$mirror_dir, 'update.ver');
+        $tmp_update_ver = Tools::ds($dir, TMP_PATH, static::$mirror_dir, 'update.ver');
         $content = @file_get_contents($tmp_update_ver);
         $start_time = microtime(true);
         preg_match_all('#\[\w+\][^\[]+#', $content, $matches);
@@ -281,16 +302,25 @@ class Mirror
   </SECTION>
   </GETLICEXP>';
 
-        $response = Tools::download_file(array(CURLOPT_URL => "http://expire.eset.com/getlicexp", CURLOPT_POSTFIELDS => $xml, CURLOPT_POST => 1, CURLOPT_HEADER => 'Content-type: application/x-www-form-urlencoded', CURLOPT_RETURNTRANSFER => 1), $headers);
-        $LicInfo = array();
+        $response = Tools::download_file(
+            [
+                CURLOPT_URL => "http://expire.eset.com/getlicexp",
+                CURLOPT_POSTFIELDS => $xml,
+                CURLOPT_POST => 1,
+                CURLOPT_HEADER => 'Content-type: application/x-www-form-urlencoded',
+                CURLOPT_RETURNTRANSFER => 1
+            ]
+            , $headers
+        );
+        $LicInfo = [];
 
         if ($response == "unknownlic\n") return false;
 
         if (class_exists('SimpleXMLElement')) {
-            foreach ((new SimpleXMLElement($response))->xpath('SECTION/LICENSEINFO/NODE')[0]->attributes() as $key => $value) {
+            foreach ((new SimpleXMLElement($response))->xpath('SECTION/LICENSEINFO/NODE')[0]->attributes() as $key => $value)
                 $LicInfo[$key] = (string)$value;
-            }
         }
+
         return date('d.m.Y', hexdec($LicInfo['VALUE']));
     }
 
@@ -300,34 +330,35 @@ class Mirror
     static protected function multi_download($download_files)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        $web_dir = Config::get('web_dir');
-        $num_threads = Config::get('threads');
+        $web_dir = Config::get('SCRIPT')['web_dir'];
+        $num_threads = Config::get('SCRIPT')['threads'];
+        $CONNECTION = Config::get('CONNECTION');
         $master = curl_multi_init();
-        $options = array(
+        $options = [
             CURLOPT_USERPWD => static::$key[0] .":" . static::$key[1],
             CURLOPT_BINARYTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => Config::get('CONNECTTIMEOUT'),
+            CURLOPT_CONNECTTIMEOUT => $CONNECTION['timeout'],
             CURLOPT_HEADER => false,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
-        );
+        ];
 
-        if (($limit = Config::get('download_speed_limit')) !== 0) {
+        if (($limit = $CONNECTION['download_speed_limit']) !== 0) {
             $options[CURLOPT_MAX_RECV_SPEED_LARGE] = $limit;
         }
 
-        if (Config::get('proxy_enable') !== 0) {
-            $options[CURLOPT_PROXY] = Config::get('proxy_server');
-            $options[CURLOPT_PROXYPORT] = Config::get('proxy_port');
+        if ($CONNECTION['proxy'] !== 0) {
+            $options[CURLOPT_PROXY] = $CONNECTION['server'];
+            $options[CURLOPT_PROXYPORT] = $CONNECTION['port'];
 
-            if (($user = Config::get('proxy_user')) !== NULL) {
-                $options[CURLOPT_PROXYUSERNAME] = $user;
-                $options[CURLOPT_PROXYPASSWORD] = Config::get('proxy_passwd');
+            if ($CONNECTION['user'] !== NULL) {
+                $options[CURLOPT_PROXYUSERNAME] = $CONNECTION['user'];
+                $options[CURLOPT_PROXYPASSWORD] = $CONNECTION['password'];
             }
         }
 
-        $files = array();
-        $handles = array();
+        $files = [];
+        $handles = [];
         $threads = 0;
 
         foreach ($download_files as $i => $file) {
@@ -440,13 +471,14 @@ class Mirror
     static protected function single_download($download_files)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
+        $web_dir = Config::get('SCRIPT')['web_dir'];
 
         foreach ($download_files as $file) {
             foreach (static::$mirrors as $id => $mirror) {
                 $time = microtime(true);
                 Log::write_log(Language::t("Trying download file %s from %s", basename($file['file']), $mirror['host']), 3, static::$version);
-                $out = Tools::ds(Config::get('web_dir'), $file['file']);
-                Tools::download_file(array(CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror['host'] . $file['file'], CURLOPT_FILE => $out), $header);
+                $out = Tools::ds($web_dir, $file['file']);
+                Tools::download_file([CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror['host'] . $file['file'], CURLOPT_FILE => $out], $header);
 
                 if (is_array($header) and $header['http_code'] == 200 and $header['size_download'] == $file['size']) {
                     static::$total_downloads += $header['size_download'];
@@ -493,28 +525,35 @@ class Mirror
         $new_content = '';
         $new_files = array();
         $total_size = 0;
-        $update_version_x32 = Config::get('update_version_x32');
-        $update_version_x64 = Config::get('update_version_x64');
-        $update_version_ess = Config::get('update_version_ess');
-        $update_version_lang = Config::get('update_version_lang');
 
         foreach ($matches as $container) {
 
-            $parsed_container = parse_ini_string((preg_replace("/version=(.*?)\n/i", "version=\"\${1}\"\n", str_replace("\r\n", "\n", $container))), true);
+            $parsed_container = parse_ini_string(
+                preg_replace(
+                    "/version=(.*?)\n/i",
+                    "version=\"\${1}\"\n",
+                    str_replace(
+                        "\r\n",
+                        "\n",
+                        $container
+                    )
+                ),
+                true);
             $output = array_shift($parsed_container);
 
             if (intval(static::$version) < 10) {
                 if (empty($output['file']) or empty($output['size']) or empty($output['date']) or
-                    (!empty($output['language']) and !in_array($output['language'], $update_version_lang)) or
-                    ($update_version_x32 != 1 and preg_match("/32|86/", $output['platform'])) or
-                    ($update_version_x64 != 1 and preg_match("/64/", $output['platform'])) or
-                    ($update_version_ess != 1 and preg_match("/ess/", $output['type']))
+                    (!empty($output['language']) and !in_array($output['language'], static::$ESET['lang'])) or
+                    (static::$ESET['x32'] != 1 and preg_match("/32|86/", $output['platform'])) or
+                    (static::$ESET['x64'] != 1 and preg_match("/64/", $output['platform'])) or
+                    (static::$ESET['ess'] != 1 and preg_match("/ess/", $output['type']))
                 )
                     continue;
             } else {
                 if (empty($output['file']) or empty($output['size']) or
-                    ($update_version_x32 != 1 and preg_match("/32|86/", $output['platform'])) or
-                    ($update_version_x64 != 1 and preg_match("/64/", $output['platform']))
+                    (static::$ESET['x32'] != 1 and preg_match("/32|86/", $output['platform'])) or
+                    (static::$ESET['x64'] != 1 and preg_match("/64/", $output['platform'])) or
+                    (static::$ESET['ess'] != 1 and preg_match("/ess/", $output['type']))
                 )
                     continue;
             }
@@ -552,6 +591,7 @@ class Mirror
         static::$dir = 'v' . static::$version . '-rel-*';
         static::$mirror_dir = $dir;
         static::$updated = false;
+        static::$ESET = Config::get('ESET');
         Log::write_log(Language::t("Mirror initiliazed with dir=%s, mirror_dir=%s", static::$dir, static::$mirror_dir), 5, static::$version);
     }
 

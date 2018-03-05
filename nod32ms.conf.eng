@@ -32,6 +32,9 @@ generate_only_table = 0
 ; Show used login and password in generated html.
 show_login_password = 0
 
+; HTML file name
+filename_html = "index.html"
+
 ; HTML codepage.
 html_codepage = "utf-8"
 

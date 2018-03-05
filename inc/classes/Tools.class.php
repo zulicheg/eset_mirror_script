@@ -5,32 +5,40 @@
  */
 class Tools
 {
-
+    /**
+     * @var
+     */
     static private $CONF;
+
+    /**
+     * @var
+     */
     static private $unrar;
 
     /**
-     *
+     * @throws Exception
      */
     static public function init()
     {
-        if (!file_exists(CONF_FILE)) return "Config file does not exist!";
+        if (!file_exists(CONF_FILE))
+            throw new ConfigException("Config file does not exist!");
 
-        if (!is_readable(CONF_FILE)) return "Can't read config file! Check the file and its permissions!";
+        if (!is_readable(CONF_FILE))
+            throw new ConfigException("Can't read config file! Check the file and its permissions!");
 
         $ini = parse_ini_file(CONF_FILE, true);
+
+        if (empty($ini))
+            throw new ConfigException("Empty config file!");
+
         static::$CONF = $ini['CONNECTION'];
         static::$unrar = $ini['SCRIPT']['unrar_binary'];
-
-        var_dump(static::$unrar);
-        var_dump(static::$CONF);
-        return null;
     }
 
     /**
      * @param array $options
      * @param $headers
-     * @return array|bool
+     * @return mixed
      */
     static public function download_file($options = array(), &$headers)
     {
@@ -106,10 +114,12 @@ class Tools
         $date = date("Y-m-d-H-i-s-") . explode('.', microtime(1))[1];
 
         if (!file_exists(static::$unrar))
-            Log::write_log(Language::t("Unrar not exists at %s", static::$unrar), 0, Mirror::$version);
+            //Log::write_log(Language::t("Unrar not exists at %s", static::$unrar), 0, Mirror::$version);
+            throw new ToolsException("Unrar not exists at %s", static::$unrar);
 
         if (!is_executable(static::$unrar))
-            Log::write_log(Language::t("Unrar not executable at %s", static::$unrar), 0, Mirror::$version);
+            //Log::write_log(Language::t("Unrar not executable at %s", static::$unrar), 0, Mirror::$version);
+            throw new ToolsException("Unrar not executable at %s", static::$unrar);
 
         switch (PHP_OS) {
             case "Darwin":

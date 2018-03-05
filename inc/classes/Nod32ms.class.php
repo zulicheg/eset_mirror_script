@@ -425,16 +425,16 @@ class Nod32ms
     private function find_keys()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $sys = Config::get('FIND')['system'];
+        $FIND = Config::get('FIND');
 
-        if (Config::get('FIND')['auto'] != 1)
+        if ($FIND['auto'] != 1)
             return null;
 
-        if ($sys === null) {
+        if ($FIND['system'] === null) {
             $patterns = $this->get_all_patterns();
             shuffle($patterns);
         } else {
-            $patterns = array(PATTERN . $sys . '.pattern');
+            $patterns = [PATTERN . $FIND['system'] . '.pattern'];
         }
 
         while ($elem = array_shift($patterns)) {
@@ -458,19 +458,15 @@ class Nod32ms
                 continue;
             }
 
-            if (empty($pageindex))
-                $pageindex[] = Config::get('FIND')['pageindex'];
+            if (empty($pageindex)) $pageindex[] = $FIND['pageindex'];
 
-            if (empty($pattern))
-                $pattern[] = Config::get('FIND')['pattern'];
+            if (empty($pattern)) $pattern[] = $FIND['pattern'];
 
-            if (empty($page_qty))
-                $page_qty[] = Config::get('FIND')['page_qty'];
+            if (empty($page_qty)) $page_qty[] = $FIND['page_qty'];
 
-            if (empty($recursion_level))
-                $recursion_level[] = Config::get('FIND')['recursion_level'];
+            if (empty($recursion_level)) $recursion_level[] = $FIND['recursion_level'];
 
-            $queries = explode(", ", Config::get('FIND')['search_query']);
+            $queries = explode(", ", $FIND['search_query']);
 
             foreach ($queries as $query) {
                 $pages = substr_count($link[0], "#PAGE#") ? $page_qty[0] : 1;
@@ -479,8 +475,7 @@ class Nod32ms
                     $this_link = str_replace("#QUERY#", str_replace(" ", "+", trim($query)), $link[0]);
                     $this_link = str_replace("#PAGE#", ($i * $pageindex[0]), $this_link);
 
-                    if ($this->parse_www_page($this_link, $recursion_level[0], $pattern) == true)
-                        break(3);
+                    if ($this->parse_www_page($this_link, $recursion_level[0], $pattern) == true) break(3);
                 }
             }
         }
@@ -497,6 +492,7 @@ class Nod32ms
         Log::write_log(Language::t("Generating html..."), 0);
         $total_size = $this->get_databases_size();
         $web_dir = Config::get('SCRIPT')['web_dir'];
+        $ESET = Config::get('ESET');
         $html_page = '';
 
         if (Config::get('generate_only_table') == '0') {
@@ -504,7 +500,7 @@ class Nod32ms
             $html_page .= '<html>';
             $html_page .= '<head>';
             $html_page .= '<title>' . Language::t("ESET NOD32 update server") . '</title>';
-            $html_page .= '<meta http-equiv="Content-Type" content="text/html; charset=' . Config::get('html_codepage') . '">';
+            $html_page .= '<meta http-equiv="Content-Type" content="text/html; charset=' . Config::get('SCRIPT')['html_codepage'] . '">';
             $html_page .= '<style type="text/css">html,body{height:100%;margin:0;padding:0;width:100%}table#center{border:0;height:100%;width:100%}table td table td{text-align:center;vertical-align:middle;font-weight:bold;padding:10px 15px;border:0}table tr:nth-child(odd){background:#eee}table tr:nth-child(even){background:#fc0}</style>';
             $html_page .= '</head>';
             $html_page .= '<body>';
@@ -540,17 +536,17 @@ class Nod32ms
 
         $html_page .= '<tr>';
         $html_page .= '<td colspan="2">' . Language::t("Present versions") . '</td>';
-        $html_page .= '<td colspan="2">' . (Config::get('update_version_ess') ? 'EAV, ESS' : 'EAV') . '</td>';
+        $html_page .= '<td colspan="2">' . ($ESET['ess'] == 1 ? 'EAV, ESS' : 'EAV') . '</td>';
         $html_page .= '</tr>';
 
         $html_page .= '<tr>';
         $html_page .= '<td colspan="2">' . Language::t("Present platforms") . '</td>';
-        $html_page .= '<td colspan="2">' . ((Config::get('update_version_x32') ? '32bit' : '') . (Config::get('update_version_x64') ? (Config::get('update_version_x32') ? ', 64bit' : '64bit') : '')) . '</td>';
+        $html_page .= '<td colspan="2">' . ($ESET['x32'] == 1 ? '32bit' : '') . ($ESET['x64'] == 1  ? ($ESET['x32'] ? ', 64bit' : '64bit') : '') . '</td>';
         $html_page .= '</tr>';
 
         $html_page .= '<tr>';
         $html_page .= '<td colspan="2">' . Language::t("Present languages") . '</td>';
-        $html_page .= '<td colspan="2">' . Config::get('present_languages') . '</td>';
+        $html_page .= '<td colspan="2">' . $ESET['lang'] . '</td>';
         $html_page .= '</tr>';
 
         $html_page .= '<tr>';
@@ -558,7 +554,7 @@ class Nod32ms
         $html_page .= '<td colspan="2">' . (static::$start_time ? date("Y-m-d, H:i:s", static::$start_time) : Language::t("n/a")) . '</td>';
         $html_page .= '</tr>';
 
-        if (Config::get('show_login_password')) {
+        if (Config::get('SCRIPT')['show_login_password']) {
             if (file_exists(static::$key_valid_file)) {
                 $keys = Parser::parse_keys(static::$key_valid_file);
 
@@ -582,12 +578,12 @@ class Nod32ms
             }
         }
         $html_page .= '</table>';
-        $html_page .= (Config::get('generate_only_table') == '0') ? '</td></tr></table></body></html>' : '';
-        $file = Tools::ds($web_dir, Config::get('filename_html'));
+        $html_page .= (Config::get('SCRIPT')['generate_only_table'] == '0') ? '</td></tr></table></body></html>' : '';
+        $file = Tools::ds($web_dir, Config::get('SCRIPT')['filename_html']);
 
         if (file_exists($file)) @unlink($file);
 
-        Log::write_to_file($file, Tools::conv($html_page, Config::get('html_codepage')), true);
+        Log::write_to_file($file, Tools::conv($html_page, Config::get('SCRIPT')['html_codepage']), true);
     }
 
     /**
@@ -600,6 +596,7 @@ class Nod32ms
         $total_size = array();
         $total_downloads = array();
         $average_speed = array();
+        $web_dir = Config::get('SCRIPT')['web_dir'];
 
         foreach ($DIRECTORIES as $version => $dir) {
             if (Config::upd_version_is_set($version) == '1') {
@@ -619,7 +616,7 @@ class Nod32ms
                 }
 
                 Mirror::find_best_mirrors();
-                $old_version = Tools::get_DB_version(Tools::ds(Config::get('SCRIPT')['web_dir'], $dir, 'update.ver'));
+                $old_version = Tools::get_DB_version(Tools::ds($web_dir, $dir, 'update.ver'));
 
                 if (!empty(Mirror::$mirrors)) {
                     foreach (Mirror::$mirrors as $id => $mirror) {
@@ -676,8 +673,7 @@ class Nod32ms
         if (array_sum($average_speed) > 0)
            Log::write_log(Language::t("Average speed for all databases: %s/s", Tools::bytesToSize1024(array_sum($average_speed) / count($average_speed))), 3);
 
-        if (Config::get('SCRIPT')['generate_html'] == '1')
-            $this->generate_html();
+        if (Config::get('SCRIPT')['generate_html'] == '1') $this->generate_html();
     }
 
     /**

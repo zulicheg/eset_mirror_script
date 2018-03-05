@@ -14,7 +14,7 @@ class Parser
     static public function parse_line($handle, $tag, $pattern = false)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $arr = array();
+        $arr = [];
 
         if (preg_match_all(($pattern ? $pattern : "/$tag *=(.+)/"), $handle, $result, PREG_PATTERN_ORDER)) {
             foreach ($result[1] as $key) {
@@ -82,7 +82,7 @@ class Parser
     static public function parse_header($http_response_header)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $header = array();
+        $header = [];
 
         foreach ($http_response_header as $line) {
             if (preg_match("/\:/", $line)) {

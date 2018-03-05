@@ -36,11 +36,11 @@ class SelfUpdate
                 CURLOPT_PORT => static::$CONF['port'],
                 CURLOPT_RETURNTRANSFER => 1),
             $headers);
-        $arr = array();
+        $arr = [];
 
         if (preg_match_all("/(.+)=(.+)=(.+)/", $content, $result, PREG_OFFSET_CAPTURE))
             foreach ($result[1] as $num => $res)
-                $arr[trim($result[1][$num][0])] = array($result[2][$num][0], $result[3][$num][0]);
+                $arr[trim($result[1][$num][0])] = [$result[2][$num][0], $result[3][$num][0]];
 
         return $arr;
     }
@@ -52,7 +52,7 @@ class SelfUpdate
     static private function get_hashes_from_local($directory = "./")
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        $hashes = array();
+        $hashes = [];
         $d = dir($directory);
 
         while (false !== ($entry = $d->read())) {
@@ -62,7 +62,10 @@ class SelfUpdate
             (is_dir($directory . $entry)) ?
                 $hashes = array_merge(static::get_hashes_from_local($directory . $entry . DS), $hashes)
                 :
-                $hashes[str_replace(DS, "/", $directory . $entry)] = array(md5_file($directory . $entry), filesize($directory . $entry));
+                $hashes[str_replace(DS, "/", $directory . $entry)] = [
+                    md5_file($directory . $entry),
+                    filesize($directory . $entry)
+                ];
         }
         $d->close();
         return $hashes;
@@ -75,10 +78,11 @@ class SelfUpdate
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         $response = Tools::download_file(
-            array(
+            [
                 CURLOPT_URL => "http://" . static::$CONF['server'] . "/" . static::$CONF['dir'] . "/" . static::$CONF['version'],
                 CURLOPT_PORT => static::$CONF['port'],
-                CURLOPT_RETURNTRANSFER => 1),
+                CURLOPT_RETURNTRANSFER => 1
+            ],
             $headers);
         return trim($response);
     }
@@ -95,45 +99,40 @@ class SelfUpdate
             $remote_full_path = sprintf("http://%s/%s/%s", static::$CONF['server'], static::$CONF['dir'], $filename);
             Log::write_log(Language::t("Downloading %s [%s Bytes]", basename($filename), $info), 0);
             Tools::download_file(
-                array(
+                [
                     CURLOPT_URL => $remote_full_path,
                     CURLOPT_PORT => static::$CONF['port'],
-                    CURLOPT_FILE => $fs_filename),
+                    CURLOPT_FILE => $fs_filename
+                ],
                 $headers);
 
             if (is_string($headers))
-                Log::write_log(Language::t("Error while downloading file %s [%s]", basename($filename), $headers), 0);
+                //Log::write_log(Language::t("Error while downloading file %s [%s]", basename($filename), $headers), 0);
+                throw new SelfUpdateException("Error while downloading file %s [%s]", basename($filename), $headers);
         }
     }
 
     /**
-     *
+     * @throws SelfUpdateException
      */
     static public function init()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        static::load(CONF_FILE);
+        Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
+
+        if (!file_exists(CONF_FILE))
+            throw new SelfUpdateException("Config file does not exist!");
+
+        if (!is_readable(CONF_FILE))
+            throw new SelfUpdateException("Can't read config file! Check the file and its permissions!");
+
+        static::$CONF = (parse_ini_file(CONF_FILE, true))['SELFUPDATE'];
         $remote_hashes = static::get_hashes_from_server();
         $local_hashes = static::get_hashes_from_local();
 
         foreach ($remote_hashes as $filename => $info)
             if (!isset($local_hashes[$filename]) || $local_hashes[$filename][0] !== $remote_hashes[$filename][0])
                 static::$list_to_update[$filename] = $info[1];
-    }
-
-    /**
-     * @return null|string
-     */
-    static public function load()
-    {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
-        if (!file_exists(CONF_FILE)) return "Config file does not exist!";
-
-        if (!is_readable(CONF_FILE)) return "Can't read config file! Check the file and its permissions!";
-
-        static::$CONF = (parse_ini_file(CONF_FILE, true))['SELFUPDATE'];
-
-        return null;
     }
 
     /**
@@ -152,5 +151,4 @@ class SelfUpdate
     {
         return isset(static::$CONF[$nm]) ? static::$CONF[$nm] : null;
     }
-
 }
