@@ -16,7 +16,7 @@ class Tools
     static private $unrar;
 
     /**
-     * @throws Exception
+     * @throws ConfigException
      */
     static public function init()
     {
@@ -107,6 +107,7 @@ class Tools
     /**
      * @param $source
      * @param $destination
+     * @throws ToolsException
      */
     static public function extract_file($source, $destination)
     {

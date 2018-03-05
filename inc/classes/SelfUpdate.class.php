@@ -88,7 +88,7 @@ class SelfUpdate
     }
 
     /**
-     *
+     * @throws SelfUpdateException
      */
     static public function start_to_update()
     {
@@ -130,6 +130,13 @@ class SelfUpdate
 
         if (static::$CONF['enabled'] > 0) {
             if (static::ping() === true) {
+                $remote_hashes = static::get_hashes_from_server();
+                $local_hashes = static::get_hashes_from_local();
+
+                foreach ($remote_hashes as $filename => $info)
+                    if (!isset($local_hashes[$filename]) || $local_hashes[$filename][0] !== $remote_hashes[$filename][0])
+                        static::$list_to_update[$filename] = $info[1];
+
                 if (static::is_need_to_update()) {
                     Log::informer(Language::t("New version is available on server [%s]!", static::get_version_on_server()), null, 0);
 
