@@ -430,7 +430,7 @@ class Nod32ms
         if ($FIND['auto'] != 1)
             return null;
 
-        if ($FIND['system'] === null) {
+        if (empty($FIND['system'])) {
             $patterns = $this->get_all_patterns();
             shuffle($patterns);
         } else {
