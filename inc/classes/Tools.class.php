@@ -44,13 +44,13 @@ class Tools
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $out = FALSE;
-        $opts = array(
+        $opts = [
             CURLOPT_BINARYTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => static::$CONF['timeout'],
             CURLOPT_HEADER => false,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 5,
-        );
+        ];
 
         if (key_exists(CURLOPT_FILE, $options)) {
             $dir = dirname($options[CURLOPT_FILE]);
@@ -70,6 +70,8 @@ class Tools
                 $opts[CURLOPT_PROXYPASSWORD] = static::$CONF['password'];
             }
         }
+        var_dump($opts);
+        var_dump($options);
 
         $ch = curl_init();
         curl_setopt_array($ch, ($opts + $options));
