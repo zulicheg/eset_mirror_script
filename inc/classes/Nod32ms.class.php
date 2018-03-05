@@ -25,11 +25,12 @@ class Nod32ms
      */
     public function __construct()
     {
+        global $VERSION;
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         static::$start_time = time();
-        static::$key_valid_file = Tools::ds(Config::get('log_dir'), Config::get('KEY_FILE_VALID'));
-        static::$key_invalid_file = Tools::ds(Config::get('log_dir'), Config::get('KEY_FILE_INVALID'));
-        Log::write_log(Language::t("Run script %s", Config::get('VERSION')), 0);
+        static::$key_valid_file = Tools::ds(Config::get('LOG')['dir'], KEY_FILE_VALID);
+        static::$key_invalid_file = Tools::ds(Config::get('LOG')['dir'], KEY_FILE_INVALID);
+        Log::write_log(Language::t("Run script %s", $VERSION), 0);
         $this->run_script();
     }
 
@@ -53,7 +54,7 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, $version);
         $days = Config::get('icq_informer_days') * 24 * 60 * 60;
-        $fn = Tools::ds(Config::get('log_dir'), Config::get('SUCCESSFUL_TIMESTAMP'));
+        $fn = Tools::ds(Config::get('LOG')['dir'], SUCCESSFUL_TIMESTAMP);
         $timestamps = array();
 
         if (file_exists($fn)) {
@@ -84,7 +85,7 @@ class Nod32ms
     private function set_database_size($size)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $fn = Tools::ds(Config::get('log_dir'), Config::get('DATABASES_SIZE'));
+        $fn = Tools::ds(Config::get('LOG')['dir'], DATABASES_SIZE);
         $sizes = array();
 
         if (file_exists($fn)) {
@@ -103,7 +104,7 @@ class Nod32ms
         @unlink($fn);
 
         foreach ($sizes as $key => $name)
-            Log::write_to_file(Config::get('DATABASES_SIZE'), "$key:$name\r\n");
+            Log::write_to_file(DATABASES_SIZE, "$key:$name\r\n");
     }
 
     /**
@@ -112,7 +113,7 @@ class Nod32ms
     private function get_databases_size()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $fn = Tools::ds(Config::get('log_dir'), Config::get('DATABASES_SIZE'));
+        $fn = Tools::ds(Config::get('LOG')['dir'], DATABASES_SIZE);
         $sizes = array();
 
         if (file_exists($fn)) {
@@ -269,7 +270,7 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         Log::write_log(Language::t("Invalid key [%s:%s]", $login, $password), 4, Mirror::$version);
-        $log_dir = Config::get('log_dir');
+        $log_dir = Config::get('LOG')['dir'];
 
         ($this->key_exists_in_file($login, $password, static::$key_invalid_file) == false) ?
             Log::write_to_file(Tools::ds($log_dir, static::$key_invalid_file), "$login:$password:" . Mirror::$version . "\r\n", true) :
@@ -365,7 +366,7 @@ class Nod32ms
 
         if (Config::get('debug_html') == 1) {
             $path_info = pathinfo($this_link);
-            $dir = Tools::ds(Config::get('log_dir'), Config::get('DEBUG_DIR'), $path_info['basename']);
+            $dir = Tools::ds(Config::get('LOG')['dir'], DEBUG_DIR, $path_info['basename']);
             @mkdir($dir, 0755, true);
             $filename = Tools::ds($dir, $path_info['filename'] . ".log");
             file_put_contents($filename, $this->strip_tags_and_css($search));
