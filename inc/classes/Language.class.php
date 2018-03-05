@@ -60,13 +60,9 @@ class Language
     static public function t()
     {
         $text = func_get_arg(0);
-        $params = @array_shift(func_get_args());
+        $params = func_get_args();
+        @array_shift($params);
         $key = array_search($text, static::$default_language_pack);
-        var_dump($text);
-        var_dump($params);
-        var_dump($key);
-        var_dump(static::$language_pack);
-        var_dump(static::$default_language_pack);
         return (array_search($text, static::$language_pack) != FALSE) ? vsprintf($key, $params) : vsprintf($text, $params);
     }
 }
