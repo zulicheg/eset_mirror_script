@@ -425,9 +425,9 @@ class Nod32ms
     private function find_keys()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        $sys = Config::get('find_system');
+        $sys = Config::get('FIND')['system'];
 
-        if (Config::get('find_auto_enable') != 1)
+        if (Config::get('FIND')['auto'] != 1)
             return null;
 
         if ($sys === null) {
@@ -459,18 +459,18 @@ class Nod32ms
             }
 
             if (empty($pageindex))
-                $pageindex[] = Config::get('default_pageindex');
+                $pageindex[] = Config::get('FIND')['pageindex'];
 
             if (empty($pattern))
-                $pattern[] = Config::get('default_pattern');
+                $pattern[] = Config::get('FIND')['pattern'];
 
             if (empty($page_qty))
-                $page_qty[] = Config::get('default_page_qty');
+                $page_qty[] = Config::get('FIND')['page_qty'];
 
             if (empty($recursion_level))
-                $recursion_level[] = Config::get('default_recursion_level');
+                $recursion_level[] = Config::get('FIND')['recursion_level'];
 
-            $queries = explode(", ", Config::get('default_search_query'));
+            $queries = explode(", ", Config::get('FIND')['search_query']);
 
             foreach ($queries as $query) {
                 $pages = substr_count($link[0], "#PAGE#") ? $page_qty[0] : 1;
@@ -496,7 +496,7 @@ class Nod32ms
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         Log::write_log(Language::t("Generating html..."), 0);
         $total_size = $this->get_databases_size();
-        $web_dir = Config::get('web_dir');
+        $web_dir = Config::get('SCRIPT')['web_dir'];
         $html_page = '';
 
         if (Config::get('generate_only_table') == '0') {
@@ -619,7 +619,7 @@ class Nod32ms
                 }
 
                 Mirror::find_best_mirrors();
-                $old_version = Tools::get_DB_version(Tools::ds(Config::get('web_dir'), $dir, 'update.ver'));
+                $old_version = Tools::get_DB_version(Tools::ds(Config::get('SCRIPT')['web_dir'], $dir, 'update.ver'));
 
                 if (!empty(Mirror::$mirrors)) {
                     foreach (Mirror::$mirrors as $id => $mirror) {
@@ -676,7 +676,7 @@ class Nod32ms
         if (array_sum($average_speed) > 0)
            Log::write_log(Language::t("Average speed for all databases: %s/s", Tools::bytesToSize1024(array_sum($average_speed) / count($average_speed))), 3);
 
-        if (Config::get('generate_html') == '1')
+        if (Config::get('SCRIPT')['generate_html'] == '1')
             $this->generate_html();
     }
 
