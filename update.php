@@ -5,6 +5,7 @@ require __DIR__ . "/inc/init.php";
 
 try {
     Tools::init();
+    Language::init();
 
     if (SelfUpdate::init()) {
         spl_autoload_unregister($autoload);
