@@ -39,7 +39,6 @@ class Language
         var_dump(static::$language);
         var_dump(static::$language_file);
         var_dump(static::$default_language_file);
-        var_dump(static::$language_pack);
 
         if (static::$language != 'en') {
             if (!file_exists(static::$language_file))
@@ -67,10 +66,12 @@ class Language
     {
         $text = func_get_arg(0);
         $params = @array_shift(func_get_args());
-        $key = array_search($text, static::$language_pack);
+        $key = array_search($text, static::$default_language_pack);
         var_dump($text);
         var_dump($params);
         var_dump($key);
-        return ($key != FALSE) ? vsprintf($key, $params) : vsprintf($text, $params);
+        var_dump(static::$language_pack);
+        var_dump(static::$default_language_pack);
+        return (array_search($text, static::$language_pack) != FALSE) ? vsprintf($key, $params) : vsprintf($text, $params);
     }
 }
