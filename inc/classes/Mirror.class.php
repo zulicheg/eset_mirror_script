@@ -331,7 +331,7 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $web_dir = Config::get('SCRIPT')['web_dir'];
-        $num_threads = Config::get('SCRIPT')['threads'];
+        $num_threads = Config::get('SCRIPT')['download_threads'];
         $CONNECTION = Config::get('CONNECTION');
         $master = curl_multi_init();
         $options = [
