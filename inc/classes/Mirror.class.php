@@ -396,7 +396,7 @@ class Mirror
                                 //$options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], current(static::$mirrors)['host'], $info['url']);
                                 //curl_setopt_array($ch, $options);
                                 @fclose($files[$info['url']]);
-                                static::single_download($file);
+                                static::single_download([$file]);
                                 curl_multi_remove_handle($master, $ch);
                                 curl_close($ch);
                                 $threads--;
@@ -447,7 +447,7 @@ class Mirror
                         //$options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], current(static::$mirrors)['host'], $info['url']);
                         //curl_setopt_array($ch, $options);
                         @fclose($files[$info['url']]);
-                        static::single_download($file);
+                        static::single_download([str_replace("http://" . prev(static::$mirrors)['host'], '', $info['url'])]);
                         curl_multi_remove_handle($master, $ch);
                         curl_close($ch);
                     } else {
@@ -478,7 +478,14 @@ class Mirror
                 $time = microtime(true);
                 Log::write_log(Language::t("Trying download file %s from %s", basename($file['file']), $mirror['host']), 3, static::$version);
                 $out = Tools::ds($web_dir, $file['file']);
-                Tools::download_file([CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1], CURLOPT_URL => "http://" . $mirror['host'] . $file['file'], CURLOPT_FILE => $out], $header);
+                Tools::download_file(
+                    [
+                        CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
+                        CURLOPT_URL => "http://" . $mirror['host'] . $file['file'],
+                        CURLOPT_FILE => $out
+                    ],
+                    $header
+                );
 
                 if (is_array($header) and $header['http_code'] == 200 and $header['size_download'] == $file['size']) {
                     static::$total_downloads += $header['size_download'];
