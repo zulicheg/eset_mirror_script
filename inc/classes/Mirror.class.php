@@ -443,9 +443,13 @@ class Mirror
                     Log::write_log(Language::t("Error download url %s", $info['url']), 3, static::$version);
 
                     if (next(static::$mirrors)) {
-                        Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
-                        $options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], current(static::$mirrors)['host'], $info['url']);
-                        curl_setopt_array($ch, $options);
+                        //Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
+                        //$options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], current(static::$mirrors)['host'], $info['url']);
+                        //curl_setopt_array($ch, $options);
+                        @fclose($files[$info['url']]);
+                        static::single_download($file);
+                        curl_multi_remove_handle($master, $ch);
+                        curl_close($ch);
                     } else {
                         @fclose($files[$info['url']]);
                         reset(static::$mirrors);
