@@ -136,6 +136,12 @@ class SelfUpdate
         static::$CONF = $ini['SELFUPDATE'];
         static::$CONNECTION = $ini['CONNECTION'];
 
+        if (empty(static::$CONF))
+            throw new SelfUpdateException("SelfUpdate parameters don't set!");
+
+        if (empty(static::$CONNECTION))
+            throw new SelfUpdateException("Connection parameters don't set!");
+
         if (static::$CONF['enabled'] > 0) {
             if (static::ping() === true) {
                 $remote_hashes = static::get_hashes_from_server();

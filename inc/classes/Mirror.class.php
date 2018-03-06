@@ -611,7 +611,6 @@ class Mirror
         static::$updated = false;
     }
 
-
     /**
      * @param $folder
      * @return int
