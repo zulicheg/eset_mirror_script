@@ -25,7 +25,7 @@ class Log
      */
     static public function destruct()
     {
-        if (!empty(static::$mailer_log) && static::$CONF['MAILER']['enable'] == '1') {
+        if (!empty(static::$mailer_log) && !empty(static::$CONF['MAILER']) && static::$CONF['MAILER']['enable'] == '1') {
             $mailer = new PHPMailer;
             $mailer->CharSet = static::$CONF['MAILER']['codepage'];
 
@@ -166,5 +166,8 @@ class Log
         static::$CONF['rotate_size'] = Tools::human2bytes(static::$CONF['rotate_size']);
         static::$CONF['MAILER'] = $ini['MAILER'];
         static::$CONF['codepage'] = $ini['SCRIPT']['codepage'];
+
+        if (empty(static::$CONF))
+            throw new ConfigException("Log parameters don't set!");
     }
 }
