@@ -363,6 +363,7 @@ class Mirror
                 }
             } else {
                 static::single_download([$file]);
+                exit;
             }
         }
     }
