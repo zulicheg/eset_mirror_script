@@ -402,7 +402,7 @@ class Mirror
                             //$options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], current(static::$mirrors)['host'], $info['url']);
                             //curl_setopt_array($ch, $options);
                             @fclose($files[$info['url']]);
-                            static::single_download($file);
+                            static::single_download([$file]);
                             curl_multi_remove_handle($master, $ch);
                             curl_close($ch);
                             $threads--;
@@ -460,7 +460,7 @@ class Mirror
                         //$options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], current(static::$mirrors)['host'], $info['url']);
                         //curl_setopt_array($ch, $options);
                         @fclose($files[$info['url']]);
-                        static::single_download($file);
+                        static::single_download([str_replace('http://' . prev(static::$mirrors)['host'], '', $info['url'])]);
                         curl_multi_remove_handle($master, $ch);
                         curl_close($ch);
                     } else {
