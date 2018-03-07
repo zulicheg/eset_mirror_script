@@ -52,7 +52,7 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $fn = Tools::ds(Config::get('LOG')['dir'], SUCCESSFUL_TIMESTAMP);
-        $timestamps = array();
+        $timestamps = [];
 
         if (file_exists($fn)) {
             $handle = file_get_contents($fn);
@@ -123,9 +123,7 @@ class Mirror
             if ($headers['http_code'] == 200) {
                 $test_mirrors[$mirror] = round($headers['total_time'] * 1000);
                 Log::write_log(Language::t("Mirror %s active", $mirror), 3, static::$version);
-            } else {
-                Log::write_log(Language::t("Mirror %s inactive", $mirror), 3, static::$version);
-            }
+            } else Log::write_log(Language::t("Mirror %s inactive", $mirror), 3, static::$version);
         }
         asort($test_mirrors);
 
@@ -188,6 +186,7 @@ class Mirror
 
     /**
      * @return array
+     * @throws Exception
      * @throws ToolsException
      */
     static public function download_signature()
@@ -343,29 +342,140 @@ class Mirror
      */
     static protected function multi_download($download_files)
     {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
+        $web_dir = Config::get('SCRIPT')['web_dir'];
         $CONNECTION = Config::get('CONNECTION');
+        $master = curl_multi_init();
         $options = Config::getConnectionInfo();
         $options[CURLOPT_USERPWD] = static::$key[0] .":" . static::$key[1];
+        $files = [];
+        $handles = [];
         $threads = 0;
 
         foreach ($download_files as $i => $file) {
-            $pid = pcntl_fork();
-            if ($pid == -1) {
-                throw new Exception("Could not fork!");
-            } elseif ($pid) {
-                Log::write_log(Language::t("Downloading files..."), 3, static::$version);
-                $threads++;
-                if ($threads >= $CONNECTION['download_threads'])
-                {
-                    pcntl_wait($status);
-                    $threads--;
+            $ch = curl_init();
+            $handles[Tools::get_resource_id($ch)] = current(static::$mirrors)['host'];
+            $res = dirname(Tools::ds($web_dir, $file['file']));
+            if (!@file_exists($res)) @mkdir($res, 0755, true);
+            $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $file['file'];
+            $options[CURLOPT_FILE] = $files['url'] = fopen(Tools::ds($web_dir, $download_files[$i]['file']), 'w');
+            curl_setopt_array($ch, $options);
+            curl_multi_add_handle($master, $ch);
+            $threads++;
+
+            while ($threads >= $CONNECTION['download_threads']) {
+                usleep(50000);
+                curl_multi_exec($master, $running);
+                $select = curl_multi_select($master);
+
+                if ($select < 1) continue;
+
+                do {
+                    $status = curl_multi_exec($master, $running);
+                    usleep(10000);
+                } while ($status == CURLM_CALL_MULTI_PERFORM || $running);
+
+                while ($done = curl_multi_info_read($master)) {
+                    $ch = $done['handle'];
+                    $id = Tools::get_resource_id($ch);
+                    $info = curl_getinfo($ch);
+                    $host = $handles[$id];
+                    if ($info['http_code'] == 200) {
+                        @fclose($files[$info['url']]);
+                        unset($files[$info['url']]);
+                        Log::write_log(
+                            Language::t("From %s downloaded %s [%s] [%s/s]", $host, basename($info['url']),
+                                Tools::bytesToSize1024($info['download_content_length']),
+                                Tools::bytesToSize1024($info['speed_download'])),
+                            3,
+                            static::$version
+                        );
+                        unset($handles[$id]);
+                        static::$total_downloads += $info['download_content_length'];
+                        curl_multi_remove_handle($master, $ch);
+                        curl_close($ch);
+                        $threads--;
+                    } else {
+                        Log::write_log(Language::t("Error download url %s", $info['url']), 3, static::$version);
+
+                        if (next(static::$mirrors)) {
+                            //Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
+                            //$options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], current(static::$mirrors)['host'], $info['url']);
+                            //curl_setopt_array($ch, $options);
+                            @fclose($files[$info['url']]);
+                            static::single_download($file);
+                            curl_multi_remove_handle($master, $ch);
+                            curl_close($ch);
+                            $threads--;
+                        } else {
+                            @fclose($files[$info['url']]);
+                            reset(static::$mirrors);
+                            unset($files[$info['url']]);
+                            Log::write_log(Language::t("All mirrors is down!"), 3, static::$version);
+                            curl_multi_remove_handle($master, $ch);
+                            curl_close($ch);
+                            $threads--;
+                        }
+                    }
                 }
-            } else {
-                static::single_download([$file]);
-                exit;
             }
         }
+
+        do {
+            usleep(50000);
+            curl_multi_exec($master, $running);
+            $select = curl_multi_select($master);
+
+            if ($select < 1) continue;
+
+            do {
+                $status = curl_multi_exec($master, $running);
+                usleep(10000);
+            } while ($status == CURLM_CALL_MULTI_PERFORM || $running);
+
+            while ($done = curl_multi_info_read($master)) {
+                $ch = $done['handle'];
+                $id = Tools::get_resource_id($ch);
+                $info = curl_getinfo($ch);
+                $host = $handles[$id];
+                if ($info['http_code'] == 200) {
+                    @fclose($files[$info['url']]);
+                    unset($files[$info['url']]);
+                    Log::write_log(
+                        Language::t("From %s downloaded %s [%s] [%s/s]", $host, basename($info['url']),
+                            Tools::bytesToSize1024($info['download_content_length']),
+                            Tools::bytesToSize1024($info['speed_download'])),
+                        3,
+                        static::$version
+                    );
+                    unset($handles[$id]);
+                    static::$total_downloads += $info['download_content_length'];
+
+                    curl_multi_remove_handle($master, $ch);
+                    curl_close($ch);
+                } else {
+                    Log::write_log(Language::t("Error download url %s", $info['url']), 3, static::$version);
+
+                    if (next(static::$mirrors)) {
+                        //Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
+                        //$options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], current(static::$mirrors)['host'], $info['url']);
+                        //curl_setopt_array($ch, $options);
+                        @fclose($files[$info['url']]);
+                        static::single_download($file);
+                        curl_multi_remove_handle($master, $ch);
+                        curl_close($ch);
+                    } else {
+                        @fclose($files[$info['url']]);
+                        reset(static::$mirrors);
+                        unset($files[$info['url']]);
+                        Log::write_log(Language::t("All mirrors is down!"), 3, static::$version);
+
+                        curl_multi_remove_handle($master, $ch);
+                        curl_close($ch);
+                    }
+                }
+            }
+        } while ($running);
+        curl_multi_close($master);
     }
 
     /**
@@ -409,6 +519,7 @@ class Mirror
 
     /**
      * @param $download_files
+     * @throws Exception
      */
     static protected function download($download_files)
     {
@@ -478,6 +589,7 @@ class Mirror
 
     /**
      * @param $download_files
+     * @throws Exception
      * @throws ToolsException
      */
     static protected function download_files($download_files)
