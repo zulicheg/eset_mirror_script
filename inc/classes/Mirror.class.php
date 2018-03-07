@@ -364,6 +364,7 @@ class Mirror
 
             while ($threads >= $CONNECTION['download_threads']) {
                 usleep(50000);
+                Log::write_log("Threads $threads", 3, static::$version);
                 curl_multi_exec($master, $running);
                 $select = curl_multi_select($master);
 
@@ -401,6 +402,7 @@ class Mirror
                             Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
                             $options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], current(static::$mirrors)['host'], $info['url']);
                             curl_setopt_array($ch, $options);
+                            var_dump(curl_getinfo($ch));
                             //@fclose($files[$info['url']]);
                             //static::single_download([$file]);
                             //curl_multi_remove_handle($master, $ch);
