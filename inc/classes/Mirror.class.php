@@ -422,6 +422,7 @@ class Mirror
             foreach ($download_files as $i => $file) {
                 curl_multi_add_handle($master, $file['curl']);
                 print_r($file);
+                print_r(curl_getinfo($file['curl']));
                 exit;
                 $threads++;
 
