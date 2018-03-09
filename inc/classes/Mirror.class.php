@@ -357,11 +357,11 @@ class Mirror
             $res = dirname(Tools::ds($web_dir, $file['file']));
             if (!@file_exists($res)) @mkdir($res, 0755, true);
             $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $file['file'];
-            $options[CURLOPT_FILE] = $files['url'] = fopen(Tools::ds($web_dir, $download_files[$i]['file']), 'w');
+            $options[CURLOPT_FILE] = $files[$file['file']] = ['url' => fopen(Tools::ds($web_dir, $download_files[$i]['file']), 'w')];
             curl_setopt_array($ch, $options);
             curl_multi_add_handle($master, $ch);
             $threads++;
-
+/*
             while ($threads >= $CONNECTION['download_threads']) {
                 usleep(50000);
                 Log::write_log("Threads $threads", 3, static::$version);
@@ -478,6 +478,8 @@ class Mirror
             }
         } while ($running);
         curl_multi_close($master);
+*/}
+var_dump($files);
     }
 
     /**
