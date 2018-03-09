@@ -370,7 +370,6 @@ class Mirror
         while (!empty($files)) {
             foreach ($files as $i => $file) {
                 curl_multi_add_handle($master, $file['curl']);
-                print_r($file);
                 $threads++;
 
                 while ($threads >= $CONNECTION['download_threads']) {
