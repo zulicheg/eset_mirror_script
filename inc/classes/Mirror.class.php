@@ -465,6 +465,12 @@ class Mirror
                         Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
                         var_dump(str_replace(prev(static::$mirrors)['host'], next(static::$mirrors)['host'], $info['url']));
                         Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
+                        $prev = prev(static::$mirrors)['host'];
+                        $next = next(static::$mirrors)['host'];
+                        $current = current(static::$mirrors)['host'];
+                        var_dump($prev);
+                        var_dump($next);
+                        var_dump($current);
                         $options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], next(static::$mirrors)['host'], $info['url']);
                         var_dump($options);
                         curl_multi_remove_handle($master, $ch);
