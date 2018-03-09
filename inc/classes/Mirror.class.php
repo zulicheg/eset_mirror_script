@@ -400,6 +400,10 @@ class Mirror
 
                         if (next(static::$mirrors)) {
                             Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
+                            var_dump(prev(static::$mirrors)['host']);
+                            var_dump(current(static::$mirrors)['host']);
+                            var_dump(next(static::$mirrors)['host']);
+                            var_dump(current(static::$mirrors)['host']);
                             $options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], next(static::$mirrors)['host'], $info['url']);
                             curl_setopt_array($ch, $options);
                             var_dump(curl_getinfo($ch));
@@ -459,6 +463,10 @@ class Mirror
 
                     if (next(static::$mirrors)) {
                         Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
+                        var_dump(prev(static::$mirrors)['host']);
+                        var_dump(current(static::$mirrors)['host']);
+                        var_dump(next(static::$mirrors)['host']);
+                        var_dump(current(static::$mirrors)['host']);
                         $options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], next(static::$mirrors)['host'], $info['url']);
                         curl_setopt_array($ch, $options);
                         var_dump(curl_getinfo($ch));
