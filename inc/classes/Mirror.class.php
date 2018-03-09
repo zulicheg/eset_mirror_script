@@ -358,7 +358,7 @@ class Mirror
             $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $file['file'];
             $options[CURLOPT_FILE] = fopen($path, 'w');
             curl_setopt_array($ch, $options);
-            $files[$options[CURLOPT_FILE]] = [
+            $files[Tools::get_resource_id($ch)] = [
                 'file' => $file,
                 'curl' => $ch,
                 'fd' => &$options[CURLOPT_FILE],
@@ -388,8 +388,6 @@ class Mirror
                         $ch = $done['handle'];
                         $id = Tools::get_resource_id($ch);
                         $info = curl_getinfo($ch);
-                        var_dump($info);
-                        exit;
                         $host = $files[$id]['mirror'];
                         if ($info['http_code'] == 200 && $file['file']['size'] == $info['download_content_length']) {
                             @fclose($files[$id]['fd']);
@@ -407,24 +405,33 @@ class Mirror
                             $threads--;
                         } else {
                             Log::write_log(Language::t("Error download url %s", $info['url']), 3, static::$version);
+                            $f = $files[$id];
+
+                            @fclose($files[$id]['fd']);
+                            unlink($files[$id]['file']['path']);
+                            unset($files[$id]);
+                            curl_multi_remove_handle($master, $ch);
+                            curl_close($ch);
 
                             if (next(static::$mirrors)) {
                                 Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
-                                $files[$id]['mirror'] = current(static::$mirrors);
-                                $url = str_replace(prev(static::$mirrors)['host'], next(static::$mirrors)['host'], $info['url']);
-                                curl_setopt($files[$id]['curl'], CURLOPT_URL, $url);
-                                reset(static::$mirrors);
-                                $threads--;
+                                $f['mirror'] = current(static::$mirrors);
+                                $ch = curl_init();
+                                $options[CURLOPT_URL] = "http://" . $f['mirror'] . $f['file']['file'];
+                                $options[CURLOPT_FILE] = fopen($f['path'], 'w');
+                                curl_setopt_array($ch, $options);
+                                $files[Tools::get_resource_id($ch)] = [
+                                    'file' => $f['file'],
+                                    'curl' => $ch,
+                                    'fd' => &$options[CURLOPT_FILE],
+                                    'mirror' => $f['mirror'],
+                                    'path' => $f['path'],
+                                ];
                             } else {
-                                @fclose($files[$id]['fd']);
-                                unlink($files[$id]['file']['path']);
-                                reset(static::$mirrors);
-                                unset($files[$id]);
                                 Log::write_log(Language::t("All mirrors is down!"), 3, static::$version);
-                                curl_multi_remove_handle($master, $ch);
-                                curl_close($ch);
-                                $threads--;
                             }
+                            $threads--;
+                            reset(static::$mirrors);
                         }
                     }
                 }
@@ -444,8 +451,6 @@ class Mirror
                         $ch = $done['handle'];
                         $id = Tools::get_resource_id($ch);
                         $info = curl_getinfo($ch);
-                        var_dump($info);
-                        exit;
                         $host = $files[$id]['mirror'];
                         if ($info['http_code'] == 200 && $file['file']['size'] == $info['download_content_length']) {
                             @fclose($files[$id]['fd']);
@@ -463,24 +468,33 @@ class Mirror
                             $threads--;
                         } else {
                             Log::write_log(Language::t("Error download url %s", $info['url']), 3, static::$version);
+                            $f = $files[$id];
+
+                            @fclose($files[$id]['fd']);
+                            unlink($files[$id]['file']['path']);
+                            unset($files[$id]);
+                            curl_multi_remove_handle($master, $ch);
+                            curl_close($ch);
 
                             if (next(static::$mirrors)) {
                                 Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
-                                $files[$id]['mirror'] = current(static::$mirrors);
-                                $url = str_replace(prev(static::$mirrors)['host'], next(static::$mirrors)['host'], $info['url']);
-                                curl_setopt($files[$id]['curl'], CURLOPT_URL, $url);
-                                reset(static::$mirrors);
-                                $threads--;
+                                $f['mirror'] = current(static::$mirrors);
+                                $ch = curl_init();
+                                $options[CURLOPT_URL] = "http://" . $f['mirror'] . $f['file']['file'];
+                                $options[CURLOPT_FILE] = fopen($f['path'], 'w');
+                                curl_setopt_array($ch, $options);
+                                $files[Tools::get_resource_id($ch)] = [
+                                    'file' => $f['file'],
+                                    'curl' => $ch,
+                                    'fd' => &$options[CURLOPT_FILE],
+                                    'mirror' => $f['mirror'],
+                                    'path' => $f['path'],
+                                ];
                             } else {
-                                @fclose($files[$id]['fd']);
-                                unlink($files[$id]['file']['path']);
-                                reset(static::$mirrors);
-                                unset($files[$id]);
                                 Log::write_log(Language::t("All mirrors is down!"), 3, static::$version);
-                                curl_multi_remove_handle($master, $ch);
-                                curl_close($ch);
-                                $threads--;
                             }
+                            $threads--;
+                            reset(static::$mirrors);
                         }
                     }
                 } while ($running);
