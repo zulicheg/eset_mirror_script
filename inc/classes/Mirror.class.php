@@ -484,6 +484,9 @@ class Mirror
                         //static::single_download([str_replace('http://' . prev(static::$mirrors)['host'], '', $info['url'])]);
                         //curl_multi_remove_handle($master, $ch);
                         //curl_close($ch);
+                        reset(static::$mirrors);
+                        $current = current(static::$mirrors)['host'];
+                        var_dump($current);
                     } else {
                         @fclose($files[$info['url']]);
                         reset(static::$mirrors);
