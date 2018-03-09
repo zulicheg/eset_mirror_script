@@ -358,7 +358,7 @@ class Mirror
             $options[CURLOPT_URL] = "http://" . current(static::$mirrors)['host'] . $file['file'];
             $options[CURLOPT_FILE] = fopen($path, 'w');
             curl_setopt_array($ch, $options);
-            $files[Tools::get_resource_id($ch)] = [
+            $files[$options[CURLOPT_FILE]] = [
                 'file' => $file,
                 'curl' => $ch,
                 'fd' => &$options[CURLOPT_FILE],
@@ -388,6 +388,7 @@ class Mirror
                         $ch = $done['handle'];
                         $id = Tools::get_resource_id($ch);
                         $info = curl_getinfo($ch);
+                        var_dump($info);
                         $host = $files[$id]['mirror'];
                         if ($info['http_code'] == 200 && $file['file']['size'] == $info['download_content_length']) {
                             @fclose($files[$id]['fd']);
