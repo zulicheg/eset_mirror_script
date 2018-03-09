@@ -442,8 +442,6 @@ class Mirror
                 $ch = $done['handle'];
                 $id = Tools::get_resource_id($ch);
                 $info = curl_getinfo($ch);
-                var_dump($info);
-                exit;
                 $host = $handles[$id];
                 if ($info['http_code'] == 200) {
                     @fclose($files[$info['url']]);
@@ -465,7 +463,9 @@ class Mirror
 
                     if (next(static::$mirrors)) {
                         Log::write_log(Language::t("Try next mirror %s", current(static::$mirrors)['host']), 3, static::$version);
+                        var_dump($info);
                         $options[CURLOPT_URL] = str_replace(prev(static::$mirrors)['host'], next(static::$mirrors)['host'], $info['url']);
+                        var_dump($options);
                         curl_multi_remove_handle($master, $ch);
                         curl_close($ch);
                         unset($ch);
