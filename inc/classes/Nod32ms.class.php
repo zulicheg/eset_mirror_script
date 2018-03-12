@@ -88,7 +88,7 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $fn = Tools::ds(Config::get('LOG')['dir'], DATABASES_SIZE);
-        $sizes = array();
+        $sizes = [];
 
         if (file_exists($fn)) {
             $handle = file_get_contents($fn);
@@ -106,7 +106,7 @@ class Nod32ms
         @unlink($fn);
 
         foreach ($sizes as $key => $name)
-            Log::write_to_file(DATABASES_SIZE, "$key:$name\r\n");
+            Log::write_to_file($fn, "$key:$name\r\n");
     }
 
     /**
@@ -116,7 +116,7 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $fn = Tools::ds(Config::get('LOG')['dir'], DATABASES_SIZE);
-        $sizes = array();
+        $sizes = [];
 
         if (file_exists($fn)) {
             $handle = file_get_contents($fn);
@@ -141,7 +141,7 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         $d = dir($directory);
-        static $ar_patterns = array();
+        static $ar_patterns = [];
 
         while (false !== ($entry = $d->read())) {
             if (($entry == '.') || ($entry == '..'))
