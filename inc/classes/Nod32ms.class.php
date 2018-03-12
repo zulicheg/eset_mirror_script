@@ -504,7 +504,7 @@ class Nod32ms
         $ESET = Config::get('ESET');
         $html_page = '';
 
-        if (Config::get('generate_only_table') == '0') {
+        if (Config::get('SCRIPT')['generate_only_table'] == '0') {
             $html_page .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">';
             $html_page .= '<html>';
             $html_page .= '<head>';
