@@ -22,6 +22,7 @@ class Nod32ms
 
     /**
      * Nod32ms constructor.
+     * @throws Exception
      * @throws ToolsException
      */
     public function __construct()
@@ -532,7 +533,7 @@ class Nod32ms
         foreach ($DIRECTORIES as $ver => $dir) {
             if (Config::upd_version_is_set($ver) == '1') {
                 $update_ver = Tools::ds($web_dir, $dir, 'update.ver');
-                $version = Tools::get_DB_version($update_ver);
+                $version = Mirror::get_DB_version($update_ver);
                 $timestamp = $this->check_time_stamp($ver, true);
                 $html_page .= '<tr>';
                 $html_page .= '<td>' . $ver . '</td>';
@@ -599,6 +600,7 @@ class Nod32ms
     }
 
     /**
+     * @throws Exception
      * @throws ToolsException
      */
     private function run_script()
