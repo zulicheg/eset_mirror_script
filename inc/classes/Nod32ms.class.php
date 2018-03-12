@@ -591,10 +591,6 @@ class Nod32ms
         $html_page .= (Config::get('SCRIPT')['generate_only_table'] == '0') ? '</td></tr></table></body></html>' : '';
         $file = Tools::ds($web_dir, Config::get('SCRIPT')['filename_html']);
 
-
-        var_dump($file);
-        var_dump($html_page);
-
         if (file_exists($file)) @unlink($file);
 
         Log::write_to_file($file, Tools::conv($html_page, Config::get('SCRIPT')['html_codepage']));
