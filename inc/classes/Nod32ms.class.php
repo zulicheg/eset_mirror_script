@@ -592,7 +592,7 @@ class Nod32ms
 
         if (file_exists($file)) @unlink($file);
 
-        Log::write_to_file($file, Tools::conv($html_page, Config::get('SCRIPT')['html_codepage']), true);
+        Log::write_to_file($file, Tools::conv($html_page, Config::get('SCRIPT')['html_codepage']));
     }
 
     /**
