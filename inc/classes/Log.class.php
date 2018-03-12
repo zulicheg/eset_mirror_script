@@ -66,12 +66,10 @@ class Log
     /**
      * @param $filename
      * @param $text
-     * @param bool $is_log_dir
      */
-    static public function write_to_file($filename, $text, $is_log_dir = false)
+    static public function write_to_file($filename, $text)
     {
-        $file_name = $is_log_dir ? $filename : Tools::ds(static::$CONF['dir'], $filename);
-        $f = fopen($file_name, "a+");
+        $f = fopen($filename, "a+");
 
         if (!feof($f)) fwrite($f, $text);
 
