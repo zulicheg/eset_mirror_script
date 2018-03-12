@@ -142,10 +142,10 @@ class Config
         @mkdir(PATTERN, 0755, true);
         @mkdir(static::$CONF['LOG']['dir'], 0755, true);
         @mkdir(static::$CONF['SCRIPT']['web_dir'], 0755, true);
-        @mkdir(Tools::ds(static::$CONF['SCRIPT']['web_dir'], TMP_PATH, 0755, true));
+        @mkdir(Tools::ds(static::$CONF['SCRIPT']['web_dir'], TMP_PATH), 0755, true);
 
         if (static::$CONF['SCRIPT']['debug_html'] == 1)
-            @mkdir(Tools::ds(static::$CONF['LOG']['dir'], DEBUG_DIR, 0755, true));
+            @mkdir(Tools::ds(static::$CONF['LOG']['dir'], DEBUG_DIR), 0755, true);
 
         if (static::$CONF['MAILER']['enable'] == 1) {
             if (empty(static::$CONF['MAILER']['sender']) ||
