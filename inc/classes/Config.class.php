@@ -13,7 +13,7 @@ class Config
     /**
      * @var array
      */
-    static private $LCID = array(
+    static private $LCID = [
         'bgr' => 1026,
         'chs' => 2052,
         'cht' => 1028,
@@ -44,7 +44,7 @@ class Config
         'tha' => 1054,
         'trk' => 1055,
         'ukr' => 1058
-    );
+    ];
 
     /**
      * @throws ConfigException
@@ -66,8 +66,7 @@ class Config
         // Convert string languages in array LCID
         $lang = explode(",", strtoupper(static::$CONF['ESET']['lang']));
         sort($lang);
-        static::$CONF['present_languages'] = implode(", ", array_map("trim", ($lang)));
-        $languages = array();
+        $languages = [];
         $langs = array_map("trim", (explode(",", strtolower(static::$CONF['ESET']['lang']))));
 
         foreach ($langs as $key) $languages[] = static::$LCID[$key];
