@@ -556,7 +556,7 @@ class Nod32ms
 
         $html_page .= '<tr>';
         $html_page .= '<td colspan="2">' . Language::t("Present languages") . '</td>';
-        $html_page .= '<td colspan="2">' . $ESET['lang'] . '</td>';
+        $html_page .= '<td colspan="2">' . implode(", ", $ESET['lang']) . '</td>';
         $html_page .= '</tr>';
 
         $html_page .= '<tr>';
