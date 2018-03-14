@@ -437,6 +437,10 @@ class Mirror
                 }
             }
 
+            Log::write_log(Language::t("Second block"), 5, static::$version);
+            var_dump($files);
+            var_dump($threads);
+
             do {
                 usleep(50000);
                 curl_multi_exec($master, $running);
