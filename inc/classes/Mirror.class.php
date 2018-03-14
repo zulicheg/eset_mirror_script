@@ -362,7 +362,7 @@ class Mirror
             $files[Tools::get_resource_id($ch)] = [
                 'file' => $file,
                 'curl' => $ch,
-                'fd' => &$options[CURLOPT_FILE],
+                'fd' => $options[CURLOPT_FILE],
                 'mirror' => current(static::$mirrors)['host'],
                 'path' => $path,
             ];
@@ -373,7 +373,7 @@ class Mirror
                 curl_multi_add_handle($master, $file['curl']);
                 $threads++;
 
-                while ($threads >= $max_threads) {
+                /*while ($threads >= $max_threads) {
                     usleep(50000);
                     curl_multi_exec($master, $running);
 
@@ -434,7 +434,7 @@ class Mirror
                             reset(static::$mirrors);
                         }
                     }
-                }
+                }*/
             }
 
             Log::write_log(Language::t("Second block"), 5, static::$version);
@@ -442,6 +442,7 @@ class Mirror
             var_dump($threads);
 
             do {
+                Log::write_log(Language::t("Do block"), 5, static::$version);
                 usleep(50000);
                 curl_multi_exec($master, $running);
 
