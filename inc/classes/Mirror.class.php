@@ -457,6 +457,7 @@ class Mirror
                     $id = Tools::get_resource_id($ch);
                     $info = curl_getinfo($ch);
                     $host = $files[$id]['mirror'];
+                    print_r($files[$id]);
                     if ($info['http_code'] == 200 && $file['file']['size'] == $info['download_content_length']) {
                         @fclose($files[$id]['fd']);
                         unset($files[$id]);
