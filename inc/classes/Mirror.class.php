@@ -444,7 +444,6 @@ class Mirror
 
             do {
                 Log::write_log(Language::t("Running %s: threads %s in do", __METHOD__, $threads), 5, static::$version);
-                print_r($file);
 
                 usleep(50000);
                 curl_multi_exec($master, $running);
@@ -506,7 +505,7 @@ class Mirror
                         reset(static::$mirrors);
                     }
                 }
-            } while ($running);
+            } while (!empty($files));
         }
 
         curl_multi_close($master);
