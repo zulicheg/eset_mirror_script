@@ -374,7 +374,7 @@ class Mirror
                 $threads++;
                 Log::write_log(Language::t("Running %s: threads %s in foreach", __METHOD__, $threads), 5, static::$version);
 
-                while (($threads >= $max_threads and $max_threads != 0)) {
+                while (($threads >= $max_threads and $CONNECTION['download_threads'] != 0)) {
                     Log::write_log(Language::t("Running %s: threads %s in while", __METHOD__, $threads), 5, static::$version);
 
                     usleep(50000);
