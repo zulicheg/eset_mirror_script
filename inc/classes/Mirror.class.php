@@ -373,11 +373,9 @@ class Mirror
                 curl_multi_add_handle($master, $file['curl']);
                 $threads++;
                 Log::write_log(Language::t("Running %s: threads %s in foreach", __METHOD__, $threads), 5, static::$version);
-                print_r($file);
 
                 while (($threads >= $max_threads and $max_threads != 0)) {
                     Log::write_log(Language::t("Running %s: threads %s in while", __METHOD__, $threads), 5, static::$version);
-                    print_r($file);
 
                     usleep(50000);
                     curl_multi_exec($master, $running);
