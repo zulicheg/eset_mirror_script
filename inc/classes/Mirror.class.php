@@ -450,16 +450,19 @@ class Mirror
 
                 do {
                     $status = curl_multi_exec($master, $running);
+                    Log::write_log(Language::t("Threads %s in do doing do status=%s running=%s", $threads, $status, $running), 5, static::$version);
                     usleep(10000);
                 } while ($status == CURLM_CALL_MULTI_PERFORM || $running);
 
                 while ($done = curl_multi_info_read($master)) {
+                    Log::write_log(Language::t("Threads %s in do doing while"), 5, static::$version);
                     $ch = $done['handle'];
                     $id = Tools::get_resource_id($ch);
                     $info = curl_getinfo($ch);
-                    $host = $files[$id]['mirror'];
+                    $file = $files[$id];
+                    $host = $file['mirror'];
                     if ($info['http_code'] == 200 && $file['file']['size'] == $info['download_content_length']) {
-                        @fclose($files[$id]['fd']);
+                        @fclose($file['fd']);
                         unset($files[$id]);
                         Log::write_log(
                             Language::t("From %s downloaded %s [%s] [%s/s]", $host, basename($info['url']),
