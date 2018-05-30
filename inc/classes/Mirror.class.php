@@ -561,9 +561,9 @@ class Mirror
 
         switch (function_exists('curl_multi_init')) {
             case true:
-                static::multi_download($download_files);
+  /*              static::multi_download($download_files);
                 break;
-            case false:
+  */          case false:
             default:
                 static::single_download($download_files);
                 break;
