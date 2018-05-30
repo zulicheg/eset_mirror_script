@@ -57,8 +57,11 @@ timeout = 5
 ; Подключаться используя Proxy
 proxy = 0
 
+; http, socks4, socks4a, socks5
+type        = 'http'
+
 ; Параметры Proxy
-server      = 'http://proxy.example.com'
+server      = 'proxy.example.com'
 port        = 3128
 user        = 'username'
 password    = 'pass'

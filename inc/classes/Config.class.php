@@ -241,6 +241,22 @@ class Config
             $options[CURLOPT_PROXY] = static::$CONF['CONNECTION']['server'];
             $options[CURLOPT_PROXYPORT] = static::$CONF['CONNECTION']['port'];
 
+            switch (static::$CONF['CONNECTION']['type']) {
+                case 'socks4':
+                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_SOCKS4;
+                    break;
+                case 'socks4a':
+                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_SOCKS4A;
+                    break;
+                case 'socks5':
+                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_SOCKS5;
+                    break;
+                case 'http':
+                default:
+                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_HTTP;
+                    break;
+            }
+
             if (!empty(static::$CONF['CONNECTION']['user'])) {
                 $options[CURLOPT_PROXYUSERNAME] = static::$CONF['CONNECTION']['user'];
                 $options[CURLOPT_PROXYPASSWORD] = static::$CONF['CONNECTION']['password'];

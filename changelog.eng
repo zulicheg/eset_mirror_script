@@ -1,3 +1,7 @@
+20180530:
+ Added:
+  - Proxy types support(http, socks4, socks4a, socks5)
+
 20180305:
  Changed:
   - Now configuration file is a full ini-compatible with sections

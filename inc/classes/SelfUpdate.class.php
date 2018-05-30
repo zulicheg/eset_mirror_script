@@ -199,6 +199,22 @@ class SelfUpdate
             $options[CURLOPT_PROXY] = static::$CONNECTION['server'];
             $options[CURLOPT_PROXYPORT] = static::$CONNECTION['port'];
 
+            switch (static::$CONNECTION['type']) {
+                case 'socks4':
+                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_SOCKS4;
+                    break;
+                case 'socks4a':
+                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_SOCKS4A;
+                    break;
+                case 'socks5':
+                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_SOCKS5;
+                    break;
+                case 'http':
+                default:
+                $options[CURLOPT_PROXYTYPE] =  CURLPROXY_HTTP;
+                    break;
+            }
+
             if (!empty(static::$CONNECTION['user'])) {
                 $options[CURLOPT_PROXYUSERNAME] = static::$CONNECTION['user'];
                 $options[CURLOPT_PROXYPASSWORD] = static::$CONNECTION['password'];

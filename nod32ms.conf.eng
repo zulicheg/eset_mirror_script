@@ -56,7 +56,9 @@ timeout = 5
 ; 0 - disable
 ; 1 - enable
 proxy       = 0
-server      = 'http://proxy.example.com'
+; http, socks4, socks4a, socks5
+type        = 'http'
+server      = 'proxy.example.com'
 port        = 3128
 user        = 'username'
 password    = 'pass'
