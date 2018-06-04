@@ -275,7 +275,7 @@ class Nod32ms
         $log_dir = Config::get('LOG')['dir'];
 
         ($this->key_exists_in_file($login, $password, static::$key_invalid_file) == false) ?
-            Log::write_to_file(Tools::ds($log_dir, static::$key_invalid_file), "$login:$password:" . Mirror::$version . "\r\n") :
+            Log::write_to_file(static::$key_invalid_file, "$login:$password:" . Mirror::$version . "\r\n") :
             Log::write_log(Language::t("Key [%s:%s] already exists", $login, $password), 4, Mirror::$version);
 
         if (Config::get('remove_invalid_keys') == 1)
