@@ -1,3 +1,7 @@
+20180617:
+ Fixed:
+  - invalid keys removing
+
 20180530:
  Added:
   - Proxy types support(http, socks4, socks4a, socks5)

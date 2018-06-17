@@ -55,7 +55,6 @@ class Nod32ms
     private function check_time_stamp($version, $return_time_stamp = false)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, $version);
-        $days = Config::get('icq_informer_days') * 24 * 60 * 60;
         $fn = Tools::ds(Config::get('LOG')['dir'], SUCCESSFUL_TIMESTAMP);
         $timestamps = array();
 
@@ -71,9 +70,7 @@ class Nod32ms
             }
 
             if (isset($timestamps[$version])) {
-                if ($timestamps[$version] + $days < time()) {
-                    return $timestamps[$version];
-                } elseif ($return_time_stamp) {
+                if ($return_time_stamp) {
                     return $timestamps[$version];
                 }
             }
@@ -278,7 +275,7 @@ class Nod32ms
             Log::write_to_file(static::$key_invalid_file, "$login:$password:" . Mirror::$version . "\r\n") :
             Log::write_log(Language::t("Key [%s:%s] already exists", $login, $password), 4, Mirror::$version);
 
-        if (Config::get('remove_invalid_keys') == 1)
+        if (Config::get('FIND')['remove_invalid_keys'] == 1)
             Parser::delete_parse_line_in_file($login . ':' . $password . ':' . Mirror::$version, static::$key_valid_file);
     }
 
@@ -374,7 +371,7 @@ class Nod32ms
         $login = array();
         $password = array();
 
-        if (Config::get('debug_html') == 1) {
+        if (Config::get('SCRIPT')['debug_html'] == 1) {
             $path_info = pathinfo($this_link);
             $dir = Tools::ds(Config::get('LOG')['dir'], DEBUG_DIR, $path_info['basename']);
             @mkdir($dir, 0755, true);
