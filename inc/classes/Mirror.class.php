@@ -170,7 +170,7 @@ class Mirror
         );
 
         if (is_array($headers) and $headers['http_code'] == 200) {
-            if (preg_match("/text/", $headers['content_type'])) {
+            if (preg_match("/text/", Tools::get_file_mimetype($archive))) {
                 rename($archive, $extracted);
             } else {
                 Log::write_log(Language::t("Extracting file %s to %s", $archive, $tmp_path), 5, static::$version);
@@ -561,9 +561,10 @@ class Mirror
 
         switch (function_exists('curl_multi_init')) {
             case true:
-  /*              static::multi_download($download_files);
-                break;
-  */          case false:
+                /*              static::multi_download($download_files);
+                              break;
+                */
+            case false:
             default:
                 static::single_download($download_files);
                 break;
