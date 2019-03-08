@@ -170,7 +170,7 @@ class Mirror
         );
 
         if (is_array($headers) and $headers['http_code'] == 200) {
-            if (preg_match("/text/", Tools::get_file_mimetype($archive))) {
+            if (preg_match("/text/", $headers['content_type'])) {
                 rename($archive, $extracted);
             } else {
                 Log::write_log(Language::t("Extracting file %s to %s", $archive, $tmp_path), 5, static::$version);
@@ -325,8 +325,6 @@ class Mirror
             , $headers
         );
         $LicInfo = [];
-        Log::write_log(Language::t("%s", json_encode($headers)), 5, static::$version);
-        Log::write_log(Language::t("%s", $response), 5, static::$version);
 
         if ($response == "unknownlic\n") return false;
 
@@ -334,9 +332,7 @@ class Mirror
             foreach ((new SimpleXMLElement($response))->xpath('SECTION/LICENSEINFO/NODE')[0]->attributes() as $key => $value)
                 $LicInfo[$key] = (string)$value;
         }
-        Log::write_log(Language::t("%s", json_encode($LicInfo)), 5, static::$version);
-        Log::write_log(Language::t("%s", date('d.m.Y', hexdec($LicInfo['VALUE']))), 5, static::$version);
-sleep(30);
+
         return date('d.m.Y', hexdec($LicInfo['VALUE']));
     }
 
@@ -565,10 +561,9 @@ sleep(30);
 
         switch (function_exists('curl_multi_init')) {
             case true:
-                /*              static::multi_download($download_files);
-                              break;
-                */
-            case false:
+  /*              static::multi_download($download_files);
+                break;
+  */          case false:
             default:
                 static::single_download($download_files);
                 break;

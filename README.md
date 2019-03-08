@@ -22,7 +22,6 @@ Script to run own eset mirror
 
 # PHP modules
 - curl
-- fileinfo
 - iconv
 - mbstring
 - openssl

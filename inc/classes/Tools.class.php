@@ -46,17 +46,6 @@ class Tools
 
     /**
      * @param $file
-     * @return string
-     */
-    static public function get_file_mimetype($file)
-    {
-        $f = new finfo();
-        $info = $f->file($file, FILEINFO_MIME_TYPE);
-        return $info;
-    }
-
-    /**
-     * @param $file
      */
     static public function archive_file($file)
     {
@@ -104,10 +93,10 @@ class Tools
     {
         static::download_file(
             ([
-                    CURLOPT_URL => "http://" . $hostname . "/" . $file,
-                    CURLOPT_PORT => $port,
-                    CURLOPT_NOBODY => 1
-                ] + $options),
+                CURLOPT_URL => "http://" . $hostname . "/" . $file,
+                CURLOPT_PORT => $port,
+                CURLOPT_NOBODY => 1
+            ] + $options),
             $headers
         );
         return (is_array($headers)) ? true : false;
