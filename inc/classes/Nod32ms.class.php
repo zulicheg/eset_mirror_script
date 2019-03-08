@@ -171,12 +171,14 @@ class Nod32ms
 
         Mirror::set_key(array($result[0], $result[1]));
         $date = $this->get_expire_date();
-
+        Log::write_log(Language::t("%s", $date), 5, Mirror::$version);
+return true;
         if ($date == false) {
             $this->delete_key($result[0], $result[1]);
             return false;
         }
         $parsed_date = date_parse_from_format($format, $date);
+        Log::write_log(Language::t("%s", $parsed_date), 5, Mirror::$version);
 
         if ((
                 ($parsed_date['day'] >= $current_date['day']) &&
@@ -194,6 +196,7 @@ class Nod32ms
             $ret = Mirror::test_key();
         } else {
             Log::write_log(Language::t("Found expired key [%s:%s] Expiration date %s", $result[0], $result[1], $date), 4, Mirror::$version);
+exit(0);
             $this->delete_key($result[0], $result[1]);
             return false;
         }
@@ -354,11 +357,11 @@ class Nod32ms
         static $found_key = false;
         $search = Tools::download_file(
             ([
-                CURLOPT_URL => $this_link,
-                CURLOPT_RETURNTRANSFER => 1,
-                CURLOPT_NOBODY => 0,
-                CURLOPT_USERAGENT => "Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201"
-            ] + Config::getConnectionInfo()),
+                    CURLOPT_URL => $this_link,
+                    CURLOPT_RETURNTRANSFER => 1,
+                    CURLOPT_NOBODY => 0,
+                    CURLOPT_USERAGENT => "Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201"
+                ] + Config::getConnectionInfo()),
             $headers
         );
 
@@ -548,7 +551,7 @@ class Nod32ms
 
         $html_page .= '<tr>';
         $html_page .= '<td colspan="2">' . Language::t("Present platforms") . '</td>';
-        $html_page .= '<td colspan="2">' . ($ESET['x32'] == 1 ? '32bit' : '') . ($ESET['x64'] == 1  ? ($ESET['x32'] ? ', 64bit' : '64bit') : '') . '</td>';
+        $html_page .= '<td colspan="2">' . ($ESET['x32'] == 1 ? '32bit' : '') . ($ESET['x64'] == 1 ? ($ESET['x32'] ? ', 64bit' : '64bit') : '') . '</td>';
         $html_page .= '</tr>';
 
         $html_page .= '<tr>';
@@ -676,10 +679,10 @@ class Nod32ms
         Log::write_log(Language::t("Total size for all databases: %s", Tools::bytesToSize1024(array_sum($total_size))), 3);
 
         if (array_sum($total_downloads) > 0)
-           Log::write_log(Language::t("Total downloaded for all databases: %s", Tools::bytesToSize1024(array_sum($total_downloads))), 3);
+            Log::write_log(Language::t("Total downloaded for all databases: %s", Tools::bytesToSize1024(array_sum($total_downloads))), 3);
 
         if (array_sum($average_speed) > 0)
-           Log::write_log(Language::t("Average speed for all databases: %s/s", Tools::bytesToSize1024(array_sum($average_speed) / count($average_speed))), 3);
+            Log::write_log(Language::t("Average speed for all databases: %s/s", Tools::bytesToSize1024(array_sum($average_speed) / count($average_speed))), 3);
 
         if (Config::get('SCRIPT')['generate_html'] == '1') $this->generate_html();
     }

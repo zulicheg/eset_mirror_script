@@ -37,10 +37,10 @@ class SelfUpdate
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         $content = Tools::download_file(
             ([
-                CURLOPT_URL => "http://" . static::$CONF['server'] . "/" . static::$CONF['dir'] . "/" . static::$CONF['file'],
-                CURLOPT_PORT => static::$CONF['port'],
-                CURLOPT_RETURNTRANSFER => 1
-            ] + static::getConnectionInfo()),
+                    CURLOPT_URL => "http://" . static::$CONF['server'] . "/" . static::$CONF['dir'] . "/" . static::$CONF['file'],
+                    CURLOPT_PORT => static::$CONF['port'],
+                    CURLOPT_RETURNTRANSFER => 1
+                ] + static::getConnectionInfo()),
             $headers);
         $arr = [];
 
@@ -85,10 +85,10 @@ class SelfUpdate
         Log::write_log(Language::t("Running %s", __METHOD__), 5, null);
         $response = Tools::download_file(
             ([
-                CURLOPT_URL => "http://" . static::$CONF['server'] . "/" . static::$CONF['dir'] . "/" . static::$CONF['version'],
-                CURLOPT_PORT => static::$CONF['port'],
-                CURLOPT_RETURNTRANSFER => 1
-            ] + static::getConnectionInfo()),
+                    CURLOPT_URL => "http://" . static::$CONF['server'] . "/" . static::$CONF['dir'] . "/" . static::$CONF['version'],
+                    CURLOPT_PORT => static::$CONF['port'],
+                    CURLOPT_RETURNTRANSFER => 1
+                ] + static::getConnectionInfo()),
             $headers);
         return trim($response);
     }
@@ -106,10 +106,10 @@ class SelfUpdate
             Log::write_log(Language::t("Downloading %s [%s Bytes]", basename($filename), $info), 0);
             Tools::download_file(
                 ([
-                    CURLOPT_URL => $remote_full_path,
-                    CURLOPT_PORT => static::$CONF['port'],
-                    CURLOPT_FILE => $fs_filename
-                ]  + static::getConnectionInfo()),
+                        CURLOPT_URL => $remote_full_path,
+                        CURLOPT_PORT => static::$CONF['port'],
+                        CURLOPT_FILE => $fs_filename
+                    ] + static::getConnectionInfo()),
                 $headers);
 
             if (is_string($headers))
@@ -201,17 +201,17 @@ class SelfUpdate
 
             switch (static::$CONNECTION['type']) {
                 case 'socks4':
-                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_SOCKS4;
+                    $options[CURLOPT_PROXYTYPE] = CURLPROXY_SOCKS4;
                     break;
                 case 'socks4a':
-                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_SOCKS4A;
+                    $options[CURLOPT_PROXYTYPE] = CURLPROXY_SOCKS4A;
                     break;
                 case 'socks5':
-                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_SOCKS5;
+                    $options[CURLOPT_PROXYTYPE] = CURLPROXY_SOCKS5;
                     break;
                 case 'http':
                 default:
-                $options[CURLOPT_PROXYTYPE] =  CURLPROXY_HTTP;
+                    $options[CURLOPT_PROXYTYPE] = CURLPROXY_HTTP;
                     break;
             }
 
