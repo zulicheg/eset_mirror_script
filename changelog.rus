@@ -1,3 +1,7 @@
+20190309:
+ Удалено:
+  - Mirror::exp_nod метод
+
 20180711:
  Добавлено:
   - Метод Tools::get_file_mimetype

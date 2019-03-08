@@ -222,9 +222,8 @@ class Nod32ms
     /**
      * @param string $login
      * @param string $password
-     * @param string $date
      */
-    private function write_key($login, $password, $date)
+    private function write_key($login, $password)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         Log::write_log(Language::t("Found valid key [%s:%s]", $login, $password), 4, Mirror::$version);
