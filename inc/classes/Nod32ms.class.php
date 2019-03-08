@@ -164,43 +164,15 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $result = explode(":", $key);
-        $format = 'd.m.Y';
-        $current_date = date_parse_from_format($format, strftime('%d.%m.%Y'));
         Log::write_log(Language::t("Validating key [%s:%s]", $result[0], $result[1]), 4, Mirror::$version);
         if ($this->key_exists_in_file($result[0], $result[1], static::$key_invalid_file)) return false;
 
         Mirror::set_key(array($result[0], $result[1]));
-        $date = $this->get_expire_date();
-
-        if ($date == false) {
-            $this->delete_key($result[0], $result[1]);
-            return false;
-        }
-        $parsed_date = date_parse_from_format($format, $date);
-
-        if ((
-                ($parsed_date['day'] >= $current_date['day']) &&
-                ($parsed_date['month'] == $current_date['month']) &&
-                ($parsed_date['year'] == $current_date['year'])
-            )
-            ||
-            (
-                ($parsed_date['month'] > $current_date['month']) &&
-                ($parsed_date['year'] >= $current_date['year'])
-            )
-            ||
-            ($parsed_date['year'] > $current_date['year'])
-        ) {
-            $ret = Mirror::test_key();
-        } else {
-            Log::write_log(Language::t("Found expired key [%s:%s] Expiration date %s", $result[0], $result[1], $date), 4, Mirror::$version);
-            $this->delete_key($result[0], $result[1]);
-            return false;
-        }
+        $ret = Mirror::test_key();
 
         if (is_bool($ret)) {
             if ($ret) {
-                $this->write_key($result[0], $result[1], $date);
+                $this->write_key($result[0], $result[1]);
                 return true;
             } else {
                 $this->delete_key($result[0], $result[1]);
@@ -255,10 +227,10 @@ class Nod32ms
     private function write_key($login, $password, $date)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        Log::write_log(Language::t("Found valid key [%s:%s] Expiration date %s", $login, $password, $date), 4, Mirror::$version);
+        Log::write_log(Language::t("Found valid key [%s:%s]", $login, $password), 4, Mirror::$version);
         ($this->key_exists_in_file($login, $password, static::$key_valid_file) == false) ?
-            Log::write_to_file(static::$key_valid_file, "$login:$password:" . Mirror::$version . ":$date\r\n") :
-            Log::write_log(Language::t("Key [%s:%s:%s:%s] already exists", $login, $password, Mirror::$version, $date), 4, Mirror::$version);
+            Log::write_to_file(static::$key_valid_file, "$login:$password:" . Mirror::$version . "\r\n") :
+            Log::write_log(Language::t("Key [%s:%s:%s] already exists", $login, $password, Mirror::$version), 4, Mirror::$version);
     }
 
     /**
