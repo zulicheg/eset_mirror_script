@@ -243,17 +243,17 @@ class Config
 
             switch (static::$CONF['CONNECTION']['type']) {
                 case 'socks4':
-                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_SOCKS4;
+                    $options[CURLOPT_PROXYTYPE] = CURLPROXY_SOCKS4;
                     break;
                 case 'socks4a':
-                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_SOCKS4A;
+                    $options[CURLOPT_PROXYTYPE] = CURLPROXY_SOCKS4A;
                     break;
                 case 'socks5':
-                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_SOCKS5;
+                    $options[CURLOPT_PROXYTYPE] = CURLPROXY_SOCKS5;
                     break;
                 case 'http':
                 default:
-                    $options[CURLOPT_PROXYTYPE] =  CURLPROXY_HTTP;
+                    $options[CURLOPT_PROXYTYPE] = CURLPROXY_HTTP;
                     break;
             }
 

@@ -1,3 +1,9 @@
+20180711:
+ Added:
+  - Tools::get_file_mimetype method
+ Fixed:
+  - get file mimetype for update.ver by fileinfo module
+
 20180617:
  Fixed:
   - invalid keys removing
