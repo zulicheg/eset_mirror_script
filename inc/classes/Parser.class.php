@@ -31,7 +31,7 @@ class Parser
     static public function parse_keys($file)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        return static::parse_line(@file_get_contents($file), false, "/(.+:.+:.+:.+)\n/");
+        return static::parse_line(@file_get_contents($file), false, "/(.+:.+:.+)\n/");
     }
 
     /**

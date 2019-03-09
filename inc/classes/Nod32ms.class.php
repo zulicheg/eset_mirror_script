@@ -184,15 +184,6 @@ class Nod32ms
     }
 
     /**
-     * @return false|string
-     */
-    private function get_expire_date()
-    {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        return Mirror::exp_nod();
-    }
-
-    /**
      * @return array|null
      */
     private function read_keys()
@@ -200,7 +191,7 @@ class Nod32ms
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
 
         if (!file_exists(static::$key_valid_file)) {
-            $h = fopen(static::$key_valid_file, 'w');
+            $h = fopen(static::$key_valid_file, 'r');
             fclose($h);
         }
 
@@ -208,7 +199,6 @@ class Nod32ms
 
         if (!isset($keys) || !count($keys)) {
             Log::write_log(Language::t("Keys file is empty!"), 4, Mirror::$version);
-            return null;
         }
 
         foreach ($keys as $value) {
