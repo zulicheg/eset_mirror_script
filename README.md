@@ -11,7 +11,7 @@ Script to run own eset mirror
 - edit lines in nod32ms.conf
 
 # If you have valid login:password
-- set them into log/nod_keys.valid in format login:password:version:expire_date(expiration date will be set automatically when script check them)
+- set them into log/nod_keys.valid in format login:password:version
 
 # Run
 - run php update.php
