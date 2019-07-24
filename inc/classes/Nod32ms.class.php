@@ -604,7 +604,14 @@ class Nod32ms
 
                     if (!empty(Mirror::$mirrors)) {
                         foreach (Mirror::$mirrors as $id => $mirror) {
+
                             list($size, $downloads, $speed) = Mirror::download_signature();
+
+                            if (Mirror::$unAuthorized) {
+                                $keys = $this->read_keys();
+                                $this->delete_key($keys[0],$keys[1]);
+                            }
+
                             $this->set_database_size($size);
 
                             if (!Mirror::$updated && !$this->compare_versions($old_version, $mirror['db_version'])) {

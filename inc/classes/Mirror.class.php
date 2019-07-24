@@ -45,6 +45,9 @@ class Mirror
      */
     static private $ESET;
 
+
+    static public $unAuthorized = false;
+
     /**
      *
      */
@@ -211,8 +214,8 @@ class Mirror
 
             // Download files
             if (!empty($download_files)) {
-                static::$updated = true;
                 static::download_files($download_files);
+                static::$updated = !static::$unAuthorized;
             }
 
             // Delete not needed files
@@ -460,7 +463,11 @@ class Mirror
                     );
                     static::$total_downloads += $header['size_download'];
                     break;
-                } else {
+                } else if ($header['http_code'] == 401) {
+                     static::$unAuthorized = true;
+                     return null;
+                }
+                else {
                     @unlink($out);
                 }
             }

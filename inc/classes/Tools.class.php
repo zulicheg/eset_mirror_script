@@ -25,6 +25,7 @@ class Tools
         $ch = curl_init();
         curl_setopt_array($ch, $options);
         $res = curl_exec($ch);
+
         $headers = curl_getinfo($ch);
         if ($out) @fclose($out);
         curl_close($ch);
