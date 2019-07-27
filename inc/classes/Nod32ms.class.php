@@ -191,7 +191,7 @@ class Nod32ms
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
 
         if (!file_exists(static::$key_valid_file)) {
-            $h = fopen(static::$key_valid_file, 'r');
+            $h = fopen(static::$key_valid_file, 'x');
             fclose($h);
         }
 
@@ -628,7 +628,6 @@ class Nod32ms
                                 } else {
                                     Log::informer(Language::t("Your database was successfully updated to %s", $mirror['db_version']), Mirror::$version, 2);
                                 }
-
                                 break;
                             }
                         }

@@ -1,3 +1,10 @@
+20190727
+ Added:
+  - 2 mirrors
+ Fixed:
+  - No created folder logs at first start
+  - Remove tmp update.ver files when key invalid
+
 20190309:
  Removed:
   - Mirror::exp_nod method

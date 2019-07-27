@@ -464,8 +464,9 @@ class Mirror
                     static::$total_downloads += $header['size_download'];
                     break;
                 } else if ($header['http_code'] == 401) {
-                     static::$unAuthorized = true;
-                     return null;
+                    static::$unAuthorized = true;
+                    @unlink($out);
+                    return null;
                 }
                 else {
                     @unlink($out);
