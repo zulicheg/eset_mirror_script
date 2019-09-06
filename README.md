@@ -36,6 +36,3 @@ Script to create own eset mirror
 
 # Cron simple job
 @hourly **[path to php]** **[path to update.php]**
-
-
-[]: https://t.me/nod32trialKeys
