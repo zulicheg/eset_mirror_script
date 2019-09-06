@@ -552,7 +552,7 @@ class Nod32ms
         $html_page .= '<td colspan="2"><a href="https://t.me/nod32trialKeys" target="_blank">NOD32 Trial Keys Telegram Channel</a></td>';
         $html_page .= '</tr>';
 
-        
+
         if (Config::get('SCRIPT')['show_login_password']) {
             if (file_exists(static::$key_valid_file)) {
                 $keys = Parser::parse_keys(static::$key_valid_file);
