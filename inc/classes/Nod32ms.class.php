@@ -547,6 +547,12 @@ class Nod32ms
         $html_page .= '<td colspan="2">' . (static::$start_time ? date("Y-m-d, H:i:s", static::$start_time) : Language::t("n/a")) . '</td>';
         $html_page .= '</tr>';
 
+        $html_page .= '<tr>';
+        $html_page .= '<td colspan="2">Telegram Channel: NOD32 Trial Keys</td>';
+        $html_page .= '<td colspan="2"><a href="https://t.me/nod32trialKeys" target="_blank">NOD32 Trial Keys Telegram Channel</a></td>';
+        $html_page .= '</tr>';
+
+        
         if (Config::get('SCRIPT')['show_login_password']) {
             if (file_exists(static::$key_valid_file)) {
                 $keys = Parser::parse_keys(static::$key_valid_file);
@@ -571,7 +577,7 @@ class Nod32ms
             }
         }
         $html_page .= '</table>';
-        $html_page .= (Config::get('SCRIPT')['generate_only_table'] == '0') ? '</td></tr></table><br/><a href="https://t.me/nod32trialKeys" target="_blank">NOD32 Trial Keys Telegram Channel</a></body></html>' : '';
+        $html_page .= (Config::get('SCRIPT')['generate_only_table'] == '0') ? '</td></tr></table></body></html>' : '';
         $file = Tools::ds($web_dir, Config::get('SCRIPT')['filename_html']);
 
         if (file_exists($file)) @unlink($file);
