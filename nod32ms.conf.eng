@@ -150,6 +150,24 @@ rotate_qty = 5
 ; "pattern" directory.
 auto = 1
 
+; ###########################
+; added: september 2019
+; author: Kingston (kingston1853@gmail.com)
+
+; This parameter is responsible for the ability to take keys from the key server
+;  Trial keys, official, it is possible to take a unique key with the ability to automatically update the key
+; If the option is enabled, then the key search does not occur.
+use_server = 1
+
+; If the use_server parameter is enabled at the specified address, a request for keys
+; Keys are always current, automatically updated
+;
+server_url = "https://api.nod32-trial-keys.site/api/single-license"
+
+; ###########################
+; end
+
+
 ; If emptuy, will use all patterns in "pattern" dir.
 ; If you want to use specified pattern to search keys (located in "patterns"
 ; dir) you should write its file name without extension (.pattern).

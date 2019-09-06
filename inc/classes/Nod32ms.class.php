@@ -388,12 +388,37 @@ class Nod32ms
     }
 
     /**
+     * @return bool
+     */
+    private function get_key_from_server()
+    {
+        Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
+        $FIND = Config::get('FIND');
+
+        if ($FIND['use_server']) {
+            try {
+                $key = file_get_contents($FIND['server_url']);
+                $key = json_decode($key, true);
+                if ($this->validate_key($key['username'] . ':' . $key['password'])) {
+                    return true;
+                }
+            } catch (Exception $ex)
+            {
+                Log::write_log(Language::t("Error %s", $ex->getMessage()), 5, Mirror::$version);
+            }
+        }
+        return false;
+    }
+
+    /**
      * @return null
      */
     private function find_keys()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $FIND = Config::get('FIND');
+
+        if ($this->get_key_from_server()) return null;
 
         if ($FIND['auto'] != 1)
             return null;
@@ -546,7 +571,7 @@ class Nod32ms
             }
         }
         $html_page .= '</table>';
-        $html_page .= (Config::get('SCRIPT')['generate_only_table'] == '0') ? '</td></tr></table></body></html>' : '';
+        $html_page .= (Config::get('SCRIPT')['generate_only_table'] == '0') ? '</td></tr></table><br/><a href="https://t.me/nod32trialKeys" target="_blank">NOD32 Trial Keys Telegram Channel</a></body></html>' : '';
         $file = Tools::ds($web_dir, Config::get('SCRIPT')['filename_html']);
 
         if (file_exists($file)) @unlink($file);
