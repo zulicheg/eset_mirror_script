@@ -1,3 +1,12 @@
+20191008
+ Fixed:
+  - Support PHP 7.3
+ Removed:
+  - *.ru.eset.com mirror
+ Changed:
+  - Unrar binary need config only for windows
+
+
 20190727
  Added:
   - 2 mirrors

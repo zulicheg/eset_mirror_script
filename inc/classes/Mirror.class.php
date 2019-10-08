@@ -173,9 +173,7 @@ class Mirror
         );
 
         if (is_array($headers) and $headers['http_code'] == 200) {
-            if (preg_match("/text/", Tools::get_file_mimetype($archive))) {
-                rename($archive, $extracted);
-            } else {
+            if (preg_match("/rar/", Tools::get_file_mimetype($archive))) {
                 Log::write_log(Language::t("Extracting file %s to %s", $archive, $tmp_path), 5, static::$version);
                 Tools::extract_file(Config::get('SCRIPT')['unrar_binary'], $archive, $tmp_path);
                 @unlink($archive);
@@ -183,6 +181,8 @@ class Mirror
                     $date = date("Y-m-d-H-i-s-") . explode('.', microtime(1))[1];
                     copy("${tmp_path}/update.ver", "${tmp_path}/update_${mirror}_${date}.ver");
                 }
+            } else {
+                rename($archive, $extracted);
             }
         }
     }
