@@ -5,7 +5,7 @@ We open a Telegram Channel [NOD32 Trial Keys](https://t.me/nod32trialKeys)
 Script to create own eset mirror
 
 # Requirements
-- PHP 5.6+ or 7+
+- PHP
 - unrar
 - nginx or other web-server
 
