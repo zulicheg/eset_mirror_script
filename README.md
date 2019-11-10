@@ -1,12 +1,18 @@
-# News
-We open a Telegram Channel [NOD32 Trial Keys](https://t.me/nod32trialKeys)
+# Resources
+Telegram Channel [https://t.me/nod32trialKeys](https://t.me/nod32trialKeys)
+
+Telegram Bot [https://t.me/EsetNod32TrialKeysBot](https://t.me/EsetNod32TrialKeysBot)
+
+Website with TRIAL keys [https://nod32-trial-keys.site/](https://nod32-trial-keys.site/)
+
+# Documentation
+See [docs](/docs) folder
 
 # ESET NOD32 Mirror Script
 Script to create own eset mirror
 
 # Requirements
 - PHP
-- unrar
 - nginx or other web-server
 
 # Installations
@@ -33,6 +39,3 @@ Script to create own eset mirror
 - SimpleXML
 - sockets
 - zlib
-
-# Cron simple job
-@hourly **[path to php]** **[path to update.php]**
