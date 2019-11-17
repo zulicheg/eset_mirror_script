@@ -13,9 +13,10 @@ $DIRECTORIES = [
     10 => 'eset_upd/v10',
     11 => 'eset_upd/v11',
     12 => 'eset_upd/v12',
+    13 => 'eset_upd/v13'
 ];
 
-$VERSION = '20191008 [Freedom for All by Kingston]';
+$VERSION = '20191117 [Freedom for All by Kingston]';
 
 @define('DS', DIRECTORY_SEPARATOR);
 @define('SELF', dirname(__DIR__) . DS);
