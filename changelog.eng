@@ -1,3 +1,9 @@
+20200711
+ Added:
+  - Support EES/EEA
+ Deleted:
+  - Filter Package by lang, type
+
 20191008
  Fixed:
   - Support PHP 7.3
@@ -5,7 +11,6 @@
   - *.ru.eset.com mirror
  Changed:
   - Unrar binary need config only for windows
-
 
 20190727
  Added:
