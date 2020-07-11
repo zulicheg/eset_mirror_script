@@ -46,6 +46,13 @@ Example configuration file:
                  Require all granted
  
                  RewriteEngine on
+                 
+                 RewriteCond %{HTTP_USER_AGENT} ^.*[EES|EEA]\ Update.*BPC\ ([6-7])
+                 RewriteRule ^update.ver$ /eset_upd/ep%1/update.ver [L]
+                 
+                 RewriteCond %{HTTP_USER_AGENT} ^.*[EES|EEA]\ Update.*BPC\ ([6-7])
+                 RewriteRule ^eset_upd/update.ver$ /eset_upd/ep%1/update.ver [L]
+                 
                  RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 3
                  RewriteRule ^update.ver$ /eset_upd/update.ver [L]
  
