@@ -528,18 +528,8 @@ class Nod32ms
         }
 
         $html_page .= '<tr>';
-        $html_page .= '<td colspan="2">' . Language::t("Present versions") . '</td>';
-        $html_page .= '<td colspan="2">' . ($ESET['ess'] == 1 ? 'EAV, ESS' : 'EAV') . '</td>';
-        $html_page .= '</tr>';
-
-        $html_page .= '<tr>';
         $html_page .= '<td colspan="2">' . Language::t("Present platforms") . '</td>';
         $html_page .= '<td colspan="2">' . ($ESET['x32'] == 1 ? '32bit' : '') . ($ESET['x64'] == 1 ? ($ESET['x32'] ? ', 64bit' : '64bit') : '') . '</td>';
-        $html_page .= '</tr>';
-
-        $html_page .= '<tr>';
-        $html_page .= '<td colspan="2">' . Language::t("Present languages") . '</td>';
-        $html_page .= '<td colspan="2">' . implode(", ", $ESET['lang']) . '</td>';
         $html_page .= '</tr>';
 
         $html_page .= '<tr>';
@@ -548,10 +538,14 @@ class Nod32ms
         $html_page .= '</tr>';
 
         $html_page .= '<tr>';
-        $html_page .= '<td colspan="2">Telegram Channel: NOD32 Trial Keys</td>';
-        $html_page .= '<td colspan="2"><a href="https://t.me/nod32trialKeys" target="_blank">NOD32 Trial Keys Telegram Channel</a></td>';
+        $html_page .= '<td colspan="2">Telegram Channel</td>';
+        $html_page .= '<td colspan="2"><a href="https://t.me/nod32trialKeys" target="_blank">NOD32 Trial Keys</a></td>';
         $html_page .= '</tr>';
 
+        $html_page .= '<tr>';
+        $html_page .= '<td colspan="2">Web Site with trial keys</td>';
+        $html_page .= '<td colspan="2"><a href="https://nod32-trial-keys.site/" target="_blank">NOD32 Trial Keys</a></td>';
+        $html_page .= '</tr>';
 
         if (Config::get('SCRIPT')['show_login_password']) {
             if (file_exists(static::$key_valid_file)) {

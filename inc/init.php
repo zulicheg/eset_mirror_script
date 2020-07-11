@@ -3,20 +3,22 @@
 chdir(__DIR__ . "/..");
 
 $DIRECTORIES = [
-    3 => 'eset_upd',
-    4 => 'eset_upd/v4',
-    5 => 'eset_upd/v5',
-    6 => 'eset_upd/v6',
-    7 => 'eset_upd/v7',
-    8 => 'eset_upd/v8',
-    9 => 'eset_upd/v9',
-    10 => 'eset_upd/v10',
-    11 => 'eset_upd/v11',
-    12 => 'eset_upd/v12',
-    13 => 'eset_upd/v13'
+    'v3' => 'eset_upd',
+    'v4' => 'eset_upd/v4',
+    'v5' => 'eset_upd/v5',
+    'v6' => 'eset_upd/v6',
+    'v7' => 'eset_upd/v7',
+    'v8' => 'eset_upd/v8',
+    'v9' => 'eset_upd/v9',
+    'v10' => 'eset_upd/v10',
+    'v11' => 'eset_upd/v11',
+    'v12' => 'eset_upd/v12',
+    'v13' => 'eset_upd/v13',
+    'ep6' => 'eset_upd/ep6',
+    'ep7' => 'eset_upd/ep7'
 ];
 
-$VERSION = '20191117 [Freedom for All by Kingston]';
+$VERSION = '20200711 [Freedom for All by Kingston]';
 
 @define('DS', DIRECTORY_SEPARATOR);
 @define('SELF', dirname(__DIR__) . DS);
