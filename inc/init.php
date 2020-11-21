@@ -5,37 +5,37 @@ chdir(__DIR__ . "/..");
 $DIRECTORIES = [
     'v3' => [
         'file' => 'eset_upd/update.ver',
-        'dll' => null,
+        'dll' => false,
         'name' => 'ESET NOD32 Ver. 3'
     ],
     'v4' => [
         'file' => 'eset_upd/update.ver',
-        'dll' => null,
+        'dll' => false,
         'name' => 'ESET NOD32 Ver. 4'
     ],
     'v5' => [
         'file' => 'eset_upd/v5/update.ver',
-        'dll' => null,
+        'dll' => false,
         'name' => 'ESET NOD32 Ver. 5'
     ],
     'v6' => [
         'file' => 'eset_upd/update.ver',
-        'dll' => null,
+        'dll' => false,
         'name' => 'ESET NOD32 Ver. 6'
     ],
     'v7' => [
         'file' => 'eset_upd/update.ver',
-        'dll' => null,
+        'dll' => false,
         'name' => 'ESET NOD32 Ver. 7'
     ],
     'v8' => [
         'file' => 'eset_upd/update.ver',
-        'dll' => null,
+        'dll' => false,
         'name' => 'ESET NOD32 Ver. 8'
     ],
     'v9' => [
         'file' => 'eset_upd/v9/update.ver',
-        'dll' => null,
+        'dll' => false,
         'name' => 'ESET NOD32 Ver. 9'
     ],
     'v10' => [
