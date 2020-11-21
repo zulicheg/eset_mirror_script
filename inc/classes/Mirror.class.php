@@ -687,7 +687,7 @@ class Mirror
         foreach ($iterator as $file) {
             $old_files[] = $file->getPathname();
         }
-
+        var_dump($old_files);
         foreach ($new_files as $array) {
             $path = Tools::ds($dir, $array['file']);
             $needed_files[] = $path;
