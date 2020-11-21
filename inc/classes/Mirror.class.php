@@ -157,7 +157,7 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $new_version = null;
-        $file = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, static::$version, 'update.ver');
+        $file = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, pathinfo(static::$dll_file ? static::$dll_file : static::$update_file), 'update.ver');
         Log::write_log(Language::t("Checking mirror %s with key [%s:%s]", $mirror, static::$key[0], static::$key[1]), 4, static::$version);
         static::download_update_ver($mirror);
         $new_version = static::get_DB_version($file);
@@ -173,7 +173,7 @@ class Mirror
     static public function download_update_ver($mirror)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        $tmp_path = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, static::$version);
+        $tmp_path = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, pathinfo(static::$dll_file ? static::$dll_file : static::$update_file));
         @mkdir($tmp_path, 0755, true);
         $archive = Tools::ds($tmp_path, 'update.rar');
         $extracted = Tools::ds($tmp_path, 'update.ver');
@@ -574,7 +574,7 @@ class Mirror
         Log::write_log(Language::t("Running %s", __METHOD__), 5, $version);
         register_shutdown_function(array('Mirror', 'destruct'));
         static::$total_downloads = 0;
-        static::$version = $version == 'v5' ? 'ep5' : $version;
+        static::$version = $version; //$version == 'v5' ? 'ep5' : $version;
         //static::$dir = static::$version . '-rel-*';
         //static::$mirror_dir = $dir;
         static::$name = $dir['name'];

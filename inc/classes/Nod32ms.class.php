@@ -638,8 +638,7 @@ class Nod32ms
                             }
 
                             $this->set_database_size($size);
-                            echo $old_version . " = " . $mirror['db_version'] . PHP_EOL;
-                            if (!Mirror::$updated && !$this->compare_versions($old_version, $mirror['db_version'])) {
+                            if (!Mirror::$updated && $old_version != 0 && !$this->compare_versions($old_version, $mirror['db_version'])) {
                                 Log::informer(Language::t("Your database has not been updated!"), Mirror::$version, 1);
                             } else {
                                 $total_size[Mirror::$version] = $size;
