@@ -687,7 +687,6 @@ class Mirror
         foreach ($iterator as $file) {
             $old_files[] = $file->getPathname();
         }
-        var_dump($old_files);
         foreach ($new_files as $array) {
             $path = Tools::ds($dir, $array['file']);
             $needed_files[] = $path;
@@ -696,7 +695,7 @@ class Mirror
 
             if (!file_exists($path)) {
                 $results = preg_grep('/' . basename($array['file']) . '$/', $old_files);
-
+                var_dump($results);
                 if (!empty($results)) {
                     foreach ($results as $result) {
                         if (Tools::compare_files(@stat($result), $array)) {
