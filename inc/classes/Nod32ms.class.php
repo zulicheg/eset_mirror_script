@@ -230,7 +230,7 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         Log::write_log(Language::t("Invalid key [%s:%s]", $login, $password), 4, Mirror::$version);
-        $log_dir = Config::get('LOG')['dir'];
+        //$log_dir = Config::get('LOG')['dir'];
 
         ($this->key_exists_in_file($login, $password, static::$key_invalid_file) == false) ?
             Log::write_to_file(static::$key_invalid_file, "$login:$password:" . Mirror::$version . "\r\n") :
@@ -594,7 +594,7 @@ class Nod32ms
 
         foreach ($DIRECTORIES as $version => $dir) {
             if (Config::upd_version_is_set($version) == '1') {
-                Log::write_log(Language::t("Init Mirror for version %s in %s", $version, $dir), 5, $version);
+                Log::write_log(Language::t("Init Mirror for version %s in %s", $version, $dir['name']), 5, $version);
                 Mirror::init($version, $dir);
                 $key = $this->read_keys();
 
@@ -610,7 +610,7 @@ class Nod32ms
                 }
 
                 Mirror::find_best_mirrors();
-                $old_version = Mirror::get_DB_version(Tools::ds($web_dir, $dir, 'update.ver'));
+                $old_version = Mirror::get_DB_version(Tools::ds($web_dir, (Mirror::$dll_file ? Mirror::$dll_file : Mirror::$update_file)));
 
                 if (!empty(Mirror::$mirrors)) {
                     foreach (Mirror::$mirrors as $id => $mirror) {
@@ -640,7 +640,9 @@ class Nod32ms
                             $this->set_database_size($size);
 
                             if (!Mirror::$updated && !$this->compare_versions($old_version, $mirror['db_version'])) {
+
                                 Log::informer(Language::t("Your database has not been updated!"), Mirror::$version, 1);
+                                Log::informer("this", Mirror::$version, 1);
                             } else {
                                 $total_size[Mirror::$version] = $size;
                                 $total_downloads[Mirror::$version] = $downloads;
@@ -684,6 +686,7 @@ class Nod32ms
     private function compare_versions($old_version, $new_version)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
+        Log::write_log(Language::t("Compare %s >= %s", $old_version, $new_version), 5, Mirror::$version);
         return (intval($old_version) >= intval($new_version));
     }
 }

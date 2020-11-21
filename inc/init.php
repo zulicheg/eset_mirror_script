@@ -3,19 +3,89 @@
 chdir(__DIR__ . "/..");
 
 $DIRECTORIES = [
-    'v3' => 'eset_upd',
-    'v4' => 'eset_upd/v4',
-    'v5' => 'eset_upd/v5',
-    'v6' => 'eset_upd/v6',
-    'v7' => 'eset_upd/v7',
-    'v8' => 'eset_upd/v8',
+    'v3' => [
+        'file' => 'eset_upd/update.ver',
+        'dll' => null,
+        'name' => 'ESET NOD32 Ver. 3'
+    ],
+    'v4' => [
+        'file' => 'eset_upd/update.ver',
+        'dll' => null,
+        'name' => 'ESET NOD32 Ver. 4'
+    ],
+    'v5' => [
+        'file' => 'eset_upd/v5/update.ver',
+        'dll' => null,
+        'name' => 'ESET NOD32 Ver. 5'
+    ],
+    'v6' => [
+        'file' => 'eset_upd/update.ver',
+        'dll' => null,
+        'name' => 'ESET NOD32 Ver. 6'
+    ],
+    'v7' => [
+        'file' => 'eset_upd/update.ver',
+        'dll' => null,
+        'name' => 'ESET NOD32 Ver. 7'
+    ],
+    'v8' => [
+        'file' => 'eset_upd/update.ver',
+        'dll' => null,
+        'name' => 'ESET NOD32 Ver. 8'
+    ],
+    'v9' => [
+        'file' => 'eset_upd/v9/update.ver',
+        'dll' => null,
+        'name' => 'ESET NOD32 Ver. 9'
+    ],
+    'v10' => [
+        'file' => 'eset_upd/v10/update.ver',
+        'dll' => 'eset_upd/v10/dll/update.ver',
+        'name' => 'ESET NOD32 Ver. 10'
+    ],
+    'v11' => [
+        'file' => 'eset_upd/v10/update.ver',
+        'dll' => 'eset_upd/v10/dll/update.ver',
+        'name' => 'ESET NOD32 Ver. 11'
+    ],
+    'v12' => [
+        'file' => 'eset_upd/v12/update.ver',
+        'dll' => 'eset_upd/v12/dll/update.ver',
+        'name' => 'ESET NOD32 Ver. 12'
+    ],
+    'v13' => [
+        'file' => 'eset_upd/v13/update.ver',
+        'dll' => 'eset_upd/v13/dll/update.ver',
+        'name' => 'ESET NOD32 Ver. 13'
+    ],
+    'v14' => [
+        'file' => 'eset_upd/v14/update.ver',
+        'dll' => 'eset_upd/v14/dll/update.ver',
+        'name' => 'ESET NOD32 Ver. 14'
+    ],
+    'ep6' => [
+        'file' => 'eset_upd/ep6/update.ver',
+        'name' => 'ESET NOD32 Endpoint Ver. 6'
+    ],
+    'ep7' => [
+        'file' => 'eset_upd/ep7/update.ver',
+        'dll' => 'eset_upd/ep7/dll/update.ver',
+        'name' => 'ESET NOD32 Endpoint Ver. 7'
+    ],
+    'ep8' => [
+        'file' => 'eset_upd/ep8/update.ver',
+        'dll' => 'eset_upd/ep8/dll/update.ver',
+        'name' => 'ESET NOD32 Endpoint Ver. 8'
+    ],
+    /*
     'v9' => 'eset_upd/v9',
-    'v10' => 'eset_upd/v10',
-    'v11' => 'eset_upd/v11',
-    'v12' => 'eset_upd/v12',
-    'v13' => 'eset_upd/v13',
+    'v10' => 'eset_upd/v10/dll/',
+    'v11' => 'eset_upd/v10/dll/',
+    'v12' => 'eset_upd/v12/dll/',
+    'v13' => 'eset_upd/v13/dll/',
+    'v14' => 'eset_upd/v14/dll/',
     'ep6' => 'eset_upd/ep6',
-    'ep7' => 'eset_upd/ep7'
+    'ep7' => 'eset_upd/ep7'*/
 ];
 
 $VERSION = '20200711 [Freedom for All by Kingston]';
