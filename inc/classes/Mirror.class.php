@@ -695,7 +695,7 @@ class Mirror
 
             if (!file_exists($path)) {
                 $results = preg_grep('/' . basename($array['file']) . '$/', $old_files);
-                var_dump($results);
+
                 if (!empty($results)) {
                     foreach ($results as $result) {
                         if (Tools::compare_files(@stat($result), $array)) {
@@ -705,7 +705,7 @@ class Mirror
 
                             switch (Config::get('create_hard_links')) {
                                 case 'link':
-                                    link($result, $path);
+                                    symlink($result, $path);
                                     Log::write_log(Language::t("Created hard link for %s", basename($array['file'])), 3, static::$version);
                                     break;
                                 case 'fsutil':
