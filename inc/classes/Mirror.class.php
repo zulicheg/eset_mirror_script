@@ -687,6 +687,7 @@ class Mirror
         foreach ($iterator as $file) {
             $old_files[] = $file->getPathname();
         }
+
         foreach ($new_files as $array) {
             $path = Tools::ds($dir, $array['file']);
             $needed_files[] = $path;
@@ -705,7 +706,7 @@ class Mirror
 
                             switch (Config::get('create_hard_links')) {
                                 case 'link':
-                                    symlink($result, $path);
+                                    symlink(SELF . $result, SELF . $path);
                                     Log::write_log(Language::t("Created hard link for %s", basename($array['file'])), 3, static::$version);
                                     break;
                                 case 'fsutil':
