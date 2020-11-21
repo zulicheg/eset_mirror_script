@@ -157,7 +157,7 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $new_version = null;
-        $file = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, pathinfo(static::$dll_file ? static::$dll_file : static::$update_file), 'update.ver');
+        $file = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, pathinfo(static::$dll_file ? static::$dll_file : static::$update_file)['dirname'], 'update.ver');
         Log::write_log(Language::t("Checking mirror %s with key [%s:%s]", $mirror, static::$key[0], static::$key[1]), 4, static::$version);
         static::download_update_ver($mirror);
         $new_version = static::get_DB_version($file);
@@ -173,7 +173,7 @@ class Mirror
     static public function download_update_ver($mirror)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        $tmp_path = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, pathinfo(static::$dll_file ? static::$dll_file : static::$update_file));
+        $tmp_path = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, pathinfo(static::$dll_file ? static::$dll_file : static::$update_file)['dirname']);
         @mkdir($tmp_path, 0755, true);
         $archive = Tools::ds($tmp_path, 'update.rar');
         $extracted = Tools::ds($tmp_path, 'update.ver');
@@ -211,8 +211,8 @@ class Mirror
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         static::download_update_ver(current(static::$mirrors)['host']);
         $dir = Config::get('SCRIPT')['web_dir'];
-        $cur_update_ver = Tools::ds($dir, (static::$dll_file ? static::$dll_file : static::$update_file));
-        $tmp_update_ver = Tools::ds($dir, TMP_PATH, (static::$dll_file ? static::$dll_file : static::$update_file));
+        $cur_update_ver = Tools::ds($dir, static::$dll_file ? static::$dll_file : static::$update_file);
+        $tmp_update_ver = Tools::ds($dir, TMP_PATH, static::$dll_file ? static::$dll_file : static::$update_file);
         $content = @file_get_contents($tmp_update_ver);
         $start_time = microtime(true);
         preg_match_all('#\[\w+\][^\[]+#', $content, $matches);
@@ -582,7 +582,7 @@ class Mirror
         static::$dll_file = $dir['dll'];
         static::$updated = false;
         static::$ESET = Config::get('ESET');
-        Log::write_log(Language::t("Mirror for %s initiliazed with update_file=%s", static::$name, static::$update_file), 5, static::$version);
+        Log::write_log(Language::t("Mirror for %s initiliazed with update_file %s", static::$name, static::$update_file), 5, static::$version);
     }
 
     /**
