@@ -515,11 +515,11 @@ class Nod32ms
 
         foreach ($DIRECTORIES as $ver => $dir) {
             if (Config::upd_version_is_set($ver) == '1') {
-                $update_ver = Tools::ds($web_dir, $dir, 'update.ver');
+                $update_ver = Tools::ds($web_dir, ($dir['dll'] ? $dir['dll'] : $dir['file']));
                 $version = Mirror::get_DB_version($update_ver);
                 $timestamp = $this->check_time_stamp($ver, true);
                 $html_page .= '<tr>';
-                $html_page .= '<td>' . $ver . '</td>';
+                $html_page .= '<td>' . $dir['name'] . '</td>';
                 $html_page .= '<td>' . $version . '</td>';
                 $html_page .= '<td>' . (isset($total_size[$ver]) ? Tools::bytesToSize1024($total_size[$ver]) : Language::t("n/a")) . '</td>';
                 $html_page .= '<td>' . ($timestamp ? date("Y-m-d, H:i:s", $timestamp) : Language::t("n/a")) . '</td>';
@@ -640,9 +640,7 @@ class Nod32ms
                             $this->set_database_size($size);
 
                             if (!Mirror::$updated && !$this->compare_versions($old_version, $mirror['db_version'])) {
-
                                 Log::informer(Language::t("Your database has not been updated!"), Mirror::$version, 1);
-                                Log::informer("this", Mirror::$version, 1);
                             } else {
                                 $total_size[Mirror::$version] = $size;
                                 $total_downloads[Mirror::$version] = $downloads;

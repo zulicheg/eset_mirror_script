@@ -76,16 +76,7 @@ $DIRECTORIES = [
         'file' => 'eset_upd/ep8/update.ver',
         'dll' => 'eset_upd/ep8/dll/update.ver',
         'name' => 'ESET NOD32 Endpoint Ver. 8'
-    ],
-    /*
-    'v9' => 'eset_upd/v9',
-    'v10' => 'eset_upd/v10/dll/',
-    'v11' => 'eset_upd/v10/dll/',
-    'v12' => 'eset_upd/v12/dll/',
-    'v13' => 'eset_upd/v13/dll/',
-    'v14' => 'eset_upd/v14/dll/',
-    'ep6' => 'eset_upd/ep6',
-    'ep7' => 'eset_upd/ep7'*/
+    ]
 ];
 
 $VERSION = '20200711 [Freedom for All by Kingston]';
