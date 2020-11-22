@@ -4,11 +4,11 @@ chdir(__DIR__ . "/..");
 
 $DIRECTORIES = [
     'v3' => 'eset_upd',
-    'v4' => 'eset_upd/v4',
+    'v4' => 'eset_upd',
     'v5' => 'eset_upd/v5',
-    'v6' => 'eset_upd/v6',
-    'v7' => 'eset_upd/v7',
-    'v8' => 'eset_upd/v8',
+    'v6' => 'eset_upd',
+    'v7' => 'eset_upd',
+    'v8' => 'eset_upd',
     'v9' => 'eset_upd/v9',
     'v10' => 'eset_upd/v10',
     'v11' => 'eset_upd/v11',
