@@ -63,8 +63,6 @@ class Config
 
         static::$CONF['ESET']['mirror'] = array_map("trim", (explode(",", static::$CONF['ESET']['mirror'])));
 
-        // Convert update_version_filter string to pcre
-        static::$CONF['ESET']['filter'] = implode('|', array_map("trim", (explode(",", static::$CONF['ESET']['filter']))));
         static::check_config();
     }
 

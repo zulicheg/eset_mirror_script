@@ -41,46 +41,35 @@ Example configuration file:
          DocumentRoot /var/www/eset_mirror_script/www
          <Directory "/var/www/eset_mirror_script/www">
  
-                 Options FollowSymLinks
-                 AllowOverride All
-                 Require all granted
- 
-                 RewriteEngine on
+                Options FollowSymLinks
+                AllowOverride All
+                Require all granted
+                
+                RewriteEngine on
                  
-                 RewriteCond %{HTTP_USER_AGENT} ^.*(EES|EEA)\ Update.*BPC\ ([6-7])
-                 RewriteRule ^update.ver$ /eset_upd/ep%2/update.ver [L]
-                 
-                 RewriteCond %{HTTP_USER_AGENT} ^.*(EES|EEA)\ Update.*BPC\ ([6-7])
-                 RewriteRule ^eset_upd/update.ver$ /eset_upd/ep%2/update.ver [L]
-                 
-                 RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 3
-                 RewriteRule ^update.ver$ /eset_upd/update.ver [L]
- 
-                 RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ ([4-9])
-                 RewriteRule ^eset_upd/update.ver$ /eset_upd/v%1/update.ver [L]
- 
-                 RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ ([4-9])
-                 RewriteRule ^update.ver$ /eset_upd/v%1/update.ver [L]
- 
-                 RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 10 [OR]
-                 RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 11
-                 RewriteRule ^eset_upd/update.ver$ /eset_upd/v10/update.ver [L]
- 
-                 RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 10 [OR]
-                 RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 11
-                 RewriteRule ^update.ver$ /eset_upd/v10/update.ver [L]
- 
-                 RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 12
-                 RewriteRule ^eset_upd/update.ver$ /eset_upd/v12/update.ver [L]
- 
-                 RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 12
-                 RewriteRule ^update.ver$ /eset_upd/v12/update.ver [L]
- 
-                 RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 13
-                 RewriteRule ^eset_upd/update.ver$ /eset_upd/v13/update.ver [L]
-
-                 RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 13
-                 RewriteRule ^update.ver$ /eset_upd/v13/update.ver [L]
+                RewriteCond %{HTTP_USER_AGENT} ^.*(EES|EEA)\ Update.*BPC\ 6
+                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/ep6/update.ver [L]
+                
+                RewriteCond %{HTTP_USER_AGENT} ^.*(EES|EEA)\ Update.*BPC\ ([7-8]+)
+                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/ep%2/dll/update.ver [L]
+                
+                RewriteCond %{HTTP_USER_AGENT} ^.*(EES|EEA)\ Update.*BPC
+                RewriteRule ^(eset_upd/)?update\.ver$ - [F]
+                
+                RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 5
+                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/v5/update.ver [L]
+                
+                RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ ([3-8]+)
+                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/v3/update.ver [L]
+                
+                RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 9
+                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/v9/update.ver [L]
+                
+                RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ (10|11)
+                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/v10/dll/update.ver [L]
+                
+                RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ (1[2-9]+)
+                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/v%1/dll/update.ver [L]
                 
          </Directory>
  
@@ -113,25 +102,49 @@ server {
 
         location / {
 
-          if ($http_user_agent ~ "^.*Update.*BPC\s+3\..*"){
-            rewrite ^/update.ver$ /eset_upd/update.ver break;
-            rewrite ^/eset_upd/update.ver$ /eset_upd/update.ver break;
+          if ($http_user_agent ~ "^.*(EEA|EES)+\s+Update.*BPC\s+(\d+)\..*"){
+             set $ver $2;
           }
 
-          if ($http_user_agent ~* "^.*Update.*BPC\s+(\d?)\..*$"){
+          if ($ver ~ '^[7-8]+$') {
+            rewrite ^/update.ver$ /eset_upd/ep$ver/dll/update.ver break;
+            rewrite ^/eset_upd/update.ver$ /eset_upd/ep$ver/dll/update.ver break;
+          }
+
+          if ($ver ~ '^[6]+$') {
+              rewrite ^/update.ver$ /eset_upd/ep6/update.ver break;
+              rewrite ^/eset_upd/update.ver$ /eset_upd/ep6/update.ver break;
+          }
+
+          if ($http_user_agent ~ "^.*(EEA|EES)+\s+Update.*BPC\s+(\d+)\..*$"){
+              return 403;
+          }
+
+          if ($http_user_agent ~ "^.*Update.*BPC\s+(\d+)\..*$"){
             set $ver $1;
           }
 
-          if ($http_user_agent ~* "^.*Update.*BPC\s+(\d+)\..*$"){
-             set $ver $1;
+          if ($ver ~ '^(5|9)+$') {
+             rewrite ^/update.ver$ /eset_upd/v$ver/update.ver break;
+             rewrite ^/eset_upd/update.ver$ /eset_upd/v$ver/update.ver break;
           }
 
-          if ($ver = 11) {
-              set $ver 10;
+          if ($ver ~ '^[3-8]+$')
+          {
+             rewrite ^/update.ver$ /eset_upd/v3/update.ver break;
+             rewrite ^/eset_upd/update.ver$ /eset_upd/v3/update.ver break;
           }
 
-          rewrite ^/update.ver$ /eset_upd/v$ver/update.ver break;
-          rewrite ^/eset_upd/update.ver$ /eset_upd/v$ver/update.ver break;
+          if ($ver ~ "^1[0-1]+$"){
+            rewrite ^/update.ver$ /eset_upd/v10/dll/update.ver break;
+            rewrite ^/eset_upd/update.ver$ /eset_upd/v10/dll/update.ver break;
+          }
+
+          if ($ver ~ "^1[2-9]+$"){
+            rewrite ^/update.ver$ /eset_upd/v$ver/dll/update.ver break;
+            rewrite ^/eset_upd/update.ver$ /eset_upd/v$ver/dll/update.ver break;
+          }
+
 
         }
 

@@ -3,22 +3,58 @@
 chdir(__DIR__ . "/..");
 
 $DIRECTORIES = [
-    'v3' => 'eset_upd',
-    'v4' => 'eset_upd',
-    'v5' => 'eset_upd/v5',
-    'v6' => 'eset_upd',
-    'v7' => 'eset_upd',
-    'v8' => 'eset_upd',
-    'v9' => 'eset_upd/v9',
-    'v10' => 'eset_upd/v10',
-    'v11' => 'eset_upd/v11',
-    'v12' => 'eset_upd/v12',
-    'v13' => 'eset_upd/v13',
-    'ep6' => 'eset_upd/ep6',
-    'ep7' => 'eset_upd/ep7'
+    'v3' => [
+        'file' => 'eset_upd/update.ver',
+        'dll' => false,
+        'name' => 'ESET NOD32 Ver. 3-4, 6-8'
+    ],
+    'v5' => [
+        'file' => 'eset_upd/v5/update.ver',
+        'dll' => false,
+        'name' => 'ESET NOD32 Ver. 5'
+    ],
+    'v9' => [
+        'file' => 'eset_upd/v9/update.ver',
+        'dll' => false,
+        'name' => 'ESET NOD32 Ver. 9'
+    ],
+    'v10' => [
+        'file' => 'eset_upd/v10/update.ver',
+        'dll' => 'eset_upd/v10/dll/update.ver',
+        'name' => 'ESET NOD32 Ver. 10-11'
+    ],
+    'v12' => [
+        'file' => 'eset_upd/v12/update.ver',
+        'dll' => 'eset_upd/v12/dll/update.ver',
+        'name' => 'ESET NOD32 Ver. 12'
+    ],
+    'v13' => [
+        'file' => 'eset_upd/v13/update.ver',
+        'dll' => 'eset_upd/v13/dll/update.ver',
+        'name' => 'ESET NOD32 Ver. 13'
+    ],
+    'v14' => [
+        'file' => 'eset_upd/v14/update.ver',
+        'dll' => 'eset_upd/v14/dll/update.ver',
+        'name' => 'ESET NOD32 Ver. 14'
+    ],
+    'ep6' => [
+        'file' => 'eset_upd/ep6/update.ver',
+        'name' => 'ESET NOD32 Endpoint Ver. 6'
+    ],
+    'ep7' => [
+        'file' => 'eset_upd/ep7/update.ver',
+        'dll' => 'eset_upd/ep7/dll/update.ver',
+        'name' => 'ESET NOD32 Endpoint Ver. 7'
+    ],
+    'ep8' => [
+        'file' => 'eset_upd/ep8/update.ver',
+        'dll' => 'eset_upd/ep8/dll/update.ver',
+        'name' => 'ESET NOD32 Endpoint Ver. 8'
+    ]
 ];
 
-$VERSION = '20200711 [Freedom for All by Kingston]';
+$VERSION = '20201122 [Freedom for All by Kingston]';
 
 @define('DS', DIRECTORY_SEPARATOR);
 @define('SELF', dirname(__DIR__) . DS);
