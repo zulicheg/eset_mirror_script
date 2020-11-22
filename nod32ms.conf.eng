@@ -241,7 +241,5 @@ x32 = 1
 ; Eset Version 64bit OS
 x64 = 1
 
-; Filter strings separated by comma, which will be used to filter files/directories to exclude them from download list.
-filter = "rel-sta, rel-bat"
 
 
