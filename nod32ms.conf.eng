@@ -226,18 +226,15 @@ mirror = "update.eset.com, um01.eset.com, um02.eset.com, um03.eset.com, um04.ese
 
 ; Eset versions
 versionv3    = 1
-versionv4    = 1
 versionv5    = 1
-versionv6    = 1
-versionv7    = 1
-versionv8    = 1
 versionv9    = 1
 versionv10   = 1
-versionv11   = 1
 versionv12   = 1
 versionv13   = 1
+versionv14   = 1
 versionep6   = 1
 versionep7   = 1
+versionep8   = 1
 
 ; Eset Version 32bit OS
 x32 = 1

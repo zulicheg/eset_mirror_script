@@ -6,32 +6,12 @@ $DIRECTORIES = [
     'v3' => [
         'file' => 'eset_upd/update.ver',
         'dll' => false,
-        'name' => 'ESET NOD32 Ver. 3'
-    ],
-    'v4' => [
-        'file' => 'eset_upd/update.ver',
-        'dll' => false,
-        'name' => 'ESET NOD32 Ver. 4'
+        'name' => 'ESET NOD32 Ver. 3-4, 6-8'
     ],
     'v5' => [
         'file' => 'eset_upd/v5/update.ver',
         'dll' => false,
         'name' => 'ESET NOD32 Ver. 5'
-    ],
-    'v6' => [
-        'file' => 'eset_upd/update.ver',
-        'dll' => false,
-        'name' => 'ESET NOD32 Ver. 6'
-    ],
-    'v7' => [
-        'file' => 'eset_upd/update.ver',
-        'dll' => false,
-        'name' => 'ESET NOD32 Ver. 7'
-    ],
-    'v8' => [
-        'file' => 'eset_upd/update.ver',
-        'dll' => false,
-        'name' => 'ESET NOD32 Ver. 8'
     ],
     'v9' => [
         'file' => 'eset_upd/v9/update.ver',
@@ -41,12 +21,7 @@ $DIRECTORIES = [
     'v10' => [
         'file' => 'eset_upd/v10/update.ver',
         'dll' => 'eset_upd/v10/dll/update.ver',
-        'name' => 'ESET NOD32 Ver. 10'
-    ],
-    'v11' => [
-        'file' => 'eset_upd/v10/update.ver',
-        'dll' => 'eset_upd/v10/dll/update.ver',
-        'name' => 'ESET NOD32 Ver. 11'
+        'name' => 'ESET NOD32 Ver. 10-11'
     ],
     'v12' => [
         'file' => 'eset_upd/v12/update.ver',
