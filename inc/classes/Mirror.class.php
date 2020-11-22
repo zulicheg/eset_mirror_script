@@ -212,6 +212,7 @@ class Mirror
         static::download_update_ver(current(static::$mirrors)['host']);
         $dir = Config::get('SCRIPT')['web_dir'];
         $cur_update_ver = Tools::ds($dir, static::$dll_file ? static::$dll_file : static::$update_file);
+        if (static::$version == 'v3') $cur_update_ver = preg_replace('/eset_upd\//is','eset_upd/v3/', $cur_update_ver);
         $tmp_update_ver = Tools::ds($dir, TMP_PATH, static::$dll_file ? static::$dll_file : static::$update_file);
         $content = @file_get_contents($tmp_update_ver);
         $start_time = microtime(true);
@@ -579,7 +580,7 @@ class Mirror
         //static::$mirror_dir = $dir;
         static::$name = $dir['name'];
         static::$update_file = $dir['file'];
-        static::$dll_file = $dir['dll'];
+        static::$dll_file = isset($dir['dll']) ? $dir['dll'] : false;
         static::$updated = false;
         static::$ESET = Config::get('ESET');
         Log::write_log(Language::t("Mirror for %s initiliazed with update_file %s", static::$name, static::$update_file), 5, static::$version);

@@ -515,7 +515,7 @@ class Nod32ms
 
         foreach ($DIRECTORIES as $ver => $dir) {
             if (Config::upd_version_is_set($ver) == '1') {
-                $update_ver = Tools::ds($web_dir, ($dir['dll'] ? $dir['dll'] : $dir['file']));
+                $update_ver = Tools::ds($web_dir, (isset($dir['dll']) && $dir['dll'] ? $dir['dll'] : $dir['file']));
                 $version = Mirror::get_DB_version($update_ver);
                 $timestamp = $this->check_time_stamp($ver, true);
                 $html_page .= '<tr>';
