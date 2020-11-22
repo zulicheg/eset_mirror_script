@@ -575,9 +575,7 @@ class Mirror
         Log::write_log(Language::t("Running %s", __METHOD__), 5, $version);
         register_shutdown_function(array('Mirror', 'destruct'));
         static::$total_downloads = 0;
-        static::$version = $version; //$version == 'v5' ? 'ep5' : $version;
-        //static::$dir = static::$version . '-rel-*';
-        //static::$mirror_dir = $dir;
+        static::$version = $version;
         static::$name = $dir['name'];
         static::$update_file = $dir['file'];
         static::$dll_file = isset($dir['dll']) ? $dir['dll'] : false;
