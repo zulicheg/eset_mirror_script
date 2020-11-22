@@ -106,7 +106,7 @@ class Mirror
                 if ($tries > 1) usleep(Config::get('CONNECTION')['timeout'] * 1000000);
                 Tools::download_file(
                     [
-                        CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
+                        //CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
                         CURLOPT_URL => "http://" . $mirror . "/" . (static::$dll_file ? static::$dll_file : static::$update_file),
                         CURLOPT_NOBODY => 1
                     ],
