@@ -211,8 +211,7 @@ class Mirror
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         static::download_update_ver(current(static::$mirrors)['host']);
         $dir = Config::get('SCRIPT')['web_dir'];
-        $cur_update_ver = Tools::ds($dir, static::$dll_file ? static::$dll_file : static::$update_file);
-        if (static::$version == 'v3') $cur_update_ver = preg_replace('/eset_upd\//is','eset_upd/v3/', $cur_update_ver);
+        $cur_update_ver = Tools::ds($dir, preg_replace('/eset_upd\/update\.ver/is','eset_upd/v3/update.ver', static::$dll_file ? static::$dll_file : static::$update_file));
         $tmp_update_ver = Tools::ds($dir, TMP_PATH, static::$dll_file ? static::$dll_file : static::$update_file);
         $content = @file_get_contents($tmp_update_ver);
         $start_time = microtime(true);
