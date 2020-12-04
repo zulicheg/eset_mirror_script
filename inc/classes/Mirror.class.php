@@ -684,7 +684,7 @@ class Mirror
         );
 
         $version = false;
-        preg_match($preg_pattern,static::$version == 'v5' ? 'ep5' : static::$version,$version);
+        preg_match($preg_pattern, static::$version,$version);
         /** @var RegexIterator $file */
         foreach ($iterator as $file) {
             $pathVersion = false;
