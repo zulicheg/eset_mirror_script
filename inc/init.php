@@ -15,6 +15,7 @@ $DIRECTORIES = [
     ],
     'ep6' => [
         'file' => 'eset_upd/ep6/update.ver',
+        'dll' => false,
         'name' => 'ESET NOD32 Endpoint Ver. 6'
     ],
     'ep7' => [
