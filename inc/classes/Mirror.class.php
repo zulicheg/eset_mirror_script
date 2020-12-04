@@ -388,7 +388,7 @@ class Mirror
                 } while ($status == CURLM_CALL_MULTI_PERFORM || $running);
 
                 while ($done = curl_multi_info_read($master)) {
-                    Log::write_log(Language::t("Threads %s in do doing while"), 5, static::$version);
+                    Log::write_log(Language::t("Threads %s in do doing while", $threads), 5, static::$version);
                     $ch = $done['handle'];
                     $id = Tools::get_resource_id($ch);
                     $info = curl_getinfo($ch);
@@ -496,17 +496,17 @@ class Mirror
     static protected function download($download_files)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-
+        static::single_download($download_files);
+        /*
         switch (function_exists('curl_multi_init')) {
             case true:
-                /*              static::multi_download($download_files);
-                              break;
-                */
+                static::multi_download($download_files);
+                break;
             case false:
             default:
-                static::single_download($download_files);
+
                 break;
-        }
+        }*/
     }
 
     /**
@@ -672,6 +672,7 @@ class Mirror
         $old_files = [];
         $needed_files = [];
         $download_files = [];
+        $preg_pattern = '/([v|ep]+)(\d+)/is';
         $iterator = new RegexIterator(
             new RecursiveIteratorIterator(
                 new RecursiveRegexIterator(
@@ -681,9 +682,16 @@ class Mirror
             ),
             '/\.nup$/i'
         );
+
+        $version = false;
+        preg_match($preg_pattern,static::$version,$version);
         /** @var RegexIterator $file */
         foreach ($iterator as $file) {
-            $old_files[] = $file->getPathname();
+            $pathVersion = false;
+            $filepath = $file->getPathname();
+            if (is_link($filepath)) continue;
+            preg_match($preg_pattern,$filepath,$pathVersion);
+            if ($version && $pathVersion && $version[1] == $pathVersion[1] && (int)$version[2] >= (int)$pathVersion[2]) $old_files[] = $filepath;
         }
 
         foreach ($new_files as $array) {
