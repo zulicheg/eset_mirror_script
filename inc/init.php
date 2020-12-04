@@ -13,6 +13,20 @@ $DIRECTORIES = [
         'dll' => false,
         'name' => 'ESET NOD32 Ver. 5'
     ],
+    'ep6' => [
+        'file' => 'eset_upd/ep6/update.ver',
+        'name' => 'ESET NOD32 Endpoint Ver. 6'
+    ],
+    'ep7' => [
+        'file' => 'eset_upd/ep7/update.ver',
+        'dll' => 'eset_upd/ep7/dll/update.ver',
+        'name' => 'ESET NOD32 Endpoint Ver. 7'
+    ],
+    'ep8' => [
+        'file' => 'eset_upd/ep8/update.ver',
+        'dll' => 'eset_upd/ep8/dll/update.ver',
+        'name' => 'ESET NOD32 Endpoint Ver. 8'
+    ],
     'v9' => [
         'file' => 'eset_upd/v9/update.ver',
         'dll' => false,
@@ -37,20 +51,6 @@ $DIRECTORIES = [
         'file' => 'eset_upd/v14/update.ver',
         'dll' => 'eset_upd/v14/dll/update.ver',
         'name' => 'ESET NOD32 Ver. 14'
-    ],
-    'ep6' => [
-        'file' => 'eset_upd/ep6/update.ver',
-        'name' => 'ESET NOD32 Endpoint Ver. 6'
-    ],
-    'ep7' => [
-        'file' => 'eset_upd/ep7/update.ver',
-        'dll' => 'eset_upd/ep7/dll/update.ver',
-        'name' => 'ESET NOD32 Endpoint Ver. 7'
-    ],
-    'ep8' => [
-        'file' => 'eset_upd/ep8/update.ver',
-        'dll' => 'eset_upd/ep8/dll/update.ver',
-        'name' => 'ESET NOD32 Endpoint Ver. 8'
     ]
 ];
 
