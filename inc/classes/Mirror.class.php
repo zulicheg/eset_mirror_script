@@ -231,9 +231,9 @@ class Mirror
                 static::download_files($download_files);
                 static::$updated = !static::$unAuthorized;
             }
-
+            $version = static::$version == 'v5' ? 'ep5' : static::$version;
             // Delete not needed files
-            foreach (glob(Tools::ds($dir, static::$version . "-*"), GLOB_ONLYDIR) as $file) {
+            foreach (glob(Tools::ds($dir, $version . "-*"), GLOB_ONLYDIR) as $file) {
                 $del_files = static::del_files($file, $needed_files);
                 if ($del_files > 0) {
                     static::$updated = true;
@@ -242,7 +242,7 @@ class Mirror
             }
 
             // Delete empty folders
-            foreach (glob(Tools::ds($dir, static::$version . "-*"), GLOB_ONLYDIR) as $folder) {
+            foreach (glob(Tools::ds($dir, $version . "-*"), GLOB_ONLYDIR) as $folder) {
                 $del_folders = static::del_folders($folder);
                 if ($del_folders > 0) {
                     static::$updated = true;
