@@ -690,8 +690,8 @@ class Mirror
             $pathVersion = false;
             $filepath = $file->getPathname();
             if (is_link($filepath)) continue;
-            preg_match($preg_pattern,$filepath,$pathVersion);
-            if ($version && $pathVersion && /*$version[1] == $pathVersion[1] &&*/ (int)$version[2] >= (int)$pathVersion[2]) $old_files[] = $filepath;
+            preg_match($preg_pattern, $filepath, $pathVersion);
+            if ($version && is_array($pathVersion) && /*$version[1] == $pathVersion[1] &&*/ (int)$version[2] > (int)$pathVersion[2]) $old_files[] = $filepath;
         }
 
         foreach ($new_files as $array) {
