@@ -462,10 +462,66 @@ class Mirror
         curl_multi_close($master);
     }
 
+    static protected function multiple_download($download_files, $onlyCheck = false, $checkedMirror = null)
+    {
+        Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
+        $web_dir = $onlyCheck ? Tools::ds(TMP_PATH) : Config::get('SCRIPT')['web_dir'];
+        $mirrorList = static::$mirrors;
+        if ($onlyCheck && $checkedMirror) $mirrorList = [['host' => $checkedMirror]];
+        $curlOpt = [
+            CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1]
+        ];
+        $mh = curl_multi_init();
+        $curlHandlers = [];
+        $fileHandlers = [];
+
+        $chunks = array_chunk($download_files, count($mirrorList));
+        foreach ($chunks as $key => $files)
+        {
+            foreach ($files as $idx => $file)
+            {
+                $out = Tools::ds($web_dir, $file['file']);
+                $dir = dirname($out);
+
+                if (!@file_exists($dir)) @mkdir($dir, 0755, true);
+                $fh = fopen($out, "wb");
+                $ch = curl_init();
+                $options = $curlOpt + [
+                    CURLOPT_URL => "http://" . $mirrorList[$idx]['host'] . $file['file'],
+                    CURLOPT_FILE => $fh
+                ];
+
+                curl_setopt_array($ch, $options);
+                curl_multi_add_handle($mh,$ch);
+
+                $curlHandlers[$idx] = $ch;
+                $fileHandlers[$idx] = $fh;
+            }
+
+            do {
+                $status = curl_multi_exec($mh, $active);
+                if ($active) {
+                    curl_multi_select($mh);
+                }
+            } while ($active && $status == CURLM_OK);
+            break;
+        }
+        foreach ($curlHandlers as $rch)
+        {
+            curl_multi_remove_handle($mh, $rch);
+        }
+
+        foreach ($fileHandlers as $rfh) {
+            @fclose($rfh);
+        }
+
+        curl_multi_close($mh);
+    }
+
     /**
      * @param $download_files
      * @param false $onlyCheck
-     * @return void|null
+     * @param null $checkedMirror
      */
     static protected function single_download($download_files, $onlyCheck = false, $checkedMirror = null)
     {
@@ -518,7 +574,8 @@ class Mirror
     static protected function download($download_files, $onlyCheck = false, $checkedMirror = null)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        static::single_download($download_files, $onlyCheck, $checkedMirror);
+        //static::single_download($download_files, $onlyCheck, $checkedMirror);
+        static::multiple_download($download_files, $onlyCheck, $checkedMirror);
         /*
         switch (function_exists('curl_multi_init')) {
             case true:

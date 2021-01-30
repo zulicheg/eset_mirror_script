@@ -660,7 +660,7 @@ class Nod32ms
                                 } else {
                                     Log::informer(Language::t("Your database was successfully updated to %s", $mirror['db_version']), Mirror::$version, 2);
                                 }
-                                break;
+                                //break;
                             }
                         //}
                     }
