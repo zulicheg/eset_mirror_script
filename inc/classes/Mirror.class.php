@@ -504,10 +504,15 @@ class Mirror
                     curl_multi_select($mh);
                 }
                 while (false !== ($info = curl_multi_info_read($mh))) {
-                    var_dump($info);
+                    if (!$onlyCheck) var_dump($info);
                 }
             } while ($active && $status == CURLM_OK);
-            var_dump((microtime(true) - $time));
+
+            if (!$onlyCheck) var_dump((microtime(true) - $time));
+            foreach ($curlHandlers as $rch)
+            {
+                if (!$onlyCheck) var_dump(curl_getinfo($rch));
+            }
             break;
         }
         foreach ($curlHandlers as $rch)
