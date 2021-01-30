@@ -97,32 +97,8 @@ class Mirror
 
             while (++$tries <= $quantity) {
                 if ($tries > 1) usleep(Config::get('CONNECTION')['timeout'] * 1000000);
-                $tmp_path = dirname(static::$tmp_update_file);
-                $archive = Tools::ds($tmp_path, 'update.rar');
-                $extracted = Tools::ds($tmp_path, 'update.ver');
-                Tools::download_file(
-                    [
-                        CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
-                        CURLOPT_URL => "http://" . $mirror . "/" . static::$source_update_file,
-                        CURLOPT_FILE => $archive
-                    ],
-                    $headers
-                );
 
-                if (is_array($headers) and $headers['http_code'] == 200) {
-                    if (preg_match("/rar/", Tools::get_file_mimetype($archive))) {
-                        Log::write_log(Language::t("Extracting file %s to %s", $archive, $tmp_path), 5, static::$version);
-                        Tools::extract_file(Config::get('SCRIPT')['unrar_binary'], $archive, $tmp_path);
-                        @unlink($archive);
-                        if (Config::get('SCRIPT')['debug_update'] == 1) {
-                            $date = date("Y-m-d-H-i-s-") . explode('.', microtime(1))[1];
-                            copy("${tmp_path}/update.ver", "${tmp_path}/update_${mirror}_${date}.ver");
-                        }
-                    } else {
-                        rename($archive, $extracted);
-                    }
-                }
-                return $headers['http_code'] === 200 || $headers['http_code'] === 404 || false;
+                return static::check_mirror($mirror);
             }
         }
 
@@ -196,6 +172,7 @@ class Mirror
         );
 
         if (is_array($headers) and $headers['http_code'] == 200) {
+
             if (preg_match("/rar/", Tools::get_file_mimetype($archive))) {
                 Log::write_log(Language::t("Extracting file %s to %s", $archive, $tmp_path), 5, static::$version);
                 Tools::extract_file(Config::get('SCRIPT')['unrar_binary'], $archive, $tmp_path);
@@ -207,13 +184,16 @@ class Mirror
             } else {
                 rename($archive, $extracted);
             }
+            $content = @file_get_contents($extracted);
+            if (preg_match_all('#\[\w+\][^\[]+#', $content, $matches))
+            {
+                list($new_files, $total_size, $new_content) = static::parse_update_file($matches[0]);
+                shuffle($new_files);
+                $file = array_shift($new_files);
+                static::download([$file], true);
+            }
 
         }
-    }
-
-    static public function checkUpdateVerFile()
-    {
-
     }
 
     /**
@@ -462,11 +442,13 @@ class Mirror
 
     /**
      * @param $download_files
+     * @param false $onlyCheck
+     * @return void|null
      */
-    static protected function single_download($download_files)
+    static protected function single_download($download_files, $onlyCheck = false)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        $web_dir = Config::get('SCRIPT')['web_dir'];
+        $web_dir = $onlyCheck ? Tools::ds(TMP_PATH) : Config::get('SCRIPT')['web_dir'];
 
         foreach ($download_files as $file) {
             foreach (static::$mirrors as $id => $mirror) {
@@ -483,6 +465,10 @@ class Mirror
                 );
 
                 if (is_array($header) and $header['http_code'] == 200 and $header['size_download'] == $file['size']) {
+                    if ($onlyCheck) {
+                        @unlink($out);
+                        return;
+                    }
                     static::$total_downloads += $header['size_download'];
                     Log::write_log(Language::t("From %s downloaded %s [%s] [%s/s]", $mirror['host'], basename($file['file']),
                         Tools::bytesToSize1024($header['size_download']),
@@ -494,10 +480,12 @@ class Mirror
                     break;
                 } else if ($header['http_code'] == 401) {
                     static::$unAuthorized = true;
+                    @unlink(static::$tmp_update_file);
                     @unlink($out);
                     return null;
                 }
                 else {
+                    @unlink(static::$tmp_update_file);
                     @unlink($out);
                 }
             }
@@ -506,12 +494,12 @@ class Mirror
 
     /**
      * @param $download_files
-     * @throws Exception
+     * @param false $onlyCheck
      */
-    static protected function download($download_files)
+    static protected function download($download_files, $onlyCheck = false)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        static::single_download($download_files);
+        static::single_download($download_files, $onlyCheck);
         /*
         switch (function_exists('curl_multi_init')) {
             case true:
@@ -554,10 +542,6 @@ class Mirror
                 (static::$ESET['x32'] != 1 and preg_match("/32|86/", $output['platform'])) or
                 (static::$ESET['x64'] != 1 and preg_match("/64/", $output['platform']))
             ) continue;
-            /*if (static::$version == 'v5') {
-                $output = preg_replace('/file=\/ep5/is', 'file=/v5', $output);
-                $new_container = preg_replace('/file=\/ep5/is', 'file=/v5', $container);
-            }*/
             $new_files[] = $output;
             $total_size += $output['size'];
             $new_content .= $container;
@@ -568,7 +552,6 @@ class Mirror
 
     /**
      * @param $download_files
-     * @throws Exception
      * @throws ToolsException
      */
     static protected function download_files($download_files)
