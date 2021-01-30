@@ -600,7 +600,7 @@ class Mirror
     static protected function download($download_files, $onlyCheck = false, $checkedMirror = null)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        static::single_download($download_files, $onlyCheck, $checkedMirror);
+        //static::single_download($download_files, $onlyCheck, $checkedMirror);
         static::multiple_download($download_files, $onlyCheck, $checkedMirror);
         /*
         switch (function_exists('curl_multi_init')) {
