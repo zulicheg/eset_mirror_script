@@ -472,12 +472,14 @@ class Mirror
             CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1]
         ];
         $mh = curl_multi_init();
-        $curlHandlers = [];
-        $fileHandlers = [];
+        //$curlHandlers = [];
+        //$fileHandlers = [];
 
         $chunks = array_chunk($download_files, count($mirrorList));
         foreach ($chunks as $key => $files)
         {
+            $curlHandlers = [];
+            $fileHandlers = [];
             foreach ($files as $idx => $file)
             {
                 $out = Tools::ds($web_dir, $file['file']);
@@ -511,6 +513,7 @@ class Mirror
 
             foreach ($curlHandlers as $kch => $rch)
             {
+
                 $header = curl_getinfo($rch);
                 if (is_array($header) and $header['http_code'] == 200 and $header['size_download'] == $files[$kch]['size']) {
 
@@ -523,10 +526,6 @@ class Mirror
                     );
                     static::$total_downloads += $header['size_download'];
                 }
-            }
-
-            foreach ($curlHandlers as $rch)
-            {
                 curl_multi_remove_handle($mh, $rch);
             }
 
@@ -592,8 +591,8 @@ class Mirror
     static protected function download($download_files, $onlyCheck = false, $checkedMirror = null)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        //static::single_download($download_files, $onlyCheck, $checkedMirror);
-        static::multiple_download($download_files, $onlyCheck, $checkedMirror);
+        static::single_download($download_files, $onlyCheck, $checkedMirror);
+        //static::multiple_download($download_files, $onlyCheck, $checkedMirror);
         /*
         switch (function_exists('curl_multi_init')) {
             case true:
