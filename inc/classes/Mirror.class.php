@@ -114,7 +114,7 @@ class Mirror
         }
 
         asort($test_mirrors);
-
+        static::$mirrors = [];
         foreach ($test_mirrors as $mirror => $time) {
             $version = static::check_mirror($mirror);
             if ($version)
@@ -208,7 +208,7 @@ class Mirror
                 list($new_files, $total_size, $new_content) = static::parse_update_file($matches[0]);
                 shuffle($new_files);
                 $file = array_shift($new_files);
-                static::download([$file], true);
+                static::download([$file], true, $mirror);
             }
         }
     }
@@ -462,13 +462,15 @@ class Mirror
      * @param false $onlyCheck
      * @return void|null
      */
-    static protected function single_download($download_files, $onlyCheck = false)
+    static protected function single_download($download_files, $onlyCheck = false, $checkedMirror = null)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $web_dir = $onlyCheck ? Tools::ds(TMP_PATH) : Config::get('SCRIPT')['web_dir'];
-
+        $mirrorList = static::$mirrors;
+        if ($onlyCheck && $checkedMirror) $mirrorList = [['host' => $checkedMirror]];
         foreach ($download_files as $file) {
-            foreach (static::$mirrors as $id => $mirror) {
+            foreach ($mirrorList as $id => $mirror) {
+
                 $time = microtime(true);
                 Log::write_log(Language::t("Trying download file %s from %s", $file['file'], $mirror['host']), 3, static::$version);
                 $out = Tools::ds($web_dir, $file['file']);
@@ -513,10 +515,10 @@ class Mirror
      * @param $download_files
      * @param false $onlyCheck
      */
-    static protected function download($download_files, $onlyCheck = false)
+    static protected function download($download_files, $onlyCheck = false, $checkedMirror = null)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        static::single_download($download_files, $onlyCheck);
+        static::single_download($download_files, $onlyCheck, $checkedMirror);
         /*
         switch (function_exists('curl_multi_init')) {
             case true:
