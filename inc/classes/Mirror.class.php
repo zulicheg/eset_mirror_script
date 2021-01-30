@@ -23,18 +23,9 @@ class Mirror
     static public $local_update_file = null;
 
     /**
-     * @var
-     */
-    static public $mirror_dir = null;
-    /**
      * @var null
      */
     static public $source_update_file = null;
-
-    /**
-     * @var null
-     */
-    static public $dll_file = null;
 
     /**
      * @var null
@@ -198,7 +189,7 @@ class Mirror
         Tools::download_file(
             [
                 CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
-                CURLOPT_URL => "http://" . "$mirror/" . (static::$dll_file ? static::$dll_file : static::$source_update_file),
+                CURLOPT_URL => "http://" . "$mirror/" . static::$source_update_file,
                 CURLOPT_FILE => $archive
             ],
             $headers
@@ -600,12 +591,12 @@ class Mirror
         static::$total_downloads = 0;
         static::$version = $version;
         static::$name = $dir['name'];
-        static::$source_update_file = isset($dir['dll']) ? $dir['dll'] : $dir['file'];
-        static::$dll_file = isset($dir['dll']) ? $dir['dll'] : false;
+        static::$source_update_file = isset($dir['dll']) && $dir['dll'] ? $dir['dll'] : $dir['file'];
         static::$updated = false;
         static::$ESET = Config::get('ESET');
 
         $fixed_update_file = preg_replace('/eset_upd\/update\.ver/is','eset_upd/v3/update.ver', static::$source_update_file);
+
         static::$tmp_update_file = Tools::ds(TMP_PATH, $fixed_update_file);
         static::$local_update_file = Tools::ds(Config::get('SCRIPT')['web_dir'], $fixed_update_file);
 
@@ -633,7 +624,6 @@ class Mirror
         static::$total_downloads = 0;
         static::$version = null;
         static::$source_update_file = null;
-        static::$dll_file = null;
         static::$name = null;
         static::$mirrors = array();
         static::$key = array();
