@@ -55,7 +55,7 @@ $DIRECTORIES = [
     ]
 ];
 
-$VERSION = '20201122 [Freedom for All by Kingston]';
+$VERSION = '20210130 [Freedom for All by Kingston]';
 
 @define('DS', DIRECTORY_SEPARATOR);
 @define('SELF', dirname(__DIR__) . DS);
