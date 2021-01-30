@@ -497,13 +497,17 @@ class Mirror
                 $curlHandlers[$idx] = $ch;
                 $fileHandlers[$idx] = $fh;
             }
-
+            $time = microtime(true);
             do {
                 $status = curl_multi_exec($mh, $active);
                 if ($active) {
                     curl_multi_select($mh);
                 }
+                while (false !== ($info = curl_multi_info_read($mh))) {
+                    var_dump($info);
+                }
             } while ($active && $status == CURLM_OK);
+            var_dump((microtime(true) - $time));
             break;
         }
         foreach ($curlHandlers as $rch)
