@@ -497,7 +497,7 @@ class Mirror
                 $curlHandlers[$idx] = $ch;
                 $fileHandlers[$idx] = $fh;
             }
-            $time = microtime(true);
+
             do {
                 $status = curl_multi_exec($mh, $active);
                 if ($active) {
@@ -505,15 +505,12 @@ class Mirror
                 }
             } while ($active && $status == CURLM_OK);
 
-            if (!$onlyCheck) var_dump((microtime(true) - $time));
-
             foreach ($fileHandlers as $rfh) {
                 @fclose($rfh);
             }
 
             foreach ($curlHandlers as $kch => $rch)
             {
-                if (!$onlyCheck) var_dump(curl_getinfo($rch));
                 $header = curl_getinfo($rch);
                 if (is_array($header) and $header['http_code'] == 200 and $header['size_download'] == $files[$kch]['size']) {
 
@@ -527,12 +524,12 @@ class Mirror
                     static::$total_downloads += $header['size_download'];
                 }
             }
+
             foreach ($curlHandlers as $rch)
             {
                 curl_multi_remove_handle($mh, $rch);
             }
 
-            break;
         }
 
 
