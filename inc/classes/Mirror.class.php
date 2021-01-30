@@ -105,17 +105,25 @@ class Mirror
 
             if ($headers['http_code'] == 200) {
                 $test_mirrors[$mirror] = round($headers['total_time'] * 1000);
-                Log::write_log(Language::t("Mirror %s active", $mirror), 3, static::$version);
-            } else Log::write_log(Language::t("Mirror %s inactive", $mirror), 3, static::$version);
+            }
         }
 
         asort($test_mirrors);
         static::$mirrors = [];
+        $maxVersion = 0;
+        $sameMirrors = [];
+
         foreach ($test_mirrors as $mirror => $time) {
             $version = static::check_mirror($mirror);
-            if ($version)
-                static::$mirrors[] = ['host' => $mirror, 'db_version' => $version];
+            if ($version) {
+                $maxVersion = $version > $maxVersion ? $version : $maxVersion;
+                $sameMirrors[] = ['host' => $mirror, 'db_version' => $version];
+            }
         }
+
+        static::$mirrors = array_filter($sameMirrors, function ($v, $k) use ($maxVersion) {
+            return $v['db_version'] == $maxVersion;
+        }, ARRAY_FILTER_USE_BOTH);
 
         return count(static::$mirrors) > 0;
     }
@@ -465,6 +473,7 @@ class Mirror
         $web_dir = $onlyCheck ? Tools::ds(TMP_PATH) : Config::get('SCRIPT')['web_dir'];
         $mirrorList = static::$mirrors;
         if ($onlyCheck && $checkedMirror) $mirrorList = [['host' => $checkedMirror]];
+
         foreach ($download_files as $file) {
             foreach ($mirrorList as $id => $mirror) {
 
@@ -494,13 +503,7 @@ class Mirror
                     );
                     static::$total_downloads += $header['size_download'];
                     break;
-                } else if ($header['http_code'] == 401) {
-                    static::$unAuthorized = true;
-                    @unlink(static::$tmp_update_file);
-                    @unlink($out);
-                    return null;
-                }
-                else {
+                } else {
                     @unlink(static::$tmp_update_file);
                     @unlink($out);
                 }

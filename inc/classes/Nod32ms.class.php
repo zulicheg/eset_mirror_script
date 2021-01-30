@@ -602,18 +602,14 @@ class Nod32ms
 
                 Log::write_log(Language::t("Init Mirror for version %s in %s", $version, $dir['name']), 5, $version);
                 Mirror::init($version, $dir);
-
+                static::$foundValidKey = false;
                 $this->read_keys();
-
                 if (static::$foundValidKey == false) {
                     $this->find_keys();
 
                     if (static::$foundValidKey == false) {
-                        //$key = $this->read_keys();
-                        //if ($key === null) {
-                            Log::write_log(Language::t("The script has been stopped!"), 1, Mirror::$version);
-                            continue;
-                        //}
+                        Log::write_log(Language::t("The script has been stopped!"), 1, Mirror::$version);
+                        continue;
                     }
                 }
 
@@ -621,7 +617,7 @@ class Nod32ms
                 $old_version = Mirror::get_DB_version(Mirror::$local_update_file);
 
                 if (!empty(Mirror::$mirrors)) {
-
+/*
                     foreach (Mirror::$mirrors as $id => $mirror) {
                         if ($mirror['db_version'] !== 0) {
                             Log::write_log(Language::t("The latest database %s was found on %s", $mirror['db_version'], $mirror['host']), 2, Mirror::$version);
@@ -635,9 +631,12 @@ class Nod32ms
                             Log::informer(Language::t("Your version of database is relevant %s", $old_version), Mirror::$version, 2);
                         }
                     }
+*/
 
                     if (!empty(Mirror::$mirrors)) {
-                        foreach (Mirror::$mirrors as $id => $mirror) {
+                        $mirror = array_shift(Mirror::$mirrors);
+
+                        //foreach (Mirror::$mirrors as $id => $mirror) {
 
                             list($size, $downloads, $speed) = Mirror::download_signature();
 
@@ -663,7 +662,7 @@ class Nod32ms
                                 }
                                 break;
                             }
-                        }
+                        //}
                     }
                 } else {
                     Log::write_log(Language::t("All mirrors is down!"), 1, Mirror::$version);
