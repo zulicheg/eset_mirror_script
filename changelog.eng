@@ -1,3 +1,17 @@
+20210130
+  Refactoring:
+   - Multi-threaded download function
+   - Initialization of the Mirror class
+   - The logic of the main function run_script
+
+  Changed:
+   - Key and mirror verification
+   - Formation of a list of working mirrors with the current version
+   - File upload methods: single-threaded and multi-threaded
+
+  Fixed:
+   - Minor edits
+
 20201122
  Added:
   - Support version: ESET Endpoint 8, ESET 14
