@@ -45,6 +45,9 @@ html_codepage = "utf-8"
 debug_html = 0
 
 [CONNECTION]
+; Использовать многопоточную загрузку при совместимости php и php-curl
+use_multidownload = 0
+
 ; Ограничение скорости загрузки n bytes/s
 ; Указывать только число
 ; 0: не ограничено

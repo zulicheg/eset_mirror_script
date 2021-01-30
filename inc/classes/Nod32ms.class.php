@@ -613,56 +613,36 @@ class Nod32ms
                     }
                 }
 
-                //Mirror::find_best_mirrors();
                 $old_version = Mirror::get_DB_version(Mirror::$local_update_file);
 
                 if (!empty(Mirror::$mirrors)) {
-/*
-                    foreach (Mirror::$mirrors as $id => $mirror) {
-                        if ($mirror['db_version'] !== 0) {
-                            Log::write_log(Language::t("The latest database %s was found on %s", $mirror['db_version'], $mirror['host']), 2, Mirror::$version);
-                        } else {
-                            Log::write_log(Language::t("Latest database not found!"), 2, Mirror::$version);
-                            unset(Mirror::$mirrors[$id]);
-                            continue;
-                        }
-
-                        if ($old_version && $this->compare_versions($old_version, $mirror['db_version'])) {
-                            Log::informer(Language::t("Your version of database is relevant %s", $old_version), Mirror::$version, 2);
-                        }
-                    }
-*/
 
                     if (!empty(Mirror::$mirrors)) {
                         $mirror = array_shift(Mirror::$mirrors);
 
-                        //foreach (Mirror::$mirrors as $id => $mirror) {
+                        if ($old_version && $this->compare_versions($old_version, $mirror['db_version'])) {
+                            Log::informer(Language::t("Your version of database is relevant %s", $old_version), Mirror::$version, 2);
+                            continue;
+                        }
 
-                            list($size, $downloads, $speed) = Mirror::download_signature();
+                        list($size, $downloads, $speed) = Mirror::download_signature();
+                        $this->set_database_size($size);
 
-                            /*if (Mirror::$unAuthorized) {
-                                $keys = $this->read_keys();
-                                $this->delete_key($keys[0],$keys[1]);
-                            }*/
-
-                            $this->set_database_size($size);
-                            if (!Mirror::$updated && $old_version != 0 && !$this->compare_versions($old_version, $mirror['db_version'])) {
-                                Log::informer(Language::t("Your database has not been updated!"), Mirror::$version, 1);
-                            } else {
-                                $total_size[Mirror::$version] = $size;
-                                $total_downloads[Mirror::$version] = $downloads;
-                                if (!empty($speed)) {
-                                    $average_speed[Mirror::$version] = $speed;
-                                }
-
-                                if ($old_version && !$this->compare_versions($old_version, $mirror['db_version'])) {
-                                    Log::informer(Language::t("Your database was successfully updated from %s to %s", $old_version, $mirror['db_version']), Mirror::$version, 2);
-                                } else {
-                                    Log::informer(Language::t("Your database was successfully updated to %s", $mirror['db_version']), Mirror::$version, 2);
-                                }
-                                //break;
+                        if (!Mirror::$updated && $old_version != 0 && !$this->compare_versions($old_version, $mirror['db_version'])) {
+                            Log::informer(Language::t("Your database has not been updated!"), Mirror::$version, 1);
+                        } else {
+                            $total_size[Mirror::$version] = $size;
+                            $total_downloads[Mirror::$version] = $downloads;
+                            if (!empty($speed)) {
+                                $average_speed[Mirror::$version] = $speed;
                             }
-                        //}
+
+                            if ($old_version && !$this->compare_versions($old_version, $mirror['db_version'])) {
+                                Log::informer(Language::t("Your database was successfully updated from %s to %s", $old_version, $mirror['db_version']), Mirror::$version, 2);
+                            } else {
+                                Log::informer(Language::t("Your database was successfully updated to %s", $mirror['db_version']), Mirror::$version, 2);
+                            }
+                        }
                     }
                 } else {
                     Log::write_log(Language::t("All mirrors is down!"), 1, Mirror::$version);

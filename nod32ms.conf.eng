@@ -43,6 +43,10 @@ html_codepage = "utf-8"
 debug_html = 0
 
 [CONNECTION]
+; use multidownload if installed php-curl and compatible
+use_multidownload = 0
+
+
 ; Download speed limit n bytes/s
 ; Set only number
 ; Default: unlimit(0)
