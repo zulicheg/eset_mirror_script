@@ -211,6 +211,9 @@ class Mirror
             if (preg_match_all('#\[\w+\][^\[]+#', $content, $matches))
             {
                 list($new_files, $total_size, $new_content) = static::parse_update_file($matches[0]);
+                $new_files = array_filter($new_files, function($v, $k) {
+                    return $v['size'] <= 1024 * 1024;
+                });
                 shuffle($new_files);
                 $file = array_shift($new_files);
                 static::download([$file], true, $mirror);
@@ -473,8 +476,6 @@ class Mirror
             CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1]
         ];
         $mh = curl_multi_init();
-        //$curlHandlers = [];
-        //$fileHandlers = [];
 
         $max_threads = !empty($CONNECTION['download_threads']) ? $CONNECTION['download_threads'] : count($mirrorList);
 
