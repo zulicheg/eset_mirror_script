@@ -528,7 +528,7 @@ class Mirror
                 if (is_array($header) and $header['http_code'] == 200 and $header['size_download'] == $tmp2['file']['size']) {
 
                     static::$total_downloads += $header['size_download'];
-                    Log::write_log(Language::t("From %s downloaded %s [%s] [%s/s]", $tmp2['mirror']['host'], basename($tmp2['file']['size']),
+                    Log::write_log(Language::t("From %s downloaded %s [%s] [%s/s]", $tmp2['mirror']['host'], basename($tmp2['file']['file']),
                         Tools::bytesToSize1024($header['size_download']),
                         Tools::bytesToSize1024($header['size_download'] / $header['total_time'])),
                         3,
