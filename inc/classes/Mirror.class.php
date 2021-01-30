@@ -503,26 +503,38 @@ class Mirror
                 if ($active) {
                     curl_multi_select($mh);
                 }
-                while (false !== ($info = curl_multi_info_read($mh))) {
-                    if (!$onlyCheck) var_dump($info);
-                }
             } while ($active && $status == CURLM_OK);
 
             if (!$onlyCheck) var_dump((microtime(true) - $time));
-            foreach ($curlHandlers as $rch)
+
+            foreach ($fileHandlers as $rfh) {
+                @fclose($rfh);
+            }
+
+            foreach ($curlHandlers as $kch => $rch)
             {
                 if (!$onlyCheck) var_dump(curl_getinfo($rch));
+                $header = curl_getinfo($rch);
+                if (is_array($header) and $header['http_code'] == 200 and $header['size_download'] == $files[$kch]['size']) {
+
+                    static::$total_downloads += $header['size_download'];
+                    Log::write_log(Language::t("From %s downloaded %s [%s] [%s/s]", $mirrorList[$kch]['host'], basename($files[$kch]['file']),
+                        Tools::bytesToSize1024($header['size_download']),
+                        Tools::bytesToSize1024($header['size_download'] / $header['total_time'])),
+                        3,
+                        static::$version
+                    );
+                    static::$total_downloads += $header['size_download'];
+                }
             }
+            foreach ($curlHandlers as $rch)
+            {
+                curl_multi_remove_handle($mh, $rch);
+            }
+
             break;
         }
-        foreach ($curlHandlers as $rch)
-        {
-            curl_multi_remove_handle($mh, $rch);
-        }
 
-        foreach ($fileHandlers as $rfh) {
-            @fclose($rfh);
-        }
 
         curl_multi_close($mh);
     }
