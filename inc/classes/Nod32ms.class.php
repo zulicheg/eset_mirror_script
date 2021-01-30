@@ -612,6 +612,7 @@ class Nod32ms
                 $old_version = Mirror::get_DB_version(Mirror::$local_update_file);
 
                 if (!empty(Mirror::$mirrors)) {
+
                     foreach (Mirror::$mirrors as $id => $mirror) {
                         if ($mirror['db_version'] !== 0) {
                             Log::write_log(Language::t("The latest database %s was found on %s", $mirror['db_version'], $mirror['host']), 2, Mirror::$version);
@@ -621,7 +622,7 @@ class Nod32ms
                             continue;
                         }
 
-                        if ($this->compare_versions($old_version, $mirror['db_version'])) {
+                        if ($old_version && $this->compare_versions($old_version, $mirror['db_version'])) {
                             Log::informer(Language::t("Your version of database is relevant %s", $old_version), Mirror::$version, 2);
                         }
                     }
@@ -646,7 +647,7 @@ class Nod32ms
                                     $average_speed[Mirror::$version] = $speed;
                                 }
 
-                                if (!$this->compare_versions($old_version, $mirror['db_version'])) {
+                                if ($old_version && !$this->compare_versions($old_version, $mirror['db_version'])) {
                                     Log::informer(Language::t("Your database was successfully updated from %s to %s", $old_version, $mirror['db_version']), Mirror::$version, 2);
                                 } else {
                                     Log::informer(Language::t("Your database was successfully updated to %s", $mirror['db_version']), Mirror::$version, 2);

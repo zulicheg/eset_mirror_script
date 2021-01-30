@@ -93,9 +93,6 @@ class Mirror
 
         $test_mirrors = [];
         foreach (static::$ESET['mirror'] as $mirror) {
-            //$tries = 0;
-            //$quantity = Config::get('FIND')['errors_quantity'];
-
             Tools::download_file(
                 [
                     CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
@@ -110,7 +107,6 @@ class Mirror
                 $test_mirrors[$mirror] = round($headers['total_time'] * 1000);
                 Log::write_log(Language::t("Mirror %s active", $mirror), 3, static::$version);
             } else Log::write_log(Language::t("Mirror %s inactive", $mirror), 3, static::$version);
-
         }
 
         asort($test_mirrors);
@@ -164,7 +160,7 @@ class Mirror
         $new_version = null;
         $file = static::$tmp_update_file;
         Log::write_log(Language::t("Checking mirror %s with key [%s:%s]", $mirror, static::$key[0], static::$key[1]), 4, static::$version);
-        static::download_update_ver($mirror);
+        static::download_update_ver($mirror, true);
         $new_version = static::get_DB_version($file);
         @unlink($file);
 
@@ -175,7 +171,7 @@ class Mirror
      * @param $mirror
      * @throws ToolsException
      */
-    static public function download_update_ver($mirror)
+    static public function download_update_ver($mirror, $downloadRandomFile = false)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $tmp_path = dirname(static::$tmp_update_file);
@@ -202,6 +198,7 @@ class Mirror
             } else {
                 rename($archive, $extracted);
             }
+            if (!$downloadRandomFile) return;
             $content = @file_get_contents($extracted);
             if (preg_match_all('#\[\w+\][^\[]+#', $content, $matches))
             {
@@ -579,7 +576,7 @@ class Mirror
         shuffle($download_files);
         Log::write_log(Language::t("Downloading %d files", count($download_files)), 3, static::$version);
 
-        if (static::check_mirror(current(static::$mirrors)['host']) != null) static::download($download_files);
+        static::download($download_files);
     }
 
     /**
