@@ -213,7 +213,7 @@ class Mirror
                 list($new_files, $total_size, $new_content) = static::parse_update_file($matches[0]);
                 $new_files = array_filter($new_files, function($v, $k) {
                     return $v['size'] <= 1024 * 1024;
-                });
+                }, ARRAY_FILTER_USE_BOTH);
                 shuffle($new_files);
                 $file = array_shift($new_files);
                 static::download([$file], true, $mirror);
