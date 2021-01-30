@@ -93,26 +93,24 @@ class Mirror
 
         $test_mirrors = [];
         foreach (static::$ESET['mirror'] as $mirror) {
-            $tries = 0;
-            $quantity = Config::get('FIND')['errors_quantity'];
+            //$tries = 0;
+            //$quantity = Config::get('FIND')['errors_quantity'];
 
-            while (++$tries <= $quantity) {
-                if ($tries > 1) usleep(Config::get('CONNECTION')['timeout'] * 1000000);
+            Tools::download_file(
+                [
+                    CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
+                    CURLOPT_URL => "http://" . $mirror . "/" . static::$source_update_file,
+                    CURLOPT_NOBODY => 1,
+                    CURLOPT_TIMEOUT => Config::get('CONNECTION')['timeout']
+                ],
+                $headers
+            );
 
-                Tools::download_file(
-                    [
-                        CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
-                        CURLOPT_URL => "http://" . $mirror . "/" . static::$source_update_file,
-                        CURLOPT_NOBODY => 1
-                    ],
-                    $headers
-                );
+            if ($headers['http_code'] == 200) {
+                $test_mirrors[$mirror] = round($headers['total_time'] * 1000);
+                Log::write_log(Language::t("Mirror %s active", $mirror), 3, static::$version);
+            } else Log::write_log(Language::t("Mirror %s inactive", $mirror), 3, static::$version);
 
-                if ($headers['http_code'] == 200) {
-                    $test_mirrors[$mirror] = round($headers['total_time'] * 1000);
-                    Log::write_log(Language::t("Mirror %s active", $mirror), 3, static::$version);
-                } else Log::write_log(Language::t("Mirror %s inactive", $mirror), 3, static::$version);
-            }
         }
 
         asort($test_mirrors);
