@@ -63,6 +63,11 @@ class Config
 
         static::$CONF['ESET']['mirror'] = array_map("trim", (explode(",", static::$CONF['ESET']['mirror'])));
 
+        if (preg_match("/^win/i", PHP_OS) == false) {
+            if (substr(static::$CONF['SCRIPT']['web_dir'], 0, 1) != DS) {
+                static::$CONF['SCRIPT']['web_dir'] = Tools::ds(SELF, static::$CONF['SCRIPT']['web_dir']);
+            }
+        }
         static::check_config();
     }
 
@@ -129,7 +134,7 @@ class Config
         @mkdir(PATTERN, 0755, true);
         @mkdir(static::$CONF['LOG']['dir'], 0755, true);
         @mkdir(static::$CONF['SCRIPT']['web_dir'], 0755, true);
-        @mkdir(Tools::ds(static::$CONF['SCRIPT']['web_dir'], TMP_PATH), 0755, true);
+        @mkdir(TMP_PATH, 0755, true);
 
         if (static::$CONF['SCRIPT']['debug_html'] == 1)
             @mkdir(Tools::ds(static::$CONF['LOG']['dir'], DEBUG_DIR), 0755, true);
@@ -180,7 +185,7 @@ class Config
 
             if (
                 function_exists('link') &&
-                link(
+                symlink(
                     Tools::ds(static::$CONF['SCRIPT']['web_dir'], 'linktest'),
                     Tools::ds(static::$CONF['SCRIPT']['web_dir'], 'linktest2')
                 )

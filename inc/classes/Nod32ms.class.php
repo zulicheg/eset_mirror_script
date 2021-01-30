@@ -590,12 +590,14 @@ class Nod32ms
         $total_size = array();
         $total_downloads = array();
         $average_speed = array();
-        $web_dir = Config::get('SCRIPT')['web_dir'];
+        //$web_dir = Config::get('SCRIPT')['web_dir'];
 
         foreach ($DIRECTORIES as $version => $dir) {
             if (Config::upd_version_is_set($version) == '1') {
+
                 Log::write_log(Language::t("Init Mirror for version %s in %s", $version, $dir['name']), 5, $version);
                 Mirror::init($version, $dir);
+
                 $key = $this->read_keys();
 
                 if ($key === null) {
@@ -610,7 +612,7 @@ class Nod32ms
                 }
 
                 Mirror::find_best_mirrors();
-                $old_version = Mirror::get_DB_version(Tools::ds($web_dir, (Mirror::$dll_file ? Mirror::$dll_file : Mirror::$update_file)));
+                $old_version = Mirror::get_DB_version(Mirror::$local_update_file);
 
                 if (!empty(Mirror::$mirrors)) {
                     foreach (Mirror::$mirrors as $id => $mirror) {

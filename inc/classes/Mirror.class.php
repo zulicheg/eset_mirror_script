@@ -18,7 +18,9 @@ class Mirror
     /**
      * @var
      */
-    static public $dir = null;
+    static public $tmp_update_file = null;
+
+    static public $local_update_file = null;
 
     /**
      * @var
@@ -27,7 +29,7 @@ class Mirror
     /**
      * @var null
      */
-    static public $update_file = null;
+    static public $source_update_file = null;
 
     /**
      * @var null
@@ -104,14 +106,31 @@ class Mirror
 
             while (++$tries <= $quantity) {
                 if ($tries > 1) usleep(Config::get('CONNECTION')['timeout'] * 1000000);
+                $tmp_path = dirname(static::$tmp_update_file);
+                $archive = Tools::ds($tmp_path, 'update.rar');
+                $extracted = Tools::ds($tmp_path, 'update.ver');
                 Tools::download_file(
                     [
                         CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
-                        CURLOPT_URL => "http://" . $mirror . "/" . (static::$dll_file ? static::$dll_file : static::$update_file),
-                        CURLOPT_NOBODY => 1
+                        CURLOPT_URL => "http://" . $mirror . "/" . static::$source_update_file,
+                        CURLOPT_FILE => $archive
                     ],
                     $headers
                 );
+
+                if (is_array($headers) and $headers['http_code'] == 200) {
+                    if (preg_match("/rar/", Tools::get_file_mimetype($archive))) {
+                        Log::write_log(Language::t("Extracting file %s to %s", $archive, $tmp_path), 5, static::$version);
+                        Tools::extract_file(Config::get('SCRIPT')['unrar_binary'], $archive, $tmp_path);
+                        @unlink($archive);
+                        if (Config::get('SCRIPT')['debug_update'] == 1) {
+                            $date = date("Y-m-d-H-i-s-") . explode('.', microtime(1))[1];
+                            copy("${tmp_path}/update.ver", "${tmp_path}/update_${mirror}_${date}.ver");
+                        }
+                    } else {
+                        rename($archive, $extracted);
+                    }
+                }
                 return $headers['http_code'] === 200 || $headers['http_code'] === 404 || false;
             }
         }
@@ -131,7 +150,7 @@ class Mirror
             Tools::download_file(
                 [
                     CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
-                    CURLOPT_URL => "http://" . $mirror . "/" . (static::$dll_file ? static::$dll_file : static::$update_file),
+                    CURLOPT_URL => "http://" . $mirror . "/" . static::$source_update_file,
                     CURLOPT_NOBODY => 1
                 ],
                 $headers
@@ -157,7 +176,7 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $new_version = null;
-        $file = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, pathinfo(static::$dll_file ? static::$dll_file : static::$update_file)['dirname'], 'update.ver');
+        $file = static::$tmp_update_file;
         Log::write_log(Language::t("Checking mirror %s with key [%s:%s]", $mirror, static::$key[0], static::$key[1]), 4, static::$version);
         static::download_update_ver($mirror);
         $new_version = static::get_DB_version($file);
@@ -173,14 +192,13 @@ class Mirror
     static public function download_update_ver($mirror)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
-        $tmp_path = Tools::ds(Config::get('SCRIPT')['web_dir'], TMP_PATH, pathinfo(static::$dll_file ? static::$dll_file : static::$update_file)['dirname']);
-        @mkdir($tmp_path, 0755, true);
+        $tmp_path = dirname(static::$tmp_update_file);
         $archive = Tools::ds($tmp_path, 'update.rar');
         $extracted = Tools::ds($tmp_path, 'update.ver');
         Tools::download_file(
             [
                 CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
-                CURLOPT_URL => "http://" . "$mirror/" . (static::$dll_file ? static::$dll_file : static::$update_file),
+                CURLOPT_URL => "http://" . "$mirror/" . (static::$dll_file ? static::$dll_file : static::$source_update_file),
                 CURLOPT_FILE => $archive
             ],
             $headers
@@ -198,7 +216,13 @@ class Mirror
             } else {
                 rename($archive, $extracted);
             }
+
         }
+    }
+
+    static public function checkUpdateVerFile()
+    {
+
     }
 
     /**
@@ -210,9 +234,9 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         static::download_update_ver(current(static::$mirrors)['host']);
-        $dir = Config::get('SCRIPT')['web_dir'];
-        $cur_update_ver = Tools::ds($dir, preg_replace('/eset_upd\/update\.ver/is','eset_upd/v3/update.ver', static::$dll_file ? static::$dll_file : static::$update_file));
-        $tmp_update_ver = Tools::ds($dir, TMP_PATH, static::$dll_file ? static::$dll_file : static::$update_file);
+        $web_dir = Config::get('SCRIPT')['web_dir'];
+        $cur_update_ver = static::$local_update_file;
+        $tmp_update_ver = static::$tmp_update_file;
         $content = @file_get_contents($tmp_update_ver);
         $start_time = microtime(true);
         preg_match_all('#\[\w+\][^\[]+#', $content, $matches);
@@ -224,7 +248,7 @@ class Mirror
             list($new_files, $total_size, $new_content) = static::parse_update_file($matches[0]);
 
             // Create hardlinks/copy file for empty needed files (name, size)
-            list($download_files, $needed_files) = static::create_links($dir, $new_files);
+            list($download_files, $needed_files) = static::create_links($web_dir, $new_files);
 
             // Download files
             if (!empty($download_files)) {
@@ -233,7 +257,7 @@ class Mirror
             }
             $version = static::$version == 'v5' ? 'ep5' : static::$version;
             // Delete not needed files
-            foreach (glob(Tools::ds($dir, $version . "-*"), GLOB_ONLYDIR) as $file) {
+            foreach (glob(Tools::ds($web_dir, $version . "-*"), GLOB_ONLYDIR) as $file) {
                 $del_files = static::del_files($file, $needed_files);
                 if ($del_files > 0) {
                     static::$updated = true;
@@ -242,7 +266,7 @@ class Mirror
             }
 
             // Delete empty folders
-            foreach (glob(Tools::ds($dir, $version . "-*"), GLOB_ONLYDIR) as $folder) {
+            foreach (glob(Tools::ds($web_dir, $version . "-*"), GLOB_ONLYDIR) as $folder) {
                 $del_folders = static::del_folders($folder);
                 if ($del_folders > 0) {
                     static::$updated = true;
@@ -250,7 +274,7 @@ class Mirror
                 }
             }
 
-            if (!file_exists(dirname($cur_update_ver))) @mkdir(dirname($cur_update_ver), 0755, true);
+            //if (!file_exists(dirname($cur_update_ver))) @mkdir(dirname($cur_update_ver), 0755, true);
             @file_put_contents($cur_update_ver, $new_content);
 
             Log::write_log(Language::t("Total size database: %s", Tools::bytesToSize1024($total_size)), 3, static::$version);
@@ -576,11 +600,19 @@ class Mirror
         static::$total_downloads = 0;
         static::$version = $version;
         static::$name = $dir['name'];
-        static::$update_file = $dir['file'];
+        static::$source_update_file = isset($dir['dll']) ? $dir['dll'] : $dir['file'];
         static::$dll_file = isset($dir['dll']) ? $dir['dll'] : false;
         static::$updated = false;
         static::$ESET = Config::get('ESET');
-        Log::write_log(Language::t("Mirror for %s initiliazed with update_file %s", static::$name, static::$update_file), 5, static::$version);
+
+        $fixed_update_file = preg_replace('/eset_upd\/update\.ver/is','eset_upd/v3/update.ver', static::$source_update_file);
+        static::$tmp_update_file = Tools::ds(TMP_PATH, $fixed_update_file);
+        static::$local_update_file = Tools::ds(Config::get('SCRIPT')['web_dir'], $fixed_update_file);
+
+        @mkdir(dirname(static::$tmp_update_file), 0755, true);
+        @mkdir(dirname(static::$local_update_file), 0755, true);
+
+        Log::write_log(Language::t("Mirror for %s initiliazed with update_file %s", static::$name, static::$source_update_file), 5, static::$version);
     }
 
     /**
@@ -600,7 +632,7 @@ class Mirror
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         static::$total_downloads = 0;
         static::$version = null;
-        static::$update_file = null;
+        static::$source_update_file = null;
         static::$dll_file = null;
         static::$name = null;
         static::$mirrors = array();
