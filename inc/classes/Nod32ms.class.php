@@ -20,6 +20,8 @@ class Nod32ms
      */
     static private $key_invalid_file;
 
+    static private $foundValidKey = false;
+
     /**
      * Nod32ms constructor.
      * @throws Exception
@@ -172,6 +174,7 @@ class Nod32ms
 
         if (is_bool($ret)) {
             if ($ret) {
+                static::$foundValidKey = true;
                 $this->write_key($result[0], $result[1]);
                 return true;
             } else {
@@ -312,7 +315,7 @@ class Nod32ms
     private function parse_www_page($this_link, $level, $pattern)
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
-        static $found_key = false;
+        static::$foundValidKey = false;
         $search = Tools::download_file(
             ([
                     CURLOPT_URL => $this_link,
@@ -354,7 +357,7 @@ class Nod32ms
                     continue;
 
                 if ($this->validate_key($login[$b] . ':' . $password[$b])) {
-                    $found_key = true;
+                    static::$foundValidKey = true;
                     return true;
                 }
             }
@@ -379,8 +382,9 @@ class Nod32ms
             foreach ($links as $url) {
                 $this->parse_www_page($url, $level - 1, $pattern);
 
-                if ($found_key)
+                if (static::$foundValidKey)
                     return true;
+
             }
         }
 
@@ -400,6 +404,7 @@ class Nod32ms
                 $key = file_get_contents($FIND['server_url']);
                 $key = json_decode($key, true);
                 if ($this->validate_key($key['username'] . ':' . $key['password'])) {
+                    static::$foundValidKey = true;
                     return true;
                 }
             } catch (Exception $ex)
@@ -418,7 +423,7 @@ class Nod32ms
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $FIND = Config::get('FIND');
 
-        if ($this->get_key_from_server()) return null;
+        if ($this->get_key_from_server()) return true;
 
         if ($FIND['auto'] != 1)
             return null;
@@ -590,69 +595,52 @@ class Nod32ms
         $total_size = array();
         $total_downloads = array();
         $average_speed = array();
-        $web_dir = Config::get('SCRIPT')['web_dir'];
+        //$web_dir = Config::get('SCRIPT')['web_dir'];
 
         foreach ($DIRECTORIES as $version => $dir) {
             if (Config::upd_version_is_set($version) == '1') {
+
                 Log::write_log(Language::t("Init Mirror for version %s in %s", $version, $dir['name']), 5, $version);
                 Mirror::init($version, $dir);
-                $key = $this->read_keys();
-
-                if ($key === null) {
+                static::$foundValidKey = false;
+                $this->read_keys();
+                if (static::$foundValidKey == false) {
                     $this->find_keys();
-                    $key = $this->read_keys();
 
-                    if ($key === null) {
+                    if (static::$foundValidKey == false) {
                         Log::write_log(Language::t("The script has been stopped!"), 1, Mirror::$version);
                         continue;
                     }
-                    Mirror::set_key($key);
                 }
 
-                Mirror::find_best_mirrors();
-                $old_version = Mirror::get_DB_version(Tools::ds($web_dir, (Mirror::$dll_file ? Mirror::$dll_file : Mirror::$update_file)));
+                $old_version = Mirror::get_DB_version(Mirror::$local_update_file);
 
                 if (!empty(Mirror::$mirrors)) {
-                    foreach (Mirror::$mirrors as $id => $mirror) {
-                        if ($mirror['db_version'] !== 0) {
-                            Log::write_log(Language::t("The latest database %s was found on %s", $mirror['db_version'], $mirror['host']), 2, Mirror::$version);
-                        } else {
-                            Log::write_log(Language::t("Latest database not found!"), 2, Mirror::$version);
-                            unset(Mirror::$mirrors[$id]);
+
+                    if (!empty(Mirror::$mirrors)) {
+                        $mirror = array_shift(Mirror::$mirrors);
+
+                        if ($old_version && $this->compare_versions($old_version, $mirror['db_version'])) {
+                            Log::informer(Language::t("Your version of database is relevant %s", $old_version), Mirror::$version, 2);
                             continue;
                         }
 
-                        if ($this->compare_versions($old_version, $mirror['db_version'])) {
-                            Log::informer(Language::t("Your version of database is relevant %s", $old_version), Mirror::$version, 2);
-                        }
-                    }
+                        list($size, $downloads, $speed) = Mirror::download_signature();
+                        $this->set_database_size($size);
 
-                    if (!empty(Mirror::$mirrors)) {
-                        foreach (Mirror::$mirrors as $id => $mirror) {
-
-                            list($size, $downloads, $speed) = Mirror::download_signature();
-
-                            if (Mirror::$unAuthorized) {
-                                $keys = $this->read_keys();
-                                $this->delete_key($keys[0],$keys[1]);
+                        if (!Mirror::$updated && $old_version != 0 && !$this->compare_versions($old_version, $mirror['db_version'])) {
+                            Log::informer(Language::t("Your database has not been updated!"), Mirror::$version, 1);
+                        } else {
+                            $total_size[Mirror::$version] = $size;
+                            $total_downloads[Mirror::$version] = $downloads;
+                            if (!empty($speed)) {
+                                $average_speed[Mirror::$version] = $speed;
                             }
 
-                            $this->set_database_size($size);
-                            if (!Mirror::$updated && $old_version != 0 && !$this->compare_versions($old_version, $mirror['db_version'])) {
-                                Log::informer(Language::t("Your database has not been updated!"), Mirror::$version, 1);
+                            if ($old_version && !$this->compare_versions($old_version, $mirror['db_version'])) {
+                                Log::informer(Language::t("Your database was successfully updated from %s to %s", $old_version, $mirror['db_version']), Mirror::$version, 2);
                             } else {
-                                $total_size[Mirror::$version] = $size;
-                                $total_downloads[Mirror::$version] = $downloads;
-                                if (!empty($speed)) {
-                                    $average_speed[Mirror::$version] = $speed;
-                                }
-
-                                if (!$this->compare_versions($old_version, $mirror['db_version'])) {
-                                    Log::informer(Language::t("Your database was successfully updated from %s to %s", $old_version, $mirror['db_version']), Mirror::$version, 2);
-                                } else {
-                                    Log::informer(Language::t("Your database was successfully updated to %s", $mirror['db_version']), Mirror::$version, 2);
-                                }
-                                break;
+                                Log::informer(Language::t("Your database was successfully updated to %s", $mirror['db_version']), Mirror::$version, 2);
                             }
                         }
                     }

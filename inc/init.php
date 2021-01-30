@@ -65,13 +65,13 @@ $VERSION = '20201122 [Freedom for All by Kingston]';
 @define('CONF_FILE', SELF . "nod32ms.conf");
 @define('LANGPACKS_DIR', SELF . 'langpacks' . DS);
 @define('DEBUG_DIR', SELF . 'debug' . DS);
+@define('TMP_PATH', SELF . 'tmp' . DS);
 @define('KEY_FILE_VALID', 'nod_keys.valid');
 @define('KEY_FILE_INVALID', 'nod_keys.invalid');
 @define('LOG_FILE', 'nod32ms.log');
 @define('SUCCESSFUL_TIMESTAMP', 'nod_lastupdate');
 @define('LINKTEST', 'nod_linktest');
 @define('DATABASES_SIZE', 'nod_databases_size');
-@define('TMP_PATH', 'tmp' . DS);
 
 $autoload = function ($class) {
     @include_once CLASSES . "$class.class.php";

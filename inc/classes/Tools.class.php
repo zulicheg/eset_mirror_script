@@ -16,10 +16,10 @@ class Tools
         $out = FALSE;
 
         if (key_exists(CURLOPT_FILE, $options)) {
-            $dir = dirname(SELF . $options[CURLOPT_FILE]);
+            $dir = dirname($options[CURLOPT_FILE]);
             if (!@file_exists($dir)) @mkdir($dir, 0755, true);
-            $out = fopen(SELF . $options[CURLOPT_FILE], "wb");
-	    if (!is_resource($out)) return false;
+            $out = fopen($options[CURLOPT_FILE], "wb");
+	        if (!is_resource($out)) return false;
             $options[CURLOPT_FILE] = $out;
         }
 
