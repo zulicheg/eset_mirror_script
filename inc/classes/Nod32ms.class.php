@@ -399,9 +399,7 @@ class Nod32ms
             try {
                 $key = file_get_contents($FIND['server_url']);
                 $key = json_decode($key, true);
-                if ($this->validate_key($key['username'] . ':' . $key['password'])) {
-                    return true;
-                }
+                if ($this->validate_key($key['username'] . ':' . $key['password'])) return true;
             } catch (Exception $ex)
             {
                 Log::write_log(Language::t("Error %s", $ex->getMessage()), 5, Mirror::$version);
@@ -608,10 +606,9 @@ class Nod32ms
                         Log::write_log(Language::t("The script has been stopped!"), 1, Mirror::$version);
                         continue;
                     }
-                    Mirror::set_key($key);
                 }
 
-                Mirror::find_best_mirrors();
+                //Mirror::find_best_mirrors();
                 $old_version = Mirror::get_DB_version(Mirror::$local_update_file);
 
                 if (!empty(Mirror::$mirrors)) {

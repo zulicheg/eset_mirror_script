@@ -91,6 +91,7 @@ class Mirror
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         Log::write_log(Language::t("Testing key [%s:%s]", static::$key[0], static::$key[1]), 4, static::$version);
 
+        $test_mirrors = [];
         foreach (static::$ESET['mirror'] as $mirror) {
             $tries = 0;
             $quantity = Config::get('FIND')['errors_quantity'];
@@ -98,11 +99,31 @@ class Mirror
             while (++$tries <= $quantity) {
                 if ($tries > 1) usleep(Config::get('CONNECTION')['timeout'] * 1000000);
 
-                return static::check_mirror($mirror);
+                Tools::download_file(
+                    [
+                        CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
+                        CURLOPT_URL => "http://" . $mirror . "/" . static::$source_update_file,
+                        CURLOPT_NOBODY => 1
+                    ],
+                    $headers
+                );
+
+                if ($headers['http_code'] == 200) {
+                    $test_mirrors[$mirror] = round($headers['total_time'] * 1000);
+                    Log::write_log(Language::t("Mirror %s active", $mirror), 3, static::$version);
+                } else Log::write_log(Language::t("Mirror %s inactive", $mirror), 3, static::$version);
             }
         }
 
-        return false;
+        asort($test_mirrors);
+
+        foreach ($test_mirrors as $mirror => $time) {
+            $version = static::check_mirror($mirror);
+            if ($version)
+                static::$mirrors[] = ['host' => $mirror, 'db_version' => $version];
+        }
+
+        return count(static::$mirrors) > 0;
     }
 
     /**
@@ -110,7 +131,7 @@ class Mirror
      */
     static public function find_best_mirrors()
     {
-        Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
+        /*Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
         $test_mirrors = [];
 
         foreach (static::$ESET['mirror'] as $mirror) {
@@ -131,7 +152,7 @@ class Mirror
         asort($test_mirrors);
 
         foreach ($test_mirrors as $mirror => $time)
-            static::$mirrors[] = ['host' => $mirror, 'db_version' => static::check_mirror($mirror)];
+            static::$mirrors[] = ['host' => $mirror, 'db_version' => static::check_mirror($mirror)];*/
     }
 
     /**
@@ -172,7 +193,6 @@ class Mirror
         );
 
         if (is_array($headers) and $headers['http_code'] == 200) {
-
             if (preg_match("/rar/", Tools::get_file_mimetype($archive))) {
                 Log::write_log(Language::t("Extracting file %s to %s", $archive, $tmp_path), 5, static::$version);
                 Tools::extract_file(Config::get('SCRIPT')['unrar_binary'], $archive, $tmp_path);
@@ -192,7 +212,6 @@ class Mirror
                 $file = array_shift($new_files);
                 static::download([$file], true);
             }
-
         }
     }
 
