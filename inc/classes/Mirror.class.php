@@ -734,7 +734,7 @@ class Mirror
 
                             switch (Config::get('create_hard_links')) {
                                 case 'link':
-                                    symlink(SELF . $result, SELF . $path);
+                                    symlink($result, $path);
                                     Log::write_log(Language::t("Created hard link for %s", basename($array['file'])), 3, static::$version);
                                     break;
                                 case 'fsutil':
