@@ -76,7 +76,7 @@ Average speed for all databases: %s/s
 n/a
 Generating html...
 Testing key [%s:%s]
-Validating key [%s:%s]
+Validating key [%s:%s] for version %s
 The script has been stopped!
 Checking mirror %s with key [%s:%s]
 Extracting file %s to %s

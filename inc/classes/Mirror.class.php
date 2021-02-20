@@ -93,6 +93,7 @@ class Mirror
 
         $test_mirrors = [];
         foreach (static::$ESET['mirror'] as $mirror) {
+
             Tools::download_file(
                 [
                     CURLOPT_USERPWD => static::$key[0] . ":" . static::$key[1],
@@ -118,7 +119,8 @@ class Mirror
             if ($version) {
                 $maxVersion = $version > $maxVersion ? $version : $maxVersion;
                 $sameMirrors[] = ['host' => $mirror, 'db_version' => $version];
-            }
+            } else
+                return false;
         }
 
         static::$mirrors = array_filter($sameMirrors, function ($v, $k) use ($maxVersion) {
@@ -416,6 +418,7 @@ class Mirror
                     static::$total_downloads += $header['size_download'];
                     break;
                 } else {
+                    if ($onlyCheck) @unlink(static::$tmp_update_file);
                     @unlink($out);
                 }
             }
@@ -431,7 +434,7 @@ class Mirror
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
 
-        switch (function_exists('curl_multi_init') && Config::get('CONNECTION')['use_multidownload']) {
+        switch (function_exists('curl_multi_init') && (bool)(Config::get('CONNECTION')['use_multidownload']) && !$onlyCheck) {
             case true:
                 static::multiple_download($download_files, $onlyCheck, $checkedMirror);
                 break;
@@ -533,6 +536,7 @@ class Mirror
     static public function destruct()
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, static::$version);
+
         static::$total_downloads = 0;
         static::$version = null;
         static::$source_update_file = null;
@@ -542,6 +546,7 @@ class Mirror
         static::$updated = false;
         static::$unAuthorized = false;
     }
+
 
     /**
      * @param $folder

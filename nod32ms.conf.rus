@@ -169,6 +169,12 @@ use_server = 1
 ;
 server_url = "https://api.nod32-trial-keys.site/api/single-license"
 
+;  Email юзера, отправившего запрос лицензий на сайте nod32-trial-keys.site
+user = ''
+
+; Количество попыток запросить новый ключ, если предыдущий невалидный
+number_attempts = 5
+
 ; ###########################
 ; конец блока
 

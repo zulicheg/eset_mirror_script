@@ -166,8 +166,9 @@ class Nod32ms
     {
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $result = explode(":", $key);
-        Log::write_log(Language::t("Validating key [%s:%s]", $result[0], $result[1]), 4, Mirror::$version);
+
         if ($this->key_exists_in_file($result[0], $result[1], static::$key_invalid_file)) return false;
+        Log::write_log(Language::t("Validating key [%s:%s] for version %s", $result[0], $result[1], Mirror::$version), 4, Mirror::$version);
 
         Mirror::set_key(array($result[0], $result[1]));
         $ret = Mirror::test_key();
@@ -401,9 +402,26 @@ class Nod32ms
 
         if ($FIND['use_server']) {
             try {
-                $key = file_get_contents($FIND['server_url']);
+                $ch = curl_init();
+                $opt = [
+
+                    CURLOPT_URL => $FIND['server_url'],
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_RETURNTRANSFER => 1
+                ];
+                if (strlen($FIND['user']) > 0 ) {
+                    $opt[CURLOPT_POST] = true;
+                    $opt[CURLOPT_POSTFIELDS] = "user=" . $FIND['user'];
+                }
+                curl_setopt_array($ch, $opt);
+                $key = curl_exec($ch);
+                if ($key == false) {
+                    Log::write_log(Language::t("Error %s", curl_error($ch)), 5, Mirror::$version);
+                    return false;
+                }
+
                 $key = json_decode($key, true);
-                if ($this->validate_key($key['username'] . ':' . $key['password'])) {
+                if ($key && $this->validate_key($key['username'] . ':' . $key['password'])) {
                     static::$foundValidKey = true;
                     return true;
                 }
@@ -423,7 +441,11 @@ class Nod32ms
         Log::write_log(Language::t("Running %s", __METHOD__), 5, Mirror::$version);
         $FIND = Config::get('FIND');
 
-        if ($this->get_key_from_server()) return true;
+        $attempts = 0;
+        while ($attempts < $FIND['number_attempts']) {
+            if ($this->get_key_from_server()) return true;
+            $attempts++;
+        }
 
         if ($FIND['auto'] != 1)
             return null;
@@ -595,15 +617,17 @@ class Nod32ms
         $total_size = array();
         $total_downloads = array();
         $average_speed = array();
-        //$web_dir = Config::get('SCRIPT')['web_dir'];
+
 
         foreach ($DIRECTORIES as $version => $dir) {
             if (Config::upd_version_is_set($version) == '1') {
 
                 Log::write_log(Language::t("Init Mirror for version %s in %s", $version, $dir['name']), 5, $version);
                 Mirror::init($version, $dir);
+
                 static::$foundValidKey = false;
                 $this->read_keys();
+
                 if (static::$foundValidKey == false) {
                     $this->find_keys();
 
@@ -652,6 +676,11 @@ class Nod32ms
             }
         }
 
+        foreach (glob(Tools::ds(TMP_PATH, '*')) as $folder) {
+            static::clear_tmp($folder);
+            @rmdir($folder);
+        }
+
         Log::write_log(Language::t("Total size for all databases: %s", Tools::bytesToSize1024(array_sum($total_size))), 3);
 
         if (array_sum($total_downloads) > 0)
@@ -661,6 +690,27 @@ class Nod32ms
             Log::write_log(Language::t("Average speed for all databases: %s/s", Tools::bytesToSize1024(array_sum($average_speed) / count($average_speed))), 3);
 
         if (Config::get('SCRIPT')['generate_html'] == '1') $this->generate_html();
+    }
+
+    private function clear_tmp($path)
+    {
+        try {
+            $iterator = new DirectoryIterator($path);
+            foreach ( $iterator as $fileinfo) {
+                if($fileinfo->isDot())continue;
+                if($fileinfo->isDir()){
+                    if(static::clear_tmp($fileinfo->getPathname()))
+                        @rmdir($fileinfo->getPathname());
+                }
+                if($fileinfo->isFile()){
+                    @unlink($fileinfo->getPathname());
+                }
+            }
+        } catch ( Exception $e ){
+            // write log
+            return false;
+        }
+        return true;
     }
 
     /**

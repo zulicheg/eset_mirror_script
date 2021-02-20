@@ -160,7 +160,7 @@ auto = 1
 ; Telegram channel: https://t.me/nod32trialKeys
 
 ; This parameter is responsible for the ability to take keys from the key server
-;  Trial keys, official, it is possible to take a unique key with the ability to automatically update the key
+; Trial keys, official, it is possible to take a unique key with the ability to automatically update the key
 ; If the option is enabled, then the key search does not occur.
 use_server = 1
 
@@ -168,6 +168,12 @@ use_server = 1
 ; Keys are always current, automatically updated
 ;
 server_url = "https://api.nod32-trial-keys.site/api/single-license"
+
+; User email which registered on site nod32-trial-keys.site to request licenses
+user = ''
+
+; Number of attempts to request new key if previous invalid
+number_attempts = 5
 
 ; ###########################
 ; end
