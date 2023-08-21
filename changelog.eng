@@ -1,3 +1,9 @@
+20230821
+ Added:
+  - Support version: ESET Endpoint 9,10, ESET 15
+  Fixed:
+  - Documentation
+
 20210130
   Refactoring:
    - Multi-threaded download function

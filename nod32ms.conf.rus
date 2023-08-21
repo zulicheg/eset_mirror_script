@@ -7,7 +7,7 @@ codepage = "utf-8"
 
 ; Часовой пояс в формате date_default_timezone_set (если данная функция поддерживается Вашей версией PHP)
 ; По умолчанию Ваш текущий системный часовой пояс.
-timezone = "Europe/Kiev"
+timezone = "Europe/Moscow"
 
 ; Лимит памяти для php
 memory_limit = '32M'
@@ -46,7 +46,7 @@ debug_html = 0
 
 [CONNECTION]
 ; Использовать многопоточную загрузку при совместимости php и php-curl
-use_multidownload = 0
+use_multidownload = 1
 
 ; Ограничение скорости загрузки n bytes/s
 ; Указывать только число
@@ -235,9 +235,12 @@ versionv10   = 1
 versionv12   = 1
 versionv13   = 1
 versionv14   = 1
+versionv15   = 1
 versionep6   = 1
 versionep7   = 1
 versionep8   = 1
+versionep9   = 1
+versionep10  = 1
 
 ; 32бит OS модули
 x32 = 1

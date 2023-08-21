@@ -28,7 +28,7 @@ File structure - INI, sections and parameters contains comments.
 
 Cron setup, update every 4 hours
 
-`0 */4 * * * cd /var/www/eset_mirror_script/ && /usr/bin/php /var/www/eset_mirror_script/update.php`
+`0 */4 * * * root cd /var/www/eset_mirror_script/ && /usr/bin/php /var/www/eset_mirror_script/update.php`
 
 ## Apache VirtualHost Configuration
 Example configuration file:
@@ -36,46 +36,39 @@ Example configuration file:
 <VirtualHost *:80>
          ServerName nod32.domain.ru
          ServerAlias nod.domain.ru, eset.domain.ru, update.domain.ru
- 
+
          ServerAdmin webmaster@domain.ru
          DocumentRoot /var/www/eset_mirror_script/www
+
          <Directory "/var/www/eset_mirror_script/www">
- 
                 Options FollowSymLinks
                 AllowOverride All
                 Require all granted
-                
+
                 RewriteEngine on
-                 
-                RewriteCond %{HTTP_USER_AGENT} ^.*(EES|EEA)\ Update.*BPC\ 6
-                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/ep6/update.ver [L]
-                
-                RewriteCond %{HTTP_USER_AGENT} ^.*(EES|EEA)\ Update.*BPC\ ([7-8]+)
-                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/ep%2/dll/update.ver [L]
-                
-                RewriteCond %{HTTP_USER_AGENT} ^.*(EES|EEA)\ Update.*BPC
-                RewriteRule ^(eset_upd/)?update\.ver$ - [F]
-                
-                RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 5
-                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/v5/update.ver [L]
-                
-                RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ ([3-8]+)
-                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/v3/update.ver [L]
-                
-                RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ 9
-                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/v9/update.ver [L]
-                
+
+                RewriteCond %{HTTP_USER_AGENT} ^.*(EES|EEA|EFSW|ESFW)\ Update.*BPC\ (6|7|8|9|10)
+                RewriteRule ^(eset_upd/|dll/)?update.ver$ /eset_upd/ep%2/dll/update.ver [L]
+
+                RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ (3|4|6|7|8|20\.22\.10\.12)
+                RewriteRule ^(eset_upd/|dll/)?update.ver$ /eset_upd/v3/update.ver [L]
+
+                RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ (5|9)
+                RewriteRule ^(eset_upd/|dll/)?update.ver$ /eset_upd/v%2/update.ver [L]
+
                 RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ (10|11)
-                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/v10/dll/update.ver [L]
-                
-                RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ (1[2-9]+)
-                RewriteRule ^(eset_upd/)?update.ver$ /eset_upd/v%1/dll/update.ver [L]
-                
+                RewriteRule ^(eset_upd/|dll/)?update.ver$ /eset_upd/v10/dll/update.ver [L]
+
+                RewriteCond %{HTTP_USER_AGENT} ^.*Update.*BPC\ (12|13|14|15)
+                RewriteRule ^(eset_upd/|dll/)?update.ver$ /eset_upd/v%1/dll/update.ver [L]
+
+                RewriteCond %{HTTP_USER_AGENT} ^.*(EES|EEA)\ Update.*BPC
+                RewriteRule ^(eset_upd/|dll/)?update\.ver$ - [F]
          </Directory>
- 
+
          ErrorLog /var/www/eset_mirror_script/log/apache-error.log
          CustomLog /var/www/eset_mirror_script/log/apache-access.log combined
- 
+
  </VirtualHost>
 ```
 This file need to place in folder `/etc/apache2/sites-available/` and name of file nod32ms-site.conf
@@ -88,6 +81,11 @@ Then in console run command (need sudo or root access): `a2ensite nod32ms-site.c
 ## Nginx Configuration File
 Example configuration file:
 ```
+map $http_user_agent $ver {
+        "~^.*(EEA|EES|EFSW|EMSX|ESFW)+\s+Update.*BPC\s+(\d+)\..*$" "ep$2";
+        "~^.*Update.*BPC\s+(\d+)\..*$" "v$1";
+}
+
 server {
 
         listen 80;
@@ -100,52 +98,25 @@ server {
 
         server_name nod32.domain.ru update.domain.ru;
 
-        location / {
-
-          if ($http_user_agent ~ "^.*(EEA|EES)+\s+Update.*BPC\s+(\d+)\..*"){
-             set $ver $2;
-          }
-
-          if ($ver ~ '^[7-8]+$') {
-            rewrite ^/update.ver$ /eset_upd/ep$ver/dll/update.ver break;
-            rewrite ^/eset_upd/update.ver$ /eset_upd/ep$ver/dll/update.ver break;
-          }
-
-          if ($ver ~ '^[6]+$') {
-              rewrite ^/update.ver$ /eset_upd/ep6/update.ver break;
-              rewrite ^/eset_upd/update.ver$ /eset_upd/ep6/update.ver break;
-          }
-
-          if ($http_user_agent ~ "^.*(EEA|EES)+\s+Update.*BPC\s+(\d+)\..*$"){
-              return 403;
-          }
-
-          if ($http_user_agent ~ "^.*Update.*BPC\s+(\d+)\..*$"){
-            set $ver $1;
-          }
-
-          if ($ver ~ '^(5|9)+$') {
-             rewrite ^/update.ver$ /eset_upd/v$ver/update.ver break;
-             rewrite ^/eset_upd/update.ver$ /eset_upd/v$ver/update.ver break;
-          }
-
-          if ($ver ~ '^[3-8]+$')
-          {
-             rewrite ^/update.ver$ /eset_upd/v3/update.ver break;
-             rewrite ^/eset_upd/update.ver$ /eset_upd/v3/update.ver break;
-          }
-
-          if ($ver ~ "^1[0-1]+$"){
-            rewrite ^/update.ver$ /eset_upd/v10/dll/update.ver break;
-            rewrite ^/eset_upd/update.ver$ /eset_upd/v10/dll/update.ver break;
-          }
-
-          if ($ver ~ "^1[2-9]+$"){
-            rewrite ^/update.ver$ /eset_upd/v$ver/dll/update.ver break;
-            rewrite ^/eset_upd/update.ver$ /eset_upd/v$ver/dll/update.ver break;
-          }
-
-
+        location ~* \.ver$ {
+            if ($ver ~ "^ep[6-9]$") {
+                rewrite ^/(dll/)?update.ver$ /eset_upd/$ver/$1update.ver break;
+            }
+            if ($ver ~ "^ep1[0-9]$") {
+                rewrite ^/(dll/)?update.ver$ /eset_upd/$ver/$1update.ver break;
+            }
+            if ($ver ~ "^v(5|9)$") {
+                rewrite ^(.*) /eset_upd/$ver/update.ver break;
+            }
+            if ($ver ~ "^v[3-8]$") {
+                rewrite ^(.*) /eset_upd/v3/update.ver break;
+            }
+            if ($ver ~ "^v1[0-1]$") {
+                rewrite ^(.*) /eset_upd/v10/dll/update.ver break;
+            }
+            if ($ver ~ "^v1[2-9]$") {
+                rewrite ^(.*) /eset_upd/$ver/dll/update.ver break;
+            }
         }
 
         access_log /var/www/eset_mirror_script/log/nginx-access.log;

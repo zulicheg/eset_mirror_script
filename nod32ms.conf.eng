@@ -6,7 +6,7 @@ language = "en"
 codepage = "utf-8"
 
 ; Timezone in format date_default_timezone_set (if this function is supported by your PHP)
-timezone = "Europe/Kiev"
+timezone = "Europe/Moscow"
 
 ; Memory limit for php
 memory_limit = '32M'
@@ -44,7 +44,7 @@ debug_html = 0
 
 [CONNECTION]
 ; use multidownload if installed php-curl and compatible
-use_multidownload = 0
+use_multidownload = 1
 
 
 ; Download speed limit n bytes/s
@@ -242,9 +242,12 @@ versionv10   = 1
 versionv12   = 1
 versionv13   = 1
 versionv14   = 1
+versionv15   = 1
 versionep6   = 1
 versionep7   = 1
 versionep8   = 1
+versionep9   = 1
+versionep10  = 1
 
 ; Eset Version 32bit OS
 x32 = 1
