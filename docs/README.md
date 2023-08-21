@@ -12,7 +12,7 @@ User with sudo right and allow to run apache2/nginx daemon, same as www-data on 
 
 Go to folder /var/www/ or other public html root folder
 
-Clone repo by command: `git clone https://github.com/Kingston-kms/eset_mirror_script.git`
+Clone repo by command: `git clone https://github.com/zulicheg/eset_mirror_script.git`
 
 Move to folder: `cd eset_mirror_script && cp nod32ms.conf.eng nod32ms.conf`
 
